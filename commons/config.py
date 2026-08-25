@@ -76,6 +76,14 @@ def razorpay_local_stdio(binary_path: str) -> UpstreamConfig:
     )
 
 
+MESSAGING_MCP_URL = "http://127.0.0.1:8788/mcp"
+
+
+def messaging_local() -> UpstreamConfig:
+    """The second vendor. Runs in its own process on its own port, and knows nothing
+    about Commons — Commons reaches it exactly as it reaches Razorpay's hosted server."""
+    return UpstreamConfig(name="messaging", kind="http", url=MESSAGING_MCP_URL)
+
+
 def default_upstreams() -> dict[str, UpstreamConfig]:
-    # Day 4 adds: "messaging": UpstreamConfig(name="messaging", kind="memory", server_factory=...)
-    return {"razorpay": razorpay_remote()}
+    return {"razorpay": razorpay_remote(), "messaging": messaging_local()}

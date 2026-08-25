@@ -14,3 +14,5 @@ proxy.log
 *.egg-info/
 build/
 dist/
+outbox.jsonl
+messaging.log

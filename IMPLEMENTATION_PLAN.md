@@ -424,7 +424,54 @@ This is the Day 7 determinism caveat, now proven rather than promised. Say it in
 
 ---
 
-### Day 4 — 28 Aug — messaging server + world simulator core
+### Day 4 — ✅ DONE 25 Aug — messaging server + world simulator core
+
+**Built:** `mcp_servers/messaging/` (the second vendor, own process, own port),
+`commons/world/` (customers, seeded clock, calibrated event generation), `commons/cli.py`.
+
+**DoD met.** `pytest` — **54 passing**. Same seed produces a byte-identical world.
+
+Live, through Commons, in ENFORCE, across **two real vendors**:
+
+```
+cart-recovery          messaging  send_whatsapp        promotional_message  +919800000021  ALLOW
+subscription-recovery  messaging  send_whatsapp        promotional_message  +919800000021  DEFER
+subscription-recovery  razorpay   create_payment_link  discount_grant       +919800000021  ALLOW
+
+"Commons deferred this call: 2 promotional_message in 24h, limit 1 (last by cart-recovery)"
+vendors touched: ['messaging', 'razorpay']   distinct entities: 1
+```
+
+Two vendors that have never heard of each other, one human, one policy.
+
+**Design decision made during the day — event clustering.** The first generated world
+scattered each customer's events uniformly across 30 days, which meant a 24-hour frequency
+cap could *never* fire — the run would have proved nothing. Rather than weaken the rule or
+(much worse) nudge the agents, the fix is in the world model: customers with several
+conditions get their events **clustered within a few days**, because the conditions share a
+root cause. A payment instrument that stops working produces a declined autopay mandate, an
+abandoned checkout, and later a disputed charge, all within days. Uniform scattering was the
+*less* realistic model. Documented in `world.py` with the reasoning.
+
+Result, unprompted, for `cust_4471`:
+
+```
+Sep 21 17:27  cart_abandoned    -> cart-recovery
+Sep 22 00:46  mandate_failed    -> subscription-recovery     (7h later: inside the 24h cap)
+Sep 23 10:09  dispute_filed     -> dispute-responder
+Sep 23 13:03  rto_risk_flagged  -> rto-shield                (contradicts cart-recovery)
+```
+
+That is the handoff §14 demo script, generated rather than staged.
+
+**Disclosures now emitted in every run summary** (handoff §16.5, §17): the configured
+overlap rate, how many customers actually have 2+ concurrent conditions, and the fact that
+**one customer is deliberately given all four conditions** as the video's worked example.
+All population configuration — no agent was touched.
+
+---
+
+### Day 4 (original plan, for reference) — messaging server + world simulator core
 
 - `mcp_servers/messaging`: `send_whatsapp`, `send_email`. Runs in-process (`InMemoryTransport`)
   **and** standalone. Delivery is simulated; it writes to the world's contact log.
