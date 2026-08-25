@@ -15,9 +15,9 @@ engine can be a pure function of (facts, ledger) rather than tangled into transp
 
 from __future__ import annotations
 
-import json
 import logging
 import time
+from datetime import datetime, timezone
 
 from mcp.server import Server, ServerRequestContext
 from mcp.types import (
@@ -30,6 +30,8 @@ from mcp.types import (
 
 from commons.proxy.registry import AgentSpec
 from commons.proxy.upstream import Upstream
+from commons.rules.engine import ENFORCE, RuleEngine
+from commons.rules.primitives import ALLOW, BLOCK, EvalContext
 from commons.semantics.manifest import CallFacts, Manifest, derive_facts
 
 logger = logging.getLogger(__name__)
@@ -51,8 +53,17 @@ def build_face(
     ledger,
     resolver,
     manifest: Manifest | None,
+    engine: RuleEngine | None = None,
+    mode: str = "OBSERVE",
+    clock=None,
 ) -> Server:
-    """An MCP server that presents `upstream` to `agent`, mediated by Commons."""
+    """An MCP server that presents `upstream` to `agent`, mediated by Commons.
+
+    `clock` returns the current SIMULATED time; the world simulator injects its own on
+    Day 4 so a 30-day month can run in a minute. Defaults to the wall clock.
+    """
+
+    now = clock or (lambda: datetime.now(timezone.utc))
 
     allowed = set(agent.allowed(upstream.name))
     # Entity lookups (order_id -> customer) are stable within a run; cache them so
@@ -106,12 +117,29 @@ def build_face(
             facts = await derive_facts(sem, args, resolver, upstream, lookup_cache)
 
         # ------------------------------------------------------------------
-        # DECISION POINT — Day 3 evaluates the ruleset here and returns
-        # ALLOW / DEFER / BLOCK. In OBSERVE mode the decision is recorded and the
-        # call forwarded anyway; in ENFORCE mode it is honoured. Same engine, same
-        # code path — the mode changes what happens on this line and nothing else.
+        # DECISION POINT. The engine evaluates against everything every OTHER agent
+        # has already done to this entity. It is not told which mode it is running in
+        # — that is the whole point of "one engine, two modes".
         # ------------------------------------------------------------------
-        decision = "ALLOW"
+        sim_now = now()
+        if engine is not None:
+            decision = engine.evaluate(
+                facts,
+                EvalContext(
+                    ledger=ledger,
+                    agent_id=agent.id,
+                    now=sim_now,
+                    run_id=ledger.run_id,
+                ),
+            )
+        else:
+            from commons.rules.engine import Decision
+
+            decision = Decision(verdict=ALLOW)
+
+        # In OBSERVE the violation is recorded and the call goes through anyway — that
+        # is what makes run 1 show real damage. In ENFORCE the same decision is honoured.
+        honour = mode == ENFORCE and decision.blocked
 
         call_id = ledger.record_call(
             agent_id=agent.id,
@@ -123,14 +151,40 @@ def build_face(
             magnitude=facts.magnitude,
             magnitude_unit=facts.magnitude_unit,
             resource=facts.resource,
-            decision=decision,
+            decision=decision.verdict,
             forwarded=0,
             args_json=args,
+            sim_ts=sim_now.isoformat(timespec="milliseconds"),
         )
+        for firing in decision.firings:
+            ledger.record_rule_fired(
+                call_id,
+                rule_id=firing.rule_id,
+                verdict=firing.verdict,
+                reason=firing.reason,
+                observed=firing.observed,
+                limit_value=firing.limit_value,
+                detail_json=firing.detail,
+            )
 
-        if decision == "BLOCK":
+        if decision.violations:
+            logger.warning(
+                "%s %s agent=%s tool=%s entity=%s :: %s",
+                "STOPPED" if honour else "OBSERVED",
+                decision.verdict,
+                agent.id,
+                params.name,
+                facts.entity_id,
+                decision.summary(),
+            )
+
+        if honour:
             ledger.update_call(call_id, latency_ms=int((time.perf_counter() - started) * 1000))
-            return _denied("Commons: blocked by merchant policy.")
+            reasons = "; ".join(f.reason for f in decision.violations)
+            verb = "blocked" if decision.verdict == BLOCK else "deferred"
+            return _denied(
+                f"Commons {verb} this call under merchant policy across all agents: {reasons}"
+            )
 
         result = await upstream.call_tool(params.name, args)
         text = _result_text(result)
@@ -143,17 +197,17 @@ def build_face(
             latency_ms=int((time.perf_counter() - started) * 1000),
         )
 
-        logger.info(
-            "%s agent=%s tool=%s action=%s entity=%s%s",
-            decision,
-            agent.id,
-            params.name,
-            facts.action_class,
-            facts.entity_id,
-            f" magnitude={facts.magnitude}{facts.magnitude_unit or ''}"
-            if facts.magnitude is not None
-            else "",
-        )
+        if not decision.violations:
+            logger.info(
+                "ALLOW agent=%s tool=%s action=%s entity=%s%s",
+                agent.id,
+                params.name,
+                facts.action_class,
+                facts.entity_id,
+                f" magnitude={facts.magnitude}{facts.magnitude_unit or ''}"
+                if facts.magnitude is not None
+                else "",
+            )
         return result
 
     return Server(

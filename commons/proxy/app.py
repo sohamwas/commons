@@ -28,6 +28,7 @@ from commons.ledger.db import Ledger
 from commons.proxy.face import COMMONS_VERSION, build_face
 from commons.proxy.registry import AGENTS
 from commons.proxy.upstream import UpstreamPool
+from commons.rules.engine import RuleEngine
 from commons.semantics.manifest import load_manifests
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ def create_app(
     ledger = Ledger(db_path)
     resolver = IdentityResolver(ledger)
     manifests = load_manifests()
+    engine = RuleEngine.load()
 
     # Build every (agent, upstream) face up front. Each is a full Starlette sub-app with
     # its own session manager, so its lifespan must be entered explicitly — nothing runs
@@ -82,7 +84,13 @@ def create_app(
             if not agent.allowed(upstream.name):
                 continue  # this agent has no business with this upstream at all
             face = build_face(
-                agent, upstream, ledger, resolver, manifests.get(upstream.name)
+                agent,
+                upstream,
+                ledger,
+                resolver,
+                manifests.get(upstream.name),
+                engine=engine,
+                mode=mode,
             )
             sub = face.streamable_http_app(streamable_http_path="/")
             path = f"/mcp/{agent.id}/{upstream.name}"
@@ -99,6 +107,7 @@ def create_app(
                 "run_id": ledger.run_id,
                 "upstreams": [u.name for u in pool],
                 "manifests": {n: len(m.tools) for n, m in manifests.items()},
+                "rules": [r.id for r in engine.rules],
                 "endpoints": endpoints,
             }
         )

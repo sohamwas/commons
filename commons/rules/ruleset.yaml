@@ -1,0 +1,55 @@
+# The merchant's policy.
+#
+# Each rule carries the plain-English sentence the merchant wrote alongside the compiled
+# invariant that is actually enforced, so the two can be shown side by side and checked
+# against each other (handoff §9, §13.2). Authoring these in English via an LLM is a
+# stretch goal (plan D5); the invariant below is the source of truth either way.
+#
+# Every one of these needs HISTORY and AGGREGATION. None can be checked from a single
+# action in isolation, which is exactly why per-agent validation cannot express them.
+
+- id: msg_frequency
+  english: "Never contact the same customer more than once in 24 hours."
+  primitive: RateLimit
+  scope:
+    action_class: [promotional_message]
+    window: 24h
+    max: 1
+  # Deferred, not destroyed: the message is still wanted, just not now.
+  on_violation: DEFER
+
+- id: discount_cap
+  english: "No customer receives more than 15% total discount in any 30-day period."
+  primitive: CumulativeBudget
+  scope:
+    action_class: [discount_grant]
+    window: 30d
+    cap: 15
+    unit: percent
+    unit_symbol: "%"
+  on_violation: BLOCK
+
+- id: no_promo_during_dispute
+  english: "Never send promotional offers to a customer with an open dispute."
+  primitive: StateCondition
+  scope:
+    action_class: [promotional_message, discount_grant]
+    state: dispute_status
+    equals: open
+  on_violation: BLOCK
+
+- id: one_agent_per_order
+  english: "Only one agent may work an order at a time."
+  primitive: MutualExclusion
+  scope:
+    lease: 30m
+  on_violation: DEFER
+
+- id: restriction_beats_incentive
+  english: "A fulfilment restriction outranks a discount incentive on the same customer."
+  primitive: Contradiction
+  scope:
+    winner: fulfilment_restriction
+    loser: discount_grant
+    window: 7d
+  on_violation: BLOCK

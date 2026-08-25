@@ -131,6 +131,10 @@ class Ledger:
     def record_call(self, **fields: Any) -> int:
         fields.setdefault("run_id", self.run_id)
         fields.setdefault("ts", _now())
+        # Rules reason about SIMULATED time (a 30-day month compressed into a minute).
+        # Outside a simulation the two clocks are the same, so defaulting here means
+        # the engine never has to care which world it is running in.
+        fields.setdefault("sim_ts", fields["ts"])
         for k in ("args_json", "result_json"):
             if k in fields and not isinstance(fields[k], (str, type(None))):
                 fields[k] = json.dumps(fields[k], default=str)[:200_000]
@@ -165,6 +169,10 @@ class Ledger:
 
     # ---------------- queries the rule engine needs ----------------
 
+    # Only `forwarded = 1` rows count. In OBSERVE a violating call really happened, so it
+    # consumes budget for everything after it; in ENFORCE it was stopped, so it does not.
+    # That single condition is what makes the A/B comparison mean something.
+
     def count_actions(
         self, entity_id: str, action_classes: tuple[str, ...], since_iso: str, run_id: str | None = None
     ) -> int:
@@ -172,7 +180,7 @@ class Ledger:
         row = self.conn.execute(
             f"""SELECT COUNT(*) AS n FROM call
                 WHERE entity_id = ? AND run_id = ? AND forwarded = 1
-                  AND action_class IN ({marks}) AND ts >= ?""",
+                  AND action_class IN ({marks}) AND sim_ts >= ?""",
             (entity_id, run_id or self.run_id, *action_classes, since_iso),
         ).fetchone()
         return int(row["n"])
@@ -184,10 +192,35 @@ class Ledger:
         row = self.conn.execute(
             f"""SELECT COALESCE(SUM(magnitude), 0) AS s FROM call
                 WHERE entity_id = ? AND run_id = ? AND forwarded = 1
-                  AND action_class IN ({marks}) AND ts >= ?""",
+                  AND action_class IN ({marks}) AND sim_ts >= ?""",
             (entity_id, run_id or self.run_id, *action_classes, since_iso),
         ).fetchone()
         return float(row["s"])
+
+    def last_actor_on_resource(
+        self, resource: str, since_iso: str, run_id: str | None = None
+    ) -> tuple[str, str] | None:
+        """Who last touched this resource, and when. Used for mutual exclusion."""
+        row = self.conn.execute(
+            """SELECT agent_id, sim_ts FROM call
+               WHERE resource = ? AND run_id = ? AND forwarded = 1 AND sim_ts >= ?
+               ORDER BY sim_ts DESC LIMIT 1""",
+            (resource, run_id or self.run_id, since_iso),
+        ).fetchone()
+        return (row["agent_id"], row["sim_ts"]) if row else None
+
+    def last_action_of_class(
+        self, entity_id: str, action_class: str, since_iso: str, run_id: str | None = None
+    ) -> tuple[str, str] | None:
+        """Most recent agent to apply this action class to this entity, and when."""
+        row = self.conn.execute(
+            """SELECT agent_id, sim_ts FROM call
+               WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+                 AND action_class = ? AND sim_ts >= ?
+               ORDER BY sim_ts DESC LIMIT 1""",
+            (entity_id, run_id or self.run_id, action_class, since_iso),
+        ).fetchone()
+        return (row["agent_id"], row["sim_ts"]) if row else None
 
     def calls_for_entity(self, entity_id: str, run_id: str | None = None) -> list[sqlite3.Row]:
         return self.conn.execute(

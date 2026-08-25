@@ -1,10 +1,13 @@
 """Run the Commons proxy.
 
-    .venv/Scripts/python.exe scripts/run_proxy.py
+    .venv/Scripts/python.exe scripts/run_proxy.py                      # OBSERVE
+    .venv/Scripts/python.exe scripts/run_proxy.py --mode ENFORCE
+    .venv/Scripts/python.exe scripts/run_proxy.py --mode ENFORCE --db enforce.db
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
 
 import uvicorn
@@ -18,4 +21,15 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    uvicorn.run(create_app(), host="127.0.0.1", port=8787, log_level="warning")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["OBSERVE", "ENFORCE"], default="OBSERVE")
+    parser.add_argument("--db", default="commons.db")
+    parser.add_argument("--port", type=int, default=8787)
+    args = parser.parse_args()
+
+    uvicorn.run(
+        create_app(db_path=args.db, mode=args.mode),
+        host="127.0.0.1",
+        port=args.port,
+        log_level="warning",
+    )

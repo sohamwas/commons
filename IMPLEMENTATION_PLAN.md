@@ -370,7 +370,48 @@ a `create_payment_link` for a customer id land on the **same `entity_id`** in th
 
 ---
 
-### Day 3 — 27 Aug — rule engine
+### Day 3 — ✅ DONE 25 Aug — rule engine
+
+**Built:** `commons/rules/` — five primitives, `ruleset.yaml` (5 rules), engine, wired into the
+proxy's decision point with OBSERVE/ENFORCE.
+
+**DoD met in tests and live.** `pytest` — **37 passing**. Every demo rule has a violating and a
+compliant fixture, plus window-expiry, same-agent, and transactional-exemption cases.
+
+Live A/B against the real Razorpay test API, same two agents, same customer:
+
+```
+OBSERVE   cart-recovery 10% -> ALLOWED   plink_TTuWXayNDnrCuv
+          subscription- 8%  -> ALLOWED   plink_TTuWYdTIIgC2XI
+          delivered: 18%   (cap 15) — violation recorded, not prevented
+
+ENFORCE   cart-recovery 10% -> ALLOWED   plink_TTuX7LnX7y1T1e
+          subscription- 8%  -> REFUSED   "10 + 8 = 18% in 30d, cap 15;
+                                          cart-recovery is already working order_… "
+          delivered: 10%   (cap 15) — stopped before reaching Razorpay
+```
+
+Note the refusal names **two** rules. The engine evaluates all of them and never
+short-circuits, which is what the hero UI's per-customer violation count needs.
+
+**Correction made during the day — worth keeping in mind.** The first version of the
+"one engine, two modes" test asserted that OBSERVE and ENFORCE produce *identical decision
+traces across a run*. That is **false in general**, and the test only passed because the
+chosen sequence happened not to cross-contaminate. Once ENFORCE stops a call, that call never
+consumed budget, so every later decision legitimately sees a different world. Replaced with two
+honest tests:
+
+- `test_engine_cannot_see_the_mode` — `evaluate()` takes only `(facts, ctx)`; it is
+  structurally incapable of behaving differently in simulation than live.
+- `test_enforce_diverges_downstream_and_that_is_the_point` — constructs a case where OBSERVE
+  ends at 22% delivered and ENFORCE at 14%, with **different verdicts on the third call**, and
+  asserts the divergence.
+
+This is the Day 7 determinism caveat, now proven rather than promised. Say it in the README.
+
+---
+
+### Day 3 (original plan, for reference) — rule engine
 
 - The five primitives (§4). Pure functions over `(call, ledger)`.
 - `ruleset.yaml` loader; engine evaluates all rules and records every one that fired.
