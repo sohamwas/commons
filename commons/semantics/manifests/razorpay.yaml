@@ -1,0 +1,63 @@
+# Tool semantics for Razorpay's MCP server (remote: 42 tools).
+#
+# Declared from the PUBLIC tool schemas — verified against tools/list on 2026-08-25,
+# not guessed. Note the input schemas are FLAT (customer_contact, notify_sms) while the
+# API *responses* are nested (customer.contact); the paths below reflect that difference.
+#
+# Commons never reads a vendor's source. Everything needed to govern a tool is in the
+# schema the vendor already publishes, which is what makes this work for third-party
+# agents in a marketplace.
+
+upstream: razorpay
+
+tools:
+  # Cart Recovery / Subscription Recovery: a discounted payment link.
+  # The discount is what consumes the shared margin budget.
+  create_payment_link:
+    action_class: discount_grant
+    entity:
+      from: args
+      path: customer_contact
+      as: phone
+    magnitude:
+      from: args
+      path: notes.discount_pct
+      unit: percent
+    resource:
+      from: args
+      path: notes.order_id
+
+  # Razorpay's OWN outbound contact tool. Discovered during the Day 1 spike.
+  # This is why the frequency rule is breached across two vendors' surfaces rather
+  # than only via the messaging server we wrote ourselves.
+  payment_link_notify:
+    action_class: promotional_message
+    entity:
+      from: upstream_lookup
+      tool: fetch_payment_link
+      args: {payment_link_id: payment_link_id}
+      path: customer.contact
+      as: phone
+
+  # RTO Shield restricting an order to prepaid-only. Directly contradicts a Cart
+  # Recovery incentive on the same customer — the Contradiction rule (plan §4).
+  update_order:
+    action_class: fulfilment_restriction
+    entity:
+      from: upstream_lookup
+      tool: fetch_order
+      args: {order_id: order_id}
+      path: notes.contact
+      as: phone
+    resource:
+      from: args
+      path: order_id
+
+  # Reads are logged but never governed — they consume nothing shared.
+  fetch_payment: {action_class: read}
+  fetch_all_payments: {action_class: read}
+  fetch_order: {action_class: read}
+  fetch_all_orders: {action_class: read}
+  fetch_payment_link: {action_class: read}
+  fetch_refund: {action_class: read}
+  fetch_specific_refund_for_payment: {action_class: read}
