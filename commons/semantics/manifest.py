@@ -67,6 +67,9 @@ class ToolSemantics:
     magnitude_unit: str | None = None
     resource: Extractor | None = None
     overrides: tuple[Override, ...] = ()
+    # Other handles for the SAME customer carried in this one call. The vendor is
+    # asserting they belong together, so recording the link is not inference.
+    also_identifies: tuple[Extractor, ...] = ()
 
     @property
     def governed(self) -> bool:
@@ -111,6 +114,9 @@ def load_manifest(path: Path) -> Manifest:
             overrides=tuple(
                 Override(path=o["if"]["path"], equals=str(o["if"]["equals"]), then=o["then"])
                 for o in (spec.get("action_class_when") or [])
+            ),
+            also_identifies=tuple(
+                _extractor(x) for x in (spec.get("also_identifies") or []) if _extractor(x)
             ),
         )
     return Manifest(upstream=data["upstream"], tools=tools)
@@ -183,6 +189,9 @@ class CallFacts:
     magnitude: float | None = None
     magnitude_unit: str | None = None
     resource: str | None = None
+    # Extra handles this call taught us about, and any disagreements it surfaced.
+    linked_handles: list[tuple[str, str]] = field(default_factory=list)
+    identity_conflicts: list[tuple[str, str]] = field(default_factory=list)
 
 
 async def _extract(
@@ -238,6 +247,28 @@ async def derive_facts(
         )
         facts.entity_id = entity_id
         facts.entity_ref = normalised
+
+        # Any other handles this same call carries belong to the same customer —
+        # the vendor said so by putting them in one payload. Recording them means
+        # identities knit together as traffic flows, instead of depending entirely
+        # on the merchant seeding every mapping up front.
+        if entity_id is not None:
+            for extra in sem.also_identifies:
+                extra_raw = await _extract(extra, args, upstream, lookup_cache)
+                if extra_raw is None:
+                    continue
+                outcome = resolver.link_if_new(
+                    entity_id,
+                    extra.namespace or "customer_id",
+                    extra_raw,
+                    source=f"asserted-by:{sem.tool}",
+                )
+                if outcome == "linked":
+                    facts.linked_handles.append((extra.namespace or "customer_id", str(extra_raw)))
+                elif outcome == "conflict":
+                    facts.identity_conflicts.append(
+                        (extra.namespace or "customer_id", str(extra_raw))
+                    )
 
     if sem.magnitude is not None:
         facts.magnitude = to_number(await _extract(sem.magnitude, args, upstream, lookup_cache))

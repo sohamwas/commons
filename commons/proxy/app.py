@@ -112,6 +112,48 @@ def create_app(
             }
         )
 
+    async def seed_entities(request):
+        """Declare who the merchant's customers are.
+
+        This is the mechanism that merges different KINDS of handle. Commons never
+        infers that a phone and an email are one person; the merchant states it, once,
+        from the customer list they already have. In the simulation the world does the
+        stating; in production it would be a sync from the merchant's own database.
+
+        POST /admin/entities
+        {"entities": [{"ref": "cust_4471", "display_name": "Priya S.",
+                       "handles": {"phone": "...", "email": "...", "customer_id": "..."},
+                       "state": {"dispute_status": "none"}}]}
+        """
+        body = await request.json()
+        mapping: dict[str, str] = {}
+        for item in body.get("entities", []):
+            handles = item.get("handles") or {}
+            ref = item.get("ref") or handles.get("customer_id") or item.get("display_name", "")
+            entity_id = ledger.create_entity(item.get("display_name") or ref)
+            resolver.declare(entity_id, handles, source="merchant-declared")
+            for key, value in (item.get("state") or {}).items():
+                ledger.set_state(entity_id, key, value)
+            mapping[ref] = entity_id
+        logger.info("seeded %d entities", len(mapping))
+        return JSONResponse({"seeded": len(mapping), "entities": mapping})
+
+    async def list_entities(_request):
+        rows = ledger.conn.execute(
+            "SELECT id, display_name FROM entity ORDER BY id"
+        ).fetchall()
+        return JSONResponse(
+            [
+                {
+                    "id": r["id"],
+                    "display_name": r["display_name"],
+                    "handles": ledger.identities_of(r["id"]),
+                    "state": ledger.state_of(r["id"]),
+                }
+                for r in rows
+            ]
+        )
+
     @asynccontextmanager
     async def lifespan(_app: Starlette):
         async with AsyncExitStack() as stack:
@@ -127,5 +169,12 @@ def create_app(
             finally:
                 ledger.end_run()
 
-    base = Starlette(routes=[Route("/health", health)], lifespan=lifespan)
+    base = Starlette(
+        routes=[
+            Route("/health", health),
+            Route("/admin/entities", seed_entities, methods=["POST"]),
+            Route("/admin/entities", list_entities, methods=["GET"]),
+        ],
+        lifespan=lifespan,
+    )
     return PathDispatch(table, base)

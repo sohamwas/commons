@@ -487,7 +487,76 @@ byte-identical output.
 
 ---
 
-### Day 5 — 29 Aug — personas and consequences
+### Day 5 — ✅ DONE 25 Aug — identity linking, personas, consequences
+
+**Built:** `commons/llm/` (client + deterministic cache + provider config),
+`commons/world/personas.py`, `commons/world/seed.py`, `POST /admin/entities`,
+and `also_identifies` in the manifest. **80 tests passing.**
+
+**Two gaps closed that would have quietly broken the full run.**
+
+**(a) Different KINDS of handle never merged.** Normalisation (Day 2) only unifies
+different spellings of the *same* detail. Nothing merged a phone with an email — so
+Dispute Responder (which emails) and Cart Recovery (which WhatsApps) resolved to **two
+different people**, and every cross-agent rule between them silently failed to fire. The
+Day 1–4 runs never caught it because every call happened to carry a phone number.
+
+Two legitimate routes now exist, and both are somebody stating a fact rather than Commons
+guessing:
+
+- **The merchant declares it** — `POST /admin/entities` takes the customer list. The
+  simulator posts its population; in production this is a sync from the merchant's own
+  database. This is the mechanism that merges kinds.
+- **A vendor asserts it** — `create_payment_link(customer_contact=…, customer_email=…)`
+  carries both handles in one payload, so Razorpay is *stating* they are one customer.
+  `also_identifies` records that. Identities now knit together as traffic flows instead of
+  depending entirely on upfront seeding.
+
+A handle already pointing at a different entity is **reported, not silently repointed** —
+two vendors disagreeing about who someone is deserves attention, not a merge that could
+hand one customer another's spending history.
+
+Live proof, in ENFORCE:
+
+```
+cart-recovery      -> WhatsApp to +919800000021      SENT
+dispute-responder  -> email to    priya0@example.com REFUSED
+   "2 promotional_message in 24h, limit 1 (last by cart-recovery)"
+```
+
+Two channels, two agents, one cap. Before the declaration those were two people.
+
+**(b) Personas now have consequences.** One cached LLM call per inbound message returns
+`{reaction, text}` over `engage | ignore | irritated | opt_out | escalate`, and the
+reaction mutates the world: opt-out suppresses contact, escalation **opens a dispute**
+(which then makes every later promotional contact a policy violation), irritation
+accumulates.
+
+Real Gemini output across the five archetypes, three unsolicited messages in one day:
+
+```
+busy             ignore    -> ignore    -> ignore     no change
+irritable        irritated -> opt_out   -> ignore     OPTED OUT
+loyal            ignore    -> irritated -> irritated  irritation=2
+patient          ignore    -> ignore    -> ignore     no change
+price_sensitive  ignore    -> ignore    -> ignore     no change
+```
+
+The spread is the point — the model is judging situations, not following a script. A
+"busy" customer genuinely does ignore spam; a "price_sensitive" one genuinely is
+unmoved by 5%. **Measure the population, not one customer**, because a single tolerant
+persona proves nothing either way.
+
+**Cache verified:** second run, 14/14 hits, identical outcomes, zero new tokens. That is
+handoff §16.4 working — and it is what makes reruns and dashboard iteration free.
+
+**Correction during the day:** the first version of the persona check tracked only
+`(opted_out, dispute_status, irritation)` and missed `converted`, so a real state change
+read as "no change". Fixed.
+
+---
+
+### Day 5 (original plan, for reference) — personas and consequences
 
 - ~20 customers **sampled for concurrent conditions** (handoff §16.5) — and disclose the sampling
   in the README, precisely: *the population is sampled for overlap; the agents are not designed

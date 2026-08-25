@@ -1,0 +1,56 @@
+# Which model does which job.
+#
+# Measured against the real accounts on 2026-08-24 (scripts/probe_providers.py), NOT
+# taken from the handoff, which was stale: Cerebras' free tier is gone (402 on every
+# model) and Groq has retired Llama 3.3 70B.
+#
+# Gemini quotas are per-model per-project, so four flash models are four independent
+# buckets. That is why Google carries most of the fleet — not generous limits, but
+# several separate ones.
+
+providers:
+  groq:
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+  gemini:
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    api_key_env: GOOGLE_API_KEY
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+
+roles:
+  # Highest-volume agent on the fastest inference. 1000 RPD / 8000 TPM.
+  cart-recovery:
+    provider: groq
+    model: openai/gpt-oss-120b
+
+  subscription-recovery:
+    provider: gemini
+    model: models/gemini-3.1-flash-lite
+
+  # Disputes are the hardest task, so the strongest flash gets them.
+  dispute-responder:
+    provider: gemini
+    model: models/gemini-3-flash-preview
+
+  rto-shield:
+    provider: gemini
+    model: models/gemini-2.5-flash-lite
+
+  # Highest request count of all: one call per inbound message.
+  personas:
+    provider: gemini
+    model: models/gemini-3.5-flash-lite
+
+  # OpenRouter's free tier is 50 requests/day — useless as a workhorse, exactly right
+  # for the one frontier control run that shows the violations are not an artefact of
+  # small models (handoff §16.8).
+  frontier-control:
+    provider: openrouter
+    model: nvidia/nemotron-3-ultra-550b-a55b:free
+
+  # Failover only. Assume Groq's bucket is shared across its models.
+  fallback:
+    provider: groq
+    model: openai/gpt-oss-20b

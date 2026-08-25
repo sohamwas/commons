@@ -19,6 +19,11 @@ tools:
       from: args
       path: customer_contact
       as: phone
+    # This one call carries the customer's email too. Razorpay is asserting that the
+    # phone and the email are the same customer, so Commons records the link rather
+    # than treating a later email-only contact as a different person.
+    also_identifies:
+      - {from: args, path: customer_email, as: email}
     magnitude:
       from: args
       path: notes.discount_pct

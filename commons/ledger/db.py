@@ -74,6 +74,15 @@ class Ledger:
         self.conn.commit()
         return entity_id
 
+    def lookup_identity(self, namespace: str, value: str) -> str | None:
+        """Resolve a handle WITHOUT creating anything. Used when deciding whether a
+        vendor-asserted link is new, redundant, or in conflict with what we already know."""
+        row = self.conn.execute(
+            "SELECT entity_id FROM identity WHERE namespace = ? AND value = ?",
+            (namespace, value),
+        ).fetchone()
+        return row["entity_id"] if row else None
+
     def link_identity(
         self, namespace: str, value: str, entity_id: str, source: str = "declared"
     ) -> None:

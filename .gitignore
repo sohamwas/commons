@@ -16,3 +16,5 @@ build/
 dist/
 outbox.jsonl
 messaging.log
+llm_cache.db
+day5.db
