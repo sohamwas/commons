@@ -75,3 +75,14 @@ def test_the_server_has_no_dependency_on_commons():
             imported.add(node.module)
 
     assert not any(name.split(".")[0] == "commons" for name in imported), imported
+
+
+async def test_email_subject_is_recorded(outbox):
+    """The tool schema advertises `subject`; a field a vendor advertises and then
+    silently drops is exactly the kind of gap Commons would be blamed for."""
+    async with Client(build_messaging_server(outbox)) as client:
+        await client.call_tool(
+            "send_email",
+            {"to": "priya@example.com", "subject": "Your cart", "body": "10% off"},
+        )
+    assert outbox.deliveries[0].subject == "Your cart"

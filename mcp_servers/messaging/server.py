@@ -47,6 +47,7 @@ class Delivery:
     body: str
     kind: str
     sent_at: str
+    subject: str | None = None
     template: str | None = None
 
 
@@ -143,6 +144,7 @@ def build_messaging_server(outbox: Outbox | None = None, clock=None) -> Server:
             body=str(args.get("body", "")),
             kind=str(args.get("kind", "promotional")),
             sent_at=now().isoformat(timespec="milliseconds"),
+            subject=args.get("subject"),
             template=args.get("template"),
         )
         box.add(delivery)
