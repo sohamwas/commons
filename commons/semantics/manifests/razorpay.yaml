@@ -48,12 +48,15 @@ tools:
   # Recovery incentive on the same customer — the Contradiction rule (plan §4).
   update_order:
     action_class: fulfilment_restriction
+    # Resolved through the merchant's DECLARED order -> customer mapping rather than by
+    # asking Razorpay. Asking the vendor was tried first and resolves to nobody whenever
+    # the order lives outside that vendor's records — which is the normal case for an
+    # order placed on a storefront and only later paid for. A rule about the customer
+    # behind an order cannot fire if the order names no customer.
     entity:
-      from: upstream_lookup
-      tool: fetch_order
-      args: {order_id: order_id}
-      path: notes.contact
-      as: phone
+      from: args
+      path: order_id
+      as: order_id
     resource:
       from: args
       path: order_id

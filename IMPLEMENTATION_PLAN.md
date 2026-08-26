@@ -571,7 +571,86 @@ read as "no change". Fixed.
 
 ---
 
-### Day 6 — 30 Aug — the four agents, first full OBSERVE run
+### Day 6 — ✅ DONE 26 Aug — the four agents, first full OBSERVE run
+
+**Built:** `commons/agents/` (definitions + runtime), `commons/runner.py`, `commons run`,
+admin endpoints for run/clock/state. **81 tests passing.**
+
+**DoD met.** Full 30-day run, 38 events, four LLM agents on four models, every tool call
+through Commons to the real Razorpay test API. **0 malformed calls, 0 agent errors,
+96% LLM cache hit rate** — comfortably inside the free tiers.
+
+#### The result, stated honestly
+
+```
+customers worked by 2+ agents:      13 / 20
+discounted by 2+ agents:            13
+sitting AT or OVER the 15% cap:      7
+direct contradictions detected:      3
+frequency violations:                1
+customers who opted out:             1
+```
+
+**The discount cap was never breached.** Cart Recovery consistently chose 5% of its
+permitted 10%; Subscription Recovery chose 10%. 5 + 10 = 15, landing *exactly on* the cap.
+Seven customers sat on the line and none went over.
+
+That is a weaker headline than "25 violations" and a **much** stronger finding, because
+the earlier number was fake — see below. The structural point stands on its own: the
+merchant configured two agents at 10% each against a 15% total cap, so **20% is reachable
+by configuration alone**, and the only thing preventing it was one agent's unforced
+conservatism. Nothing enforces that choice, and a model update could change it tomorrow.
+
+#### Four artefacts found and fixed — three of them were inflating the result
+
+1. **Duplicate tool calls (the serious one).** The weaker models emitted the same
+   `create_payment_link` three times in one response, so one agent's 5% became 15% by
+   itself. That produced **25 `discount_cap` violations that were pure artefact** — a
+   SAME-agent duplication masquerading as CROSS-agent accumulation, corrupting the exact
+   finding the project exists to demonstrate. Duplicates are now dropped and counted
+   separately, like malformed calls. Real number: **zero**.
+
+2. **Agents exempting themselves from policy.** Every `send_whatsapp` arrived tagged
+   `kind="transactional"`, so no frequency rule fired. Nothing was gaming anything — the
+   agents have no idea Commons exists, they just think a cart nudge is transactional.
+   That is the lesson: **classification that decides whether policy applies must never be
+   caller-declared.** The exemption now comes from `template`, naming an entry in the
+   *merchant's* approved list. Worth its own paragraph in the writeup.
+
+3. **`update_order` resolved to nobody.** Asking Razorpay who an order belongs to fails
+   whenever the order lives outside that vendor's records. Now resolved through the
+   merchant's declared order→customer mapping. Before this, the contradiction rule could
+   never fire at all.
+
+4. **Runs shared a `run_id`**, so consecutive runs summed and silently doubled every
+   headline number. A run is one simulated month, not one proxy lifetime.
+
+#### Also worth keeping
+
+- **Gemini 3.x rejects replayed tool calls** (`thought_signature` missing) through its
+  OpenAI-compatibility layer, which breaks multi-round tool loops. Pinning to Gemini 2.5
+  would fix it but collapse four independent quota buckets into one. Tool results are now
+  fed back as a plain user turn, which works identically on all three providers.
+- **Priya (`cust_4471`) produced the demo timeline unprompted:** Cart Recovery discounts
+  and messages her, Subscription Recovery discounts her 7 hours later, Dispute Responder
+  emails her, and RTO Shield's restriction both overrides Cart Recovery's incentive *and*
+  has its message deferred for being the second contact that day.
+
+#### What Day 7 must answer
+
+The convergence is large and the contradictions are real, but the discount breach is
+marginal. Do **not** fix that by making the agents greedier — that is the forbidden move
+(§12, §17.5). The legitimate tests are:
+
+- the **frontier control run** on OpenRouter (§6.3): does a stronger model use more of
+  its permitted allowance than `gpt-oss-120b` did? If it takes the full 10%, every one of
+  those seven customers breaches — and it says the near-miss was model timidity, not safety.
+- raising the **agent count** (the Day 9 slider): three agents on one customer breaches
+  arithmetically.
+
+---
+
+### Day 6 (original plan, for reference) — the four agents, first full OBSERVE run
 
 - One `agents/base.py`: OpenAI-compatible chat-completions loop with tool calling. **Every
   provider uses it** — Groq and OpenRouter are OpenAI-compatible, and Gemini exposes one at

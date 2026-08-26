@@ -51,11 +51,24 @@ class Extractor:
 
 @dataclass(frozen=True)
 class Override:
-    """Conditionally reclassify an action, e.g. a transactional vs promotional message."""
+    """Conditionally reclassify an action, e.g. transactional vs promotional.
+
+    Whatever an override reads should be merchant-declared, not caller-declared. A field
+    the calling agent controls must not decide whether policy applies to it.
+    """
 
     path: str
-    equals: str
     then: str
+    equals: str | None = None
+    one_of: tuple[str, ...] = ()
+
+    def matches(self, value: object) -> bool:
+        if value is None:
+            return False
+        text = str(value)
+        if self.one_of:
+            return text in self.one_of
+        return text == self.equals
 
 
 @dataclass(frozen=True)
@@ -112,7 +125,12 @@ def load_manifest(path: Path) -> Manifest:
             magnitude_unit=(spec.get("magnitude") or {}).get("unit"),
             resource=_extractor(spec.get("resource")),
             overrides=tuple(
-                Override(path=o["if"]["path"], equals=str(o["if"]["equals"]), then=o["then"])
+                Override(
+                    path=o["if"]["path"],
+                    then=o["then"],
+                    equals=None if "equals" not in o["if"] else str(o["if"]["equals"]),
+                    one_of=tuple(str(v) for v in (o["if"].get("in") or ())),
+                )
                 for o in (spec.get("action_class_when") or [])
             ),
             also_identifies=tuple(
@@ -173,7 +191,7 @@ def to_number(value: Any) -> float | None:
 
 def action_class_for(sem: ToolSemantics, args: dict) -> str:
     for override in sem.overrides:
-        if str(dig(args, override.path)) == override.equals:
+        if override.matches(dig(args, override.path)):
             return override.then
     return sem.action_class
 

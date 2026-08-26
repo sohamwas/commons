@@ -92,5 +92,13 @@ class Customer:
         return len(self.conditions)
 
     def handles(self) -> dict[str, str]:
-        """What the different vendors know this person by. Declared to Commons once."""
-        return {"phone": self.phone, "email": self.email, "customer_id": self.id}
+        """What the different vendors know this person by. Declared to Commons once.
+
+        `order_id` is included because a merchant genuinely knows which order belongs to
+        which customer. Without it, a tool like update_order — which names only an order
+        — resolves to nobody, and rules about the customer behind that order cannot fire.
+        """
+        handles = {"phone": self.phone, "email": self.email, "customer_id": self.id}
+        if self.order_id:
+            handles["order_id"] = self.order_id
+        return handles

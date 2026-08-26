@@ -7,12 +7,35 @@
 
 upstream: messaging
 
+# A shipping update is not a marketing touch, and frequency caps should apply only to
+# the latter. But note WHERE that distinction is allowed to come from.
+#
+# The `kind` argument is supplied by the CALLING AGENT. Classification that decides
+# whether policy applies must never be caller-declared: an agent can exempt itself from
+# a frequency cap simply by labelling its own marketing "transactional" — which is
+# exactly what happened on the first full run, where every cart-recovery message arrived
+# tagged transactional and no frequency rule fired.
+#
+# Nothing was gaming the system; the agents have no idea Commons exists. They just think
+# a cart nudge is transactional. That is the point: self-declared classification is
+# unreliable even when everyone is acting in good faith.
+#
+# So the exemption comes from `template`, which names an entry in the MERCHANT's approved
+# template list, not from a free-text field the agent fills in.
+
+upstream: messaging
+
+transactional_templates: &transactional_templates
+  - shipping_update
+  - delivery_confirmation
+  - payment_receipt
+  - otp
+
 tools:
   send_whatsapp:
     action_class: promotional_message
-    # A shipping update is not a marketing touch. Frequency caps apply to the latter.
     action_class_when:
-      - if: {path: kind, equals: transactional}
+      - if: {path: template, in: *transactional_templates}
         then: transactional_message
     entity:
       from: args
@@ -22,7 +45,7 @@ tools:
   send_email:
     action_class: promotional_message
     action_class_when:
-      - if: {path: kind, equals: transactional}
+      - if: {path: template, in: *transactional_templates}
         then: transactional_message
     entity:
       from: args

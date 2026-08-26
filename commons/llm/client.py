@@ -90,8 +90,10 @@ class LLMClient:
     @property
     def client(self) -> OpenAI:
         if self._client is None:
+            # Free tiers throttle hard — Groq's 8000 TPM is the binding constraint, so
+            # 429s are expected rather than exceptional. Back off and keep going.
             self._client = OpenAI(
-                api_key=self.api_key, base_url=self.base_url, max_retries=2, timeout=60.0
+                api_key=self.api_key, base_url=self.base_url, max_retries=6, timeout=90.0
             )
         return self._client
 

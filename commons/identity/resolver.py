@@ -86,6 +86,13 @@ class IdentityResolver:
         entity_id = self.ledger.entity_for(namespace, value, source=source)
         return entity_id, value
 
+    def resolve_existing(self, namespace: str, raw: object) -> tuple[str | None, str | None]:
+        """Look a handle up WITHOUT creating an entity for it."""
+        value = normalise(namespace, raw)
+        if value is None:
+            return None, None
+        return self.ledger.lookup_identity(namespace, value), value
+
     def link_if_new(
         self, entity_id: str, namespace: str, raw: object, source: str = "vendor-asserted"
     ) -> str:

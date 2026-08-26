@@ -149,15 +149,43 @@ async def test_discount_magnitude_is_extracted(resolver, manifests):
     assert facts.governed is True
 
 
-async def test_transactional_messages_are_reclassified(resolver, manifests):
-    """A shipping update is not a marketing touch; frequency caps apply to the latter."""
+async def test_merchant_templates_are_exempt_from_promotional_rules(resolver, manifests):
+    """A shipping update is not a marketing touch; frequency caps apply to the latter.
+
+    The exemption comes from `template`, which names an entry in the MERCHANT's approved
+    template list.
+    """
     sem = manifests["messaging"].get("send_whatsapp")
 
     promo = await derive_facts(sem, {"to": "9800000021"}, resolver)
-    txn = await derive_facts(sem, {"to": "9800000021", "kind": "transactional"}, resolver)
+    txn = await derive_facts(sem, {"to": "9800000021", "template": "shipping_update"}, resolver)
 
     assert promo.action_class == "promotional_message"
     assert txn.action_class == "transactional_message"
+
+
+async def test_an_agent_cannot_exempt_itself_by_relabelling(resolver, manifests):
+    """The hole found on the first full agent run.
+
+    Every cart-recovery message arrived tagged kind="transactional", so no frequency
+    rule fired. Nothing was gaming anything — the agents have no idea Commons exists,
+    they just think a cart nudge is transactional. Which is the point: classification
+    that decides whether policy applies must never be caller-declared.
+    """
+    sem = manifests["messaging"].get("send_whatsapp")
+
+    relabelled = await derive_facts(
+        sem,
+        {"to": "9800000021", "kind": "transactional", "body": "50% off today!"},
+        resolver,
+    )
+    assert relabelled.action_class == "promotional_message"
+
+    # An unrecognised template name is no escape hatch either.
+    invented = await derive_facts(
+        sem, {"to": "9800000021", "template": "definitely_transactional"}, resolver
+    )
+    assert invented.action_class == "promotional_message"
 
 
 async def test_reads_are_not_governed(resolver, manifests):

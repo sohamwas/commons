@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import AsyncExitStack, asynccontextmanager
+from datetime import datetime, timezone
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
@@ -61,6 +62,28 @@ class PathDispatch:
         await self.fallback(scope, receive, send)
 
 
+class Clock:
+    """The gateway's notion of "now".
+
+    Defaults to the wall clock, which is what a real deployment uses. A simulation
+    drives it forward via POST /admin/clock so that a 30-day month can play out in a
+    minute and a "once per 24 hours" rule still means 24 simulated hours.
+    """
+
+    def __init__(self) -> None:
+        self._override: datetime | None = None
+
+    def now(self) -> datetime:
+        return self._override or datetime.now(timezone.utc)
+
+    def set(self, when: datetime | None) -> None:
+        self._override = when
+
+    @property
+    def simulated(self) -> bool:
+        return self._override is not None
+
+
 def create_app(
     upstream_configs: dict[str, UpstreamConfig] | None = None,
     db_path: str = "commons.db",
@@ -71,6 +94,7 @@ def create_app(
     resolver = IdentityResolver(ledger)
     manifests = load_manifests()
     engine = RuleEngine.load()
+    clock = Clock()
 
     # Build every (agent, upstream) face up front. Each is a full Starlette sub-app with
     # its own session manager, so its lifespan must be entered explicitly — nothing runs
@@ -91,6 +115,7 @@ def create_app(
                 manifests.get(upstream.name),
                 engine=engine,
                 mode=mode,
+                clock=clock.now,
             )
             sub = face.streamable_http_app(streamable_http_path="/")
             path = f"/mcp/{agent.id}/{upstream.name}"
@@ -138,6 +163,47 @@ def create_app(
         logger.info("seeded %d entities", len(mapping))
         return JSONResponse({"seeded": len(mapping), "entities": mapping})
 
+    async def start_run(request):
+        """Begin a new run in the ledger.
+
+        A run is one simulated month, not one proxy lifetime. Without this, two
+        successive runs against the same proxy share a run_id and their results are
+        summed — which silently doubles every headline number.
+        """
+        body = await request.json() if await request.body() else {}
+        run_id = ledger.start_run(
+            mode=mode, seed=body.get("seed"), notes=body.get("notes", "")
+        )
+        logger.info("started run %s", run_id)
+        return JSONResponse({"run_id": run_id, "mode": mode})
+
+    async def set_clock(request):
+        """Move simulated time. POST /admin/clock {"now": "<iso8601>"} (null to reset)."""
+        body = await request.json()
+        raw = body.get("now")
+        clock.set(datetime.fromisoformat(raw) if raw else None)
+        return JSONResponse({"now": clock.now().isoformat(), "simulated": clock.simulated})
+
+    async def set_state(request):
+        """Update entity state the rules read, e.g. a dispute opening mid-run.
+
+        POST /admin/state {"ref": "cust_4471", "key": "dispute_status", "value": "open"}
+        `ref` is any handle Commons already knows: customer_id, phone or email.
+        """
+        body = await request.json()
+        ref, key, value = body.get("ref"), body["key"], body.get("value")
+        entity_id = body.get("entity_id")
+        if entity_id is None:
+            for namespace in ("customer_id", "phone", "email"):
+                found, _ = resolver.resolve_existing(namespace, ref)
+                if found:
+                    entity_id = found
+                    break
+        if entity_id is None:
+            return JSONResponse({"error": f"unknown entity: {ref}"}, status_code=404)
+        ledger.set_state(entity_id, key, value)
+        return JSONResponse({"entity_id": entity_id, key: value})
+
     async def list_entities(_request):
         rows = ledger.conn.execute(
             "SELECT id, display_name FROM entity ORDER BY id"
@@ -174,6 +240,9 @@ def create_app(
             Route("/health", health),
             Route("/admin/entities", seed_entities, methods=["POST"]),
             Route("/admin/entities", list_entities, methods=["GET"]),
+            Route("/admin/run", start_run, methods=["POST"]),
+            Route("/admin/clock", set_clock, methods=["POST"]),
+            Route("/admin/state", set_state, methods=["POST"]),
         ],
         lifespan=lifespan,
     )
