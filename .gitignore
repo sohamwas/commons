@@ -21,3 +21,8 @@ day5.db
 observe.db
 enforce.db
 runs/*.json
+dashboard/.next/
+dashboard/out/
+dashboard/node_modules/
+dashboard.log
+next-env.d.ts

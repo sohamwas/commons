@@ -131,6 +131,18 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_export(args: argparse.Namespace) -> int:
+    from commons.ledger.export import write_export
+
+    data = write_export(args.db, args.out, args.run_id)
+    s = data["stats"]
+    print(f"exported {args.db} -> {args.out}")
+    print(f"  run {data['run']['id']}  mode={data['run']['mode']}")
+    print(f"  {s['calls']} calls, {s['entities']} customers, {s['violations']} violations")
+    print(f"  {s['multi_agent_entities']} customers worked by 2+ agents")
+    return 0
+
+
 def _load(path: str) -> dict:
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
@@ -241,6 +253,12 @@ def main(argv: list[str] | None = None) -> int:
     compare.add_argument("--observe", default="runs/observe-4471.json")
     compare.add_argument("--enforce", default="runs/enforce-4471.json")
     compare.set_defaults(func=cmd_compare)
+
+    export = sub.add_parser("export", help="export a run for the dashboard")
+    export.add_argument("--db", default="observe.db")
+    export.add_argument("--out", default="dashboard/public/runs/observe-4471.json")
+    export.add_argument("--run-id", default=None)
+    export.set_defaults(func=cmd_export)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -776,7 +776,53 @@ Sep 4 01:25  rto-shield             reads the order
 
 ---
 
-### Day 8 — 1 Sep — dashboard: hero + ledger
+### Day 8 — ✅ DONE 26 Aug — dashboard: hero + ledger
+
+**Built:** `commons/ledger/export.py`, `commons export`, `GET /api/run`, and the Next.js
+dashboard (`dashboard/`). Runs at **http://127.0.0.1:3300**.
+
+**DoD met.** The hero timeline renders from real ledger data. The worked example is
+`cust_4473` (Meera R.) — **four agents, five calls, 15% cumulative discount, one
+violation**, which the export ranks first automatically because customers are sorted by
+how contested they are.
+
+#### The data adapter, built now rather than retrofitted on Day 10
+
+`src/lib/datasource.ts` has one shape and two backends:
+
+- **`file:`** a recorded run committed to the repo → the hosted demo, **no backend at all**
+- **`http:`** `GET /api/run` on a live proxy → the local app watching a real run
+
+Both return identical JSON, so every component is written once and never learns which it
+is reading. `next.config.mjs` is already `output: "export"`, so Day 10's Vercel deploy is
+a copy of `out/`. The determinism built for the A/B pays for itself twice, exactly as
+handoff §15.3 predicted.
+
+#### Design decisions worth keeping
+
+- **The export is organised BY CUSTOMER, not by agent.** If the data shape were
+  agent-centric the UI would drift back into an agent-centric list view no matter what
+  the CSS did, and the whole inversion would become invisible (handoff §13).
+- **Violations are drawn BETWEEN the lanes**, not on them — literally in the gap no
+  single agent can see. That is the thesis rendered rather than captioned.
+- **Red is reserved exclusively for violations.** Agent lanes are blue / teal / slate /
+  ochre; nothing else in the palette is ever red.
+- Tabular monospaced numerals throughout, dark-first, legible at 1080p to a
+  half-watching viewer. Fintech infrastructure, not a purple-gradient AI product.
+- The `OBSERVE / ENFORCE / LIVE` toggle **keeps the selected customer** across a mode
+  switch, so you watch one person's timeline change rather than losing your place.
+
+#### Two fixes found while wiring it up
+
+- `/api/run` returned an **empty run**, because the proxy opens a ledger run when it
+  boots and "latest run" therefore meant the empty one after every restart. It now picks
+  the most recent run that actually has calls.
+- Port 3000 was already taken on this machine by an unrelated app; the dashboard runs on
+  **3300**.
+
+---
+
+### Day 8 (original plan, for reference) — dashboard: hero + ledger
 
 - Next.js, dark-first, monospaced numerals, **red reserved exclusively for violations**. Fintech
   infrastructure, not purple-gradient AI product (handoff §13.3).

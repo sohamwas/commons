@@ -204,6 +204,23 @@ def create_app(
         ledger.set_state(entity_id, key, value)
         return JSONResponse({"entity_id": entity_id, key: value})
 
+    async def api_run(request):
+        """The dashboard's live backend — identical shape to the exported file.
+
+        Same JSON, same components, whether it comes from here or from a recorded run
+        committed to the repo.
+        """
+        from commons.ledger.export import export_run
+
+        try:
+            data = export_run(db_path, request.query_params.get("run_id"))
+        except ValueError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404)
+        return JSONResponse(
+            data,
+            headers={"Access-Control-Allow-Origin": "*"},  # local dashboard on :3000
+        )
+
     async def list_entities(_request):
         rows = ledger.conn.execute(
             "SELECT id, display_name FROM entity ORDER BY id"
@@ -240,6 +257,7 @@ def create_app(
             Route("/health", health),
             Route("/admin/entities", seed_entities, methods=["POST"]),
             Route("/admin/entities", list_entities, methods=["GET"]),
+            Route("/api/run", api_run),
             Route("/admin/run", start_run, methods=["POST"]),
             Route("/admin/clock", set_clock, methods=["POST"]),
             Route("/admin/state", set_state, methods=["POST"]),
