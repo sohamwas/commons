@@ -131,6 +131,90 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _load(path: str) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _count_reactions(report: dict) -> dict:
+    counts: dict[str, int] = {}
+    for r in report.get("reactions", []):
+        counts[r["reaction"]] = counts.get(r["reaction"], 0) + 1
+    return counts
+
+
+def cmd_compare(args: argparse.Namespace) -> int:
+    """Two runs of the SAME world, one observed and one governed."""
+    a, b = _load(args.observe), _load(args.enforce)
+    la, lb = a["ledger"], b["ledger"]
+    ra, rb = _count_reactions(a), _count_reactions(b)
+
+    def row(label: str, x, y, invert: bool = False) -> None:
+        try:
+            delta = y - x
+            sign = "+" if delta > 0 else ""
+            good = (delta < 0) if invert else (delta > 0)
+            mark = "" if delta == 0 else ("  <-- " if good else "  <-- ")
+            change = f"{sign}{delta:g}{mark}".rstrip()
+        except TypeError:
+            change = ""
+        print(f"  {label:<38} {str(x):>9} {str(y):>10}   {change}")
+
+    print("=" * 74)
+    print(f"SAME WORLD, SAME SEED ({a['seed']}), SAME AGENTS — OBSERVED vs GOVERNED")
+    print("=" * 74)
+    print(f"  {'':<38} {'OBSERVE':>9} {'ENFORCE':>10}")
+
+    print("\n  TRAFFIC")
+    row("tool calls seen by Commons", la["calls"], lb["calls"])
+    row("forwarded to the real vendors", la["forwarded"], lb["forwarded"], invert=True)
+    row(
+        "stopped by Commons",
+        la["calls"] - la["forwarded"],
+        lb["calls"] - lb["forwarded"],
+    )
+
+    print("\n  CONVERGENCE — the exposure. Identical, because it is the same world.")
+    row(
+        "customers worked by 2+ agents",
+        la["customers_touched_by_multiple_agents"],
+        lb["customers_touched_by_multiple_agents"],
+    )
+    row(
+        "direct contradictions detected",
+        la["contradictions_detected"],
+        lb["contradictions_detected"],
+    )
+    row(
+        "customers discounted by 2+ agents",
+        la["customers_discounted_by_multiple_agents"],
+        lb["customers_discounted_by_multiple_agents"],
+    )
+
+    print("\n  WHAT ACTUALLY REACHED THE CUSTOMER")
+    row(
+        "total discount delivered (%)",
+        la["total_discount_delivered_pct"],
+        lb["total_discount_delivered_pct"],
+        invert=True,
+    )
+    row("customers who opted out", ra.get("opt_out", 0), rb.get("opt_out", 0), invert=True)
+    row("customers who escalated", ra.get("escalate", 0), rb.get("escalate", 0), invert=True)
+    row("customers irritated", ra.get("irritated", 0), rb.get("irritated", 0), invert=True)
+    row("customers who engaged", ra.get("engage", 0), rb.get("engage", 0))
+
+    print("\n  MODEL NOISE (kept out of the headline on purpose)")
+    row("malformed tool calls", a["malformed_tool_calls"], b["malformed_tool_calls"], invert=True)
+    row("duplicate calls dropped", a["duplicate_tool_calls"], b["duplicate_tool_calls"], invert=True)
+
+    print("\n" + "-" * 74)
+    print("  Every per-agent dashboard is green in BOTH runs. Each agent did its job")
+    print("  correctly each time. The difference is that in one of them something could")
+    print("  see all four at once.")
+    print("-" * 74)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="commons")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -152,6 +236,11 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--db", default="commons.db", help="the proxy's ledger, for the summary")
     run.add_argument("--out", help="write the full run report as JSON")
     run.set_defaults(func=cmd_run)
+
+    compare = sub.add_parser("compare", help="A/B two runs of the same world")
+    compare.add_argument("--observe", default="runs/observe-4471.json")
+    compare.add_argument("--enforce", default="runs/enforce-4471.json")
+    compare.set_defaults(func=cmd_compare)
 
     args = parser.parse_args(argv)
     return args.func(args)

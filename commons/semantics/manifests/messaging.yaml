@@ -30,6 +30,10 @@ transactional_templates: &transactional_templates
   - delivery_confirmation
   - payment_receipt
   - otp
+  # Correspondence ABOUT a dispute is not marketing, and must not be caught by the rule
+  # that stops marketing at a customer who is in dispute. Without this the merchant's own
+  # dispute handler would be silenced at precisely the moment it needs to write.
+  - dispute_response
 
 tools:
   send_whatsapp:

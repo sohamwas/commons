@@ -29,6 +29,7 @@ from commons.world.personas import (
     apply_reaction,
     archetype_for,
 )
+from commons.world.events import EventType
 from commons.world.seed import seed_identities
 from commons.world.world import build_world
 
@@ -123,6 +124,21 @@ class Runner:
     async def set_state(self, customer, key: str, value) -> None:
         await self._post("/admin/state", {"ref": customer.id, "key": key, "value": value})
 
+    async def apply_event_state(self, customer, event) -> None:
+        """Let the world's own events move entity state, before any agent reacts.
+
+        A dispute being filed IS the customer having an open dispute. Until this existed,
+        only a persona escalation ever set the flag, so a dispute the world generated was
+        invisible to the rules and `no_promo_during_dispute` could never fire — the
+        customer was in dispute and Commons had no idea.
+        """
+        if event.type == EventType.DISPUTE_FILED and customer.dispute_status != "open":
+            customer.dispute_status = "open"
+            await self.set_state(customer, "dispute_status", "open")
+        elif event.type == EventType.DISPUTE_RESOLVED and customer.dispute_status == "open":
+            customer.dispute_status = "closed"
+            await self.set_state(customer, "dispute_status", "closed")
+
     # ---------------------------------------------------------------- personas
 
     def contacts_in_last_day(self, customer_id: str, now: datetime) -> int:
@@ -213,6 +229,7 @@ class Runner:
                 customer = self.world.customers[event.customer_id]
 
                 await self.set_clock(event.at)
+                await self.apply_event_state(customer, event)
                 outcome = await runtimes[definition.id].handle(
                     event, compact_context(customer, event)
                 )

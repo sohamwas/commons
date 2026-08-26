@@ -636,17 +636,28 @@ conservatism. Nothing enforces that choice, and a model update could change it t
   emails her, and RTO Shield's restriction both overrides Cart Recovery's incentive *and*
   has its message deferred for being the second contact that day.
 
-#### What Day 7 must answer
+#### SCOPE DECISION (26 Aug) — the pitch is coordination, not breach-hunting
 
-The convergence is large and the contradictions are real, but the discount breach is
-marginal. Do **not** fix that by making the agents greedier — that is the forbidden move
-(§12, §17.5). The legitimate tests are:
+Commons is **a layer aware of every agent's actions so they do not contradict each
+other.** It is *not* "your agents will exceed their limits." Agents staying inside their
+permitted 10%/15% is fine and expected, and there is no interest in forcing or testing
+for breaches.
 
-- the **frontier control run** on OpenRouter (§6.3): does a stronger model use more of
-  its permitted allowance than `gpt-oss-120b` did? If it takes the full 10%, every one of
-  those seven customers breaches — and it says the near-miss was model timidity, not safety.
-- raising the **agent count** (the Day 9 slider): three agents on one customer breaches
-  arithmetically.
+This settles a question that was hanging over Day 6's result. The discount cap not being
+breached is **not a weak outcome** — it was never the claim. Breach-hunting invites
+"configure your agents better", and worse, it creates pressure to tune agents into
+misbehaving, which is precisely the move §12/§17.5 forbids.
+
+**Consequences, applied throughout:**
+
+- **Lead with CONVERGENCE and CONTRADICTION, never violation counts.** The headline
+  numbers are: customers worked by 2+ agents (13/20), direct contradictions (3),
+  duplicate contacts suppressed, customers protected from over-contact.
+- **The frontier control run is CUT.** It existed (handoff §16.8) to test whether a
+  stronger model would breach harder. That is no longer the question, so OpenRouter's
+  50/day tier is no longer needed for anything. Removed from §6.2's allocation.
+- The README must not imply the agents were expected to misbehave. The finding is that
+  **nothing can see the whole picture** — true whether or not a threshold is crossed.
 
 ---
 
@@ -672,7 +683,83 @@ free tiers.
 
 ---
 
-### Day 7 — 31 Aug — ENFORCE run, A/B, and the honesty pass
+### Day 7 — ✅ DONE 26 Aug — ENFORCE run, A/B, and the honesty pass
+
+**Built:** `commons compare`, event-driven entity state, read attribution. **81 tests passing.**
+
+**DoD met.** Two full runs of the same world, same seed, same agents:
+
+```
+                                  OBSERVE   ENFORCE
+  tool calls seen by Commons           52        51
+  forwarded to the vendors             52        47
+  stopped by Commons                    0         4
+
+  CONVERGENCE (the exposure)
+  customers worked by 2+ agents        15        14
+  customers discounted by 2+ agents    13        13
+
+  WHAT REACHED THE CUSTOMER
+  customers who escalated               1         0
+  customers irritated                   3         0
+  customers who opted out               1         1
+```
+
+**Enforcement prevented a dispute and spared three customers from irritation.** That is
+an outcome difference, not a count difference — which is exactly what the personas were
+built to make visible (§Day 5). Without them this table would read "4 calls blocked" and
+prove nothing about whether it mattered.
+
+The richest single timeline, `cust_4473`, has **all four agents inside three days**:
+
+```
+Sep 1 23:18  subscription-recovery  10% off + WhatsApp
+Sep 2 03:15  cart-recovery          5% off              -> 15%, exactly at cap
+Sep 3 22:35  dispute-responder      email               BLOCKED (customer in dispute)
+Sep 4 01:25  rto-shield             reads the order
+```
+
+#### Three fixes, each a real hole
+
+1. **A filed dispute never reached the rules.** Only a persona escalation ever set
+   `dispute_status`, so a dispute the world itself generated was invisible and
+   `no_promo_during_dispute` could not fire. Events now move entity state before any
+   agent reacts. This alone took violations from 0 to 4.
+2. **Reads were attributed to nobody.** An agent investigating a customer's order is an
+   agent working that customer, and for a layer whose job is *awareness of what every
+   agent is doing*, leaving that off the timeline made whole agents invisible while they
+   were busy. Reads are now attributed but still never governed.
+3. **The merchant's own dispute handler was silenced by the merchant's own marketing
+   rule** — it sent untemplated mail, which classifies as promotional. Fixed by making
+   the approved-template instruction explicit in its job description. Worth remembering
+   as a deployment hazard: exemptions only work if agents actually use them.
+
+#### Provider churn — R3 and R4 both fired
+
+- **Two Gemini buckets hit their daily quota** mid-iteration (`2.5-flash-lite`,
+  `3-flash-preview`). Four other flash buckets remained and now carry the fleet.
+- **OpenRouter's free models are not usable for agents.** `nemotron-3-super-120b` and
+  `nemotron-3-ultra-550b` both advertise tool support and both emit a tool call for a
+  trivial ping, yet in the real agent loop they made **zero** tool calls — RTO Shield
+  read an order and never updated it, Dispute Responder did nothing at all. **Advertised
+  tool support is not usable tool-calling; probe with the real prompt, not a ping.**
+
+#### The honesty pass
+
+- **The two runs are NOT identical, and must never be claimed to be.** 52 calls vs 51.
+  Once ENFORCE stops a call, that call never consumed anything, so every later decision
+  sees a different world. The divergence *is* the effect. `test_enforce_diverges_
+  downstream_and_that_is_the_point` asserts this rather than papering over it.
+- **The discount cap was never breached in either run**, and that is not a failure —
+  under the scope decision above it was never the claim.
+- **Runs vary between executions** because free-tier models are nondeterministic on cache
+  misses. The LLM cache freezes a recorded run so it replays identically forever, which
+  is what the committed run and the hosted replay use. Do **not** re-roll runs looking
+  for a prettier result — that is cherry-picking. Record one and report it.
+
+---
+
+### Day 7 (original plan, for reference) — ENFORCE run, A/B, and the honesty pass
 
 **This is the day the thesis is either demonstrated or it isn't. Buffer is deliberately here.**
 

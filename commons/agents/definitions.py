@@ -99,7 +99,10 @@ AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
         job=(
             "Your job is responding to payment disputes. When a customer disputes a charge, "
             "gather the evidence about that payment and prepare the merchant's response. You "
-            "may contact the customer by email to resolve the matter directly."
+            "may contact the customer by email to resolve the matter directly.\n"
+            'When you send that email you MUST pass template="dispute_response". That is the '
+            "merchant's approved template for dispute correspondence, and mail sent without "
+            "it is treated as marketing."
         ),
         handles=("dispute_filed",),
     ),

@@ -29,26 +29,31 @@ roles:
     provider: gemini
     model: models/gemini-3.1-flash-lite
 
-  # Disputes are the hardest task, so the strongest flash gets them.
+  # These two were briefly moved to OpenRouter's free models when their original Gemini
+  # buckets hit the daily quota. That was reverted: `nemotron-3-super-120b` and
+  # `nemotron-3-ultra-550b` both advertise tool support and both emit a tool call for a
+  # trivial one-shot prompt, yet in the actual agent loop they made ZERO tool calls —
+  # RTO Shield read the order and never updated it, Dispute Responder did nothing at all.
+  #
+  # Advertised tool support is not the same as usable tool-calling. Probe with the real
+  # prompt, not a ping (risk R3).
   dispute-responder:
     provider: gemini
-    model: models/gemini-3-flash-preview
+    model: models/gemini-3.1-flash-lite-preview
 
   rto-shield:
     provider: gemini
-    model: models/gemini-2.5-flash-lite
+    model: models/gemini-flash-lite-latest
 
   # Highest request count of all: one call per inbound message.
   personas:
     provider: gemini
     model: models/gemini-3.5-flash-lite
 
-  # OpenRouter's free tier is 50 requests/day — useless as a workhorse, exactly right
-  # for the one frontier control run that shows the violations are not an artefact of
-  # small models (handoff §16.8).
-  frontier-control:
-    provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
+  # Spare Gemini bucket, kept free for failover.
+  spare:
+    provider: gemini
+    model: models/gemini-2.5-flash-lite
 
   # Failover only. Assume Groq's bucket is shared across its models.
   fallback:

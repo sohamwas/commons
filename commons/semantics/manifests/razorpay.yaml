@@ -61,10 +61,17 @@ tools:
       from: args
       path: order_id
 
-  # Reads are logged but never governed — they consume nothing shared.
+  # Reads are never GOVERNED — they consume nothing shared, so no rule applies to them.
+  # But where a read names a customer, it is still ATTRIBUTED to them, because an agent
+  # investigating someone's order is an agent working that customer. A layer whose job is
+  # awareness of what every agent is doing should show that on the timeline; leaving reads
+  # unattributed made whole agents invisible even while they were busy.
+  fetch_order:
+    action_class: read
+    entity: {from: args, path: order_id, as: order_id}
+
   fetch_payment: {action_class: read}
   fetch_all_payments: {action_class: read}
-  fetch_order: {action_class: read}
   fetch_all_orders: {action_class: read}
   fetch_payment_link: {action_class: read}
   fetch_refund: {action_class: read}
