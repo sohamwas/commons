@@ -589,3 +589,351 @@ tbody td {
     font-size: 11.5px;
   }
 }
+
+/* ---------------------------------------------------------------- navigation */
+
+.nav {
+  display: flex;
+  gap: 2px;
+}
+
+.nav-link {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 6px 11px;
+  border-radius: 6px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav-link[data-active="true"] {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-bright);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.pill[data-mode="ENFORCE"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.pill-off {
+  color: var(--danger);
+  border-color: var(--danger-dim);
+  background: var(--danger-bg);
+}
+
+/* ---------------------------------------------------------------- controls */
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--border-bright);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: transparent;
+}
+
+.btn-quiet:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.btn-correct:hover:not(:disabled) {
+  border-color: var(--allow);
+  color: var(--allow);
+}
+
+.btn-incorrect:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ok {
+  color: var(--allow);
+  font-size: 12.5px;
+  font-family: var(--mono);
+}
+
+.warn {
+  border: 1px solid var(--defer);
+  background: var(--defer-bg);
+  color: var(--defer);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  margin: 12px 0;
+}
+
+.ok-banner {
+  border: 1px solid var(--border-bright);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 12px 15px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* ---------------------------------------------------------------- rules page */
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+
+.mode-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.mode-sub {
+  color: var(--text-dim);
+  font-size: 13px;
+  max-width: 62ch;
+  margin-top: 3px;
+}
+
+.rule {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+.rule[data-off="true"] {
+  opacity: 0.55;
+}
+
+.rule-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.rule-english {
+  width: 100%;
+  font-size: 14.5px;
+  background: transparent;
+  border-color: transparent;
+  padding: 4px 6px;
+  margin-left: -6px;
+}
+
+.rule-english:hover {
+  border-color: var(--border);
+}
+
+.rule-compiled {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 2px;
+  padding-left: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rule-fields {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field input,
+.field select {
+  width: 190px;
+  font-size: 13px;
+}
+
+.field-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.field-hint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.rule-applies {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+
+.rule-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------------------------------------------------------------- review page */
+
+.review-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 15px 18px;
+  margin-bottom: 10px;
+}
+
+.review-card[data-done="true"] {
+  opacity: 0.62;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+}
+
+.review-reason {
+  color: var(--danger);
+  font-size: 12.5px;
+  margin: 10px 0;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.review-done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+.note-input {
+  width: 100%;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------- connect / data */
+
+.snippet {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.snippet pre {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+  padding: 13px 15px;
+  overflow-x: auto;
+}
+
+.snippet .btn {
+  margin: 10px 10px 0 0;
+}
+
+.csv {
+  width: 100%;
+  min-height: 140px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  resize: vertical;
+}
+
+h2 .btn {
+  text-transform: none;
+  letter-spacing: 0;
+}

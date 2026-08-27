@@ -31,6 +31,15 @@ export interface Call {
   rules_fired: RuleFiring[];
   violations: RuleFiring[];
   unattributed?: boolean;
+  /** The merchant's verdicts on this call, one per rule that fired. */
+  reviews?: CallReview[];
+}
+
+export interface CallReview {
+  rule_id: string;
+  verdict: "correct" | "incorrect" | "unsure";
+  note: string | null;
+  reviewed_at: string;
 }
 
 export interface EntitySummary {

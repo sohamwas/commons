@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Ledger from "@/components/Ledger";
+import Nav from "@/components/Nav";
 import Timeline from "@/components/Timeline";
 import {
   LIVE_SOURCE,
@@ -58,34 +59,7 @@ export default function Page() {
 
   return (
     <>
-      <header className="top">
-        <div className="top-inner">
-          <div className="wordmark">
-            Commons<span>arbitration gateway</span>
-          </div>
-          <div className="spacer" />
-          {data && (
-            <div
-              className="mono"
-              style={{ fontSize: 11, color: "var(--text-faint)" }}
-            >
-              seed {data.run.seed ?? "—"} · {data.stats.calls} calls
-            </div>
-          )}
-          <div className="modes">
-            {(["observe", "enforce", "live"] as const).map((m) => (
-              <button
-                key={m}
-                data-mode={m.toUpperCase()}
-                data-active={mode === m}
-                onClick={() => setMode(m)}
-              >
-                {m.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+      <Nav />
 
       <div className="shell">
         <h1>Who is being acted upon</h1>
