@@ -232,10 +232,18 @@ class Ledger:
             (entity_id, run_id or self.run_id, *action_classes, since_iso),
         ).fetchall()
         total = 0.0
+        unattributed = 0
         for row in rows:
             if exclude_resource is not None and row["resource"] == exclude_resource:
                 continue
             total += float(row["m"] or 0)
+            if row["resource"] is None:
+                unattributed += 1
+        # The count travels with the total so a rule can say whether a breach might be an
+        # attribution artefact rather than a real one. Failing closed is right, but a
+        # merchant reading "you are over your cap" deserves to know when part of that sum
+        # is offers we could not tell apart.
+        self.last_unattributed_contributors = unattributed
         return total
 
     def last_actor_on_resource(

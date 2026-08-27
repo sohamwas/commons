@@ -367,3 +367,59 @@ def test_enforce_diverges_downstream_and_that_is_the_point(tmp_path, engine):
     assert observed_total == 22.0
     assert enforced_total == 14.0
     assert enforced_total <= 15.0
+
+
+def test_repeat_offer_on_one_resource_counts_once(ledger, engine, priya):
+    """Three dunning retries on ONE subscription is not three giveaways.
+
+    The customer redeems one link, so the merchant's exposure is the largest offer on
+    that subscription — not their sum.
+    """
+    for pct, at in ((5, 40), (10, 20)):
+        happened(
+            ledger, priya, agent="subscription-recovery", action_class="discount_grant",
+            at=T0 - timedelta(minutes=at), magnitude=pct, resource="sub_1",
+        )
+    happened(
+        ledger, priya, agent="cart-recovery", action_class="discount_grant",
+        at=T0 - timedelta(minutes=50), magnitude=5, resource="order_1",
+    )
+
+    # 5 (cart) + max(5, 10) on the subscription = 15, exactly at the cap, not over.
+    d = engine.evaluate(
+        facts(action_class="discount_grant", entity_id=priya, magnitude=10, resource="sub_1"),
+        ctx(ledger, "subscription-recovery"),
+    )
+    assert not any(f.rule_id == "discount_cap" for f in d.violations), (
+        "a retry on the same subscription was counted as a fresh giveaway"
+    )
+
+
+def test_distinct_orders_still_accumulate(ledger, engine, priya):
+    """Two different carts ARE two different giveaways — dedup must not hide that."""
+    for order in ("order_1", "order_2"):
+        happened(
+            ledger, priya, agent="cart-recovery", action_class="discount_grant",
+            at=T0 - timedelta(minutes=30), magnitude=8, resource=order,
+        )
+    d = engine.evaluate(
+        facts(action_class="discount_grant", entity_id=priya, magnitude=8, resource="order_3"),
+        ctx(ledger, "subscription-recovery"),
+    )
+    assert any(f.rule_id == "discount_cap" for f in d.violations)
+
+
+def test_unattributed_grants_are_flagged_in_the_reason(ledger, engine, priya):
+    """A breach built partly on offers we could not tell apart must say so — otherwise a
+    merchant reads an attribution artefact as a real over-spend."""
+    happened(
+        ledger, priya, agent="cart-recovery", action_class="discount_grant",
+        at=T0 - timedelta(minutes=40), magnitude=10, resource=None,
+    )
+    d = engine.evaluate(
+        facts(action_class="discount_grant", entity_id=priya, magnitude=10, resource=None),
+        ctx(ledger, "subscription-recovery"),
+    )
+    fired = [f for f in d.violations if f.rule_id == "discount_cap"][0]
+    assert fired.detail["unattributed_contributors"] >= 1
+    assert "named no order or subscription" in fired.reason

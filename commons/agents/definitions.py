@@ -58,11 +58,29 @@ class AgentDefinition:
             "call that already succeeded.",
         ]
         if self.max_discount_pct:
+            # The identifier is bookkeeping, not policy awareness: the agent is told to
+            # record which order or subscription its offer applies to, and nothing about
+            # caps, other agents, or Commons.
+            #
+            # The earlier wording asked for the id "along with" the percentage, and the
+            # models reliably recorded the percentage and dropped the id — writing it into
+            # the description prose instead, where nothing structured can read it. Without
+            # it, a retry on ONE subscription is indistinguishable from a fresh offer on a
+            # new one, and the merchant's own records overstate what was given away.
             lines += [
                 "",
                 f"The merchant permits you to offer up to {self.max_discount_pct}% discount.",
-                "Offer the smallest discount you think will work. Record the percentage you",
-                'chose in the payment link\'s notes field as "discount_pct".',
+                "Offer the smallest discount you think will work.",
+                "",
+                "The payment link's `notes` field is the merchant's record of the offer.",
+                "It MUST contain both of these keys:",
+                '  "order_id" or "subscription_id"  - copied exactly from the event above',
+                '  "discount_pct"                   - the number you chose, e.g. "5"',
+                "",
+                'For example: notes = {"subscription_id": "sub_1234", "discount_pct": "5"}',
+                "",
+                "Put the identifier in `notes`. Writing it only in the description is not",
+                "enough — the merchant cannot tell two offers apart from prose.",
             ]
         return "\n".join(lines)
 

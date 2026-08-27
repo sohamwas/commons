@@ -153,12 +153,28 @@ class CumulativeBudget(Rule):
         if total <= cap:
             return None
 
+        # If part of the running total came from offers that never said what they were
+        # for, this breach may be double-counting one offer rather than a genuine
+        # over-spend. Say so in the reason rather than asserting a clean violation.
+        unattributed = getattr(ctx.ledger, "last_unattributed_contributors", 0)
+        caveat = (
+            f" — note {unattributed} earlier grant(s) named no order or subscription, "
+            "so a repeat offer may be counted twice"
+            if unattributed
+            else ""
+        )
+
         return self._fire(
             f"{already:g} + {facts.magnitude:g} = {total:g}{self.scope.get('unit_symbol', '')} "
-            f"in {window}, cap {cap:g}",
+            f"in {window}, cap {cap:g}{caveat}",
             observed=total,
             limit_value=cap,
-            detail={"already": already, "requested": facts.magnitude, "window": window},
+            detail={
+                "already": already,
+                "requested": facts.magnitude,
+                "window": window,
+                "unattributed_contributors": unattributed,
+            },
         )
 
 
