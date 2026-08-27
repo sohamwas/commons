@@ -1,9 +1,9 @@
 {
   "run": {
-    "id": "run_cc60f15ffcef",
+    "id": "run_4d9290db931e",
     "seed": 4471,
     "mode": "OBSERVE",
-    "started_at": "2026-08-26T13:39:22.977+00:00",
+    "started_at": "2026-08-27T06:51:40.194+00:00",
     "ended_at": null,
     "notes": "seed 4471"
   },
@@ -38,8 +38,8 @@
         "window": "24h",
         "max": 1
       },
-      "fired": 0,
-      "violations": 0
+      "fired": 3,
+      "violations": 3
     },
     {
       "id": "discount_cap",
@@ -55,8 +55,8 @@
         "unit": "percent",
         "unit_symbol": "%"
       },
-      "fired": 0,
-      "violations": 0
+      "fired": 13,
+      "violations": 13
     },
     {
       "id": "no_promo_during_dispute",
@@ -71,8 +71,8 @@
         "state": "dispute_status",
         "equals": "open"
       },
-      "fired": 4,
-      "violations": 4
+      "fired": 6,
+      "violations": 6
     },
     {
       "id": "one_agent_per_order",
@@ -95,58 +95,13 @@
         "loser": "discount_grant",
         "window": "7d"
       },
-      "fired": 0,
-      "violations": 0
+      "fired": 6,
+      "violations": 4
     }
   ],
   "entities": [
     {
-      "id": "ent_f58c5b36e5",
-      "display_name": "Meera R.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4473"
-        ],
-        [
-          "email",
-          "meera2@example.com"
-        ],
-        [
-          "order_id",
-          "order_4473"
-        ],
-        [
-          "phone",
-          "+919800000023"
-        ]
-      ],
-      "state": {
-        "dispute_status": "open"
-      },
-      "agents": [
-        "cart-recovery",
-        "dispute-responder",
-        "rto-shield",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        1,
-        2,
-        3,
-        10,
-        12
-      ],
-      "summary": {
-        "agent_count": 4,
-        "calls": 5,
-        "discount_pct": 15.0,
-        "promotional_contacts": 2,
-        "violations": 1
-      }
-    },
-    {
-      "id": "ent_acfd1e4d9e",
+      "id": "ent_6312881022",
       "display_name": "Priya S.",
       "handles": [
         [
@@ -176,21 +131,24 @@
         "subscription-recovery"
       ],
       "call_ids": [
-        41,
-        42,
-        48,
-        50
+        10,
+        12,
+        17,
+        20,
+        23,
+        29,
+        37
       ],
       "summary": {
         "agent_count": 4,
-        "calls": 4,
-        "discount_pct": 15.0,
-        "promotional_contacts": 1,
-        "violations": 1
+        "calls": 7,
+        "discount_pct": 40.0,
+        "promotional_contacts": 0,
+        "violations": 6
       }
     },
     {
-      "id": "ent_61cff8852b",
+      "id": "ent_959ac9e5ab",
       "display_name": "Sneha R.",
       "handles": [
         [
@@ -216,41 +174,43 @@
       "agents": [
         "cart-recovery",
         "dispute-responder",
+        "rto-shield",
         "subscription-recovery"
       ],
       "call_ids": [
-        36,
-        37,
-        40,
-        44
+        42,
+        43,
+        45,
+        48,
+        74
       ],
       "summary": {
-        "agent_count": 3,
-        "calls": 4,
-        "discount_pct": 15.0,
-        "promotional_contacts": 2,
-        "violations": 1
+        "agent_count": 4,
+        "calls": 5,
+        "discount_pct": 20.0,
+        "promotional_contacts": 0,
+        "violations": 2
       }
     },
     {
-      "id": "ent_50d0ba2881",
-      "display_name": "Vikram P.",
+      "id": "ent_2c88a3ae27",
+      "display_name": "Meera R.",
       "handles": [
         [
           "customer_id",
-          "cust_4476"
+          "cust_4473"
         ],
         [
           "email",
-          "vikram5@example.com"
+          "meera2@example.com"
         ],
         [
           "order_id",
-          "order_4476"
+          "order_4473"
         ],
         [
           "phone",
-          "+919800000026"
+          "+919800000023"
         ]
       ],
       "state": {
@@ -262,39 +222,42 @@
         "subscription-recovery"
       ],
       "call_ids": [
-        21,
-        22,
-        23,
-        26,
-        28
+        67,
+        68,
+        69,
+        72,
+        73,
+        82,
+        83,
+        92
       ],
       "summary": {
         "agent_count": 3,
-        "calls": 5,
-        "discount_pct": 5.0,
+        "calls": 8,
+        "discount_pct": 40.0,
         "promotional_contacts": 2,
-        "violations": 0
+        "violations": 5
       }
     },
     {
-      "id": "ent_960f320cab",
-      "display_name": "Ananya N.",
+      "id": "ent_f67636e64e",
+      "display_name": "Rahul M.",
       "handles": [
         [
           "customer_id",
-          "cust_4475"
+          "cust_4482"
         ],
         [
           "email",
-          "ananya4@example.com"
+          "rahul11@example.com"
         ],
         [
           "order_id",
-          "order_4475"
+          "order_4482"
         ],
         [
           "phone",
-          "+919800000025"
+          "+919800000032"
         ]
       ],
       "state": {
@@ -302,265 +265,27 @@
       },
       "agents": [
         "cart-recovery",
-        "dispute-responder"
-      ],
-      "call_ids": [
-        15,
-        18
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 5.0,
-        "promotional_contacts": 1,
-        "violations": 1
-      }
-    },
-    {
-      "id": "ent_c8606fc790",
-      "display_name": "Aditya D.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4478"
-        ],
-        [
-          "email",
-          "aditya7@example.com"
-        ],
-        [
-          "order_id",
-          "order_4478"
-        ],
-        [
-          "phone",
-          "+919800000028"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none"
-      },
-      "agents": [
-        "cart-recovery",
+        "dispute-responder",
         "subscription-recovery"
       ],
       "call_ids": [
-        29,
-        30,
-        32
+        1,
+        2,
+        4,
+        5,
+        14,
+        19
       ],
       "summary": {
-        "agent_count": 2,
-        "calls": 3,
-        "discount_pct": 15.0,
-        "promotional_contacts": 1,
-        "violations": 0
+        "agent_count": 3,
+        "calls": 6,
+        "discount_pct": 20.0,
+        "promotional_contacts": 2,
+        "violations": 3
       }
     },
     {
-      "id": "ent_ceda0195a7",
-      "display_name": "Tara D.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4486"
-        ],
-        [
-          "email",
-          "tara15@example.com"
-        ],
-        [
-          "order_id",
-          "order_4486"
-        ],
-        [
-          "phone",
-          "+919800000036"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none",
-        "opted_out": "true"
-      },
-      "agents": [
-        "cart-recovery",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        6,
-        7,
-        8
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 3,
-        "discount_pct": 10.0,
-        "promotional_contacts": 1,
-        "violations": 0
-      }
-    },
-    {
-      "id": "ent_20dfdaf909",
-      "display_name": "Nisha P.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4484"
-        ],
-        [
-          "email",
-          "nisha13@example.com"
-        ],
-        [
-          "order_id",
-          "order_4484"
-        ],
-        [
-          "phone",
-          "+919800000034"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none"
-      },
-      "agents": [
-        "cart-recovery",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        19,
-        20
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 15.0,
-        "promotional_contacts": 0,
-        "violations": 0
-      }
-    },
-    {
-      "id": "ent_2b124e6733",
-      "display_name": "Kavya V.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4477"
-        ],
-        [
-          "email",
-          "kavya6@example.com"
-        ],
-        [
-          "order_id",
-          "order_4477"
-        ],
-        [
-          "phone",
-          "+919800000027"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none"
-      },
-      "agents": [
-        "cart-recovery",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        34,
-        35
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 15.0,
-        "promotional_contacts": 0,
-        "violations": 0
-      }
-    },
-    {
-      "id": "ent_6571f2ff0a",
-      "display_name": "Divya S.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4479"
-        ],
-        [
-          "email",
-          "divya8@example.com"
-        ],
-        [
-          "order_id",
-          "order_4479"
-        ],
-        [
-          "phone",
-          "+919800000029"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none"
-      },
-      "agents": [
-        "cart-recovery",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        24,
-        25
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 5.0,
-        "promotional_contacts": 0,
-        "violations": 0
-      }
-    },
-    {
-      "id": "ent_6e2bf7f7bf",
-      "display_name": "Arjun K.",
-      "handles": [
-        [
-          "customer_id",
-          "cust_4472"
-        ],
-        [
-          "email",
-          "arjun1@example.com"
-        ],
-        [
-          "order_id",
-          "order_4472"
-        ],
-        [
-          "phone",
-          "+919800000022"
-        ]
-      ],
-      "state": {
-        "dispute_status": "none"
-      },
-      "agents": [
-        "cart-recovery",
-        "subscription-recovery"
-      ],
-      "call_ids": [
-        31,
-        33
-      ],
-      "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 5.0,
-        "promotional_contacts": 0,
-        "violations": 0
-      }
-    },
-    {
-      "id": "ent_9e8a74f003",
+      "id": "ent_b72849f3a0",
       "display_name": "Karthik K.",
       "handles": [
         [
@@ -585,22 +310,158 @@
       },
       "agents": [
         "cart-recovery",
+        "rto-shield",
         "subscription-recovery"
       ],
       "call_ids": [
-        49,
-        52
+        57,
+        58,
+        62,
+        63,
+        65,
+        71,
+        96
       ],
       "summary": {
-        "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 10.0,
-        "promotional_contacts": 0,
-        "violations": 0
+        "agent_count": 3,
+        "calls": 7,
+        "discount_pct": 20.0,
+        "promotional_contacts": 2,
+        "violations": 2
       }
     },
     {
-      "id": "ent_a5c37f0757",
+      "id": "ent_bed60ff8c3",
+      "display_name": "Kavya V.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4477"
+        ],
+        [
+          "email",
+          "kavya6@example.com"
+        ],
+        [
+          "order_id",
+          "order_4477"
+        ],
+        [
+          "phone",
+          "+919800000027"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "cart-recovery",
+        "rto-shield",
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        79,
+        80,
+        88,
+        91,
+        93,
+        95
+      ],
+      "summary": {
+        "agent_count": 3,
+        "calls": 6,
+        "discount_pct": 30.0,
+        "promotional_contacts": 0,
+        "violations": 2
+      }
+    },
+    {
+      "id": "ent_eb4323f816",
+      "display_name": "Ananya N.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4475"
+        ],
+        [
+          "email",
+          "ananya4@example.com"
+        ],
+        [
+          "order_id",
+          "order_4475"
+        ],
+        [
+          "phone",
+          "+919800000025"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "cart-recovery",
+        "rto-shield",
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        76,
+        77,
+        84,
+        85,
+        87
+      ],
+      "summary": {
+        "agent_count": 3,
+        "calls": 5,
+        "discount_pct": 20.0,
+        "promotional_contacts": 0,
+        "violations": 2
+      }
+    },
+    {
+      "id": "ent_5870c2c03b",
+      "display_name": "Divya S.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4479"
+        ],
+        [
+          "email",
+          "divya8@example.com"
+        ],
+        [
+          "order_id",
+          "order_4479"
+        ],
+        [
+          "phone",
+          "+919800000029"
+        ]
+      ],
+      "state": {
+        "dispute_status": "open"
+      },
+      "agents": [
+        "cart-recovery",
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        50,
+        52,
+        64
+      ],
+      "summary": {
+        "agent_count": 2,
+        "calls": 3,
+        "discount_pct": 20.0,
+        "promotional_contacts": 0,
+        "violations": 2
+      }
+    },
+    {
+      "id": "ent_e579d0026a",
       "display_name": "Rohan M.",
       "handles": [
         [
@@ -628,36 +489,39 @@
         "subscription-recovery"
       ],
       "call_ids": [
-        45,
-        46
+        32,
+        33,
+        34,
+        35,
+        44
       ],
       "summary": {
         "agent_count": 2,
-        "calls": 2,
-        "discount_pct": 15.0,
-        "promotional_contacts": 0,
-        "violations": 0
+        "calls": 5,
+        "discount_pct": 25.0,
+        "promotional_contacts": 2,
+        "violations": 1
       }
     },
     {
-      "id": "ent_bf0fc89704",
-      "display_name": "Rahul M.",
+      "id": "ent_01968ea937",
+      "display_name": "Arjun K.",
       "handles": [
         [
           "customer_id",
-          "cust_4482"
+          "cust_4472"
         ],
         [
           "email",
-          "rahul11@example.com"
+          "arjun1@example.com"
         ],
         [
           "order_id",
-          "order_4482"
+          "order_4472"
         ],
         [
           "phone",
-          "+919800000032"
+          "+919800000022"
         ]
       ],
       "state": {
@@ -668,8 +532,50 @@
         "subscription-recovery"
       ],
       "call_ids": [
-        4,
-        5
+        7,
+        8,
+        11,
+        38
+      ],
+      "summary": {
+        "agent_count": 2,
+        "calls": 4,
+        "discount_pct": 20.0,
+        "promotional_contacts": 1,
+        "violations": 1
+      }
+    },
+    {
+      "id": "ent_299f96cf84",
+      "display_name": "Vikram P.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4476"
+        ],
+        [
+          "email",
+          "vikram5@example.com"
+        ],
+        [
+          "order_id",
+          "order_4476"
+        ],
+        [
+          "phone",
+          "+919800000026"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "cart-recovery",
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        25,
+        26
       ],
       "summary": {
         "agent_count": 2,
@@ -680,24 +586,117 @@
       }
     },
     {
-      "id": "ent_75172ecd34",
-      "display_name": "Aarav V.",
+      "id": "ent_9b0af6c508",
+      "display_name": "order_id:sub_4471",
+      "handles": [
+        [
+          "order_id",
+          "sub_4471"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        9,
+        22,
+        36
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 3,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_b14b12f563",
+      "display_name": "Tara D.",
       "handles": [
         [
           "customer_id",
-          "cust_4485"
+          "cust_4486"
         ],
         [
           "email",
-          "aarav14@example.com"
+          "tara15@example.com"
         ],
         [
           "order_id",
-          "order_4485"
+          "order_4486"
         ],
         [
           "phone",
-          "+919800000035"
+          "+919800000036"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none",
+        "opted_out": "true"
+      },
+      "agents": [
+        "cart-recovery"
+      ],
+      "call_ids": [
+        30,
+        31,
+        56
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 3,
+        "discount_pct": 10.0,
+        "promotional_contacts": 1,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_cfbb9bd257",
+      "display_name": "order_id:sub_4477",
+      "handles": [
+        [
+          "order_id",
+          "sub_4477"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        78,
+        90,
+        94
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 3,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_321ee54424",
+      "display_name": "Riya K.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4488"
+        ],
+        [
+          "email",
+          "riya17@example.com"
+        ],
+        [
+          "order_id",
+          "order_4488"
+        ],
+        [
+          "phone",
+          "+919800000038"
         ]
       ],
       "state": {
@@ -707,8 +706,157 @@
         "cart-recovery"
       ],
       "call_ids": [
-        38,
-        39
+        15,
+        49
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 10.0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_3c91d4b59a",
+      "display_name": "order_id:sub_4482",
+      "handles": [
+        [
+          "order_id",
+          "sub_4482"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        3,
+        18
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_6cbbd4a4fa",
+      "display_name": "order_id:sub_4475",
+      "handles": [
+        [
+          "order_id",
+          "sub_4475"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        75,
+        86
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_78111c74c5",
+      "display_name": "Lakshmi M.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4490"
+        ],
+        [
+          "email",
+          "lakshmi19@example.com"
+        ],
+        [
+          "phone",
+          "+919800000040"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        28,
+        41
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 10.0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_9470cb18ee",
+      "display_name": "order_id:sub_4490",
+      "handles": [
+        [
+          "order_id",
+          "sub_4490"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        27,
+        40
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_a76400ead4",
+      "display_name": "Aditya D.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4478"
+        ],
+        [
+          "email",
+          "aditya7@example.com"
+        ],
+        [
+          "order_id",
+          "order_4478"
+        ],
+        [
+          "phone",
+          "+919800000028"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "cart-recovery"
+      ],
+      "call_ids": [
+        59,
+        60
       ],
       "summary": {
         "agent_count": 1,
@@ -719,7 +867,119 @@
       }
     },
     {
-      "id": "ent_15abc15ba7",
+      "id": "ent_c725193c53",
+      "display_name": "Nisha P.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4484"
+        ],
+        [
+          "email",
+          "nisha13@example.com"
+        ],
+        [
+          "order_id",
+          "order_4484"
+        ],
+        [
+          "phone",
+          "+919800000034"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "cart-recovery"
+      ],
+      "call_ids": [
+        6,
+        39
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 10.0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_fefa1fff38",
+      "display_name": "order_id:sub_4480",
+      "handles": [
+        [
+          "order_id",
+          "sub_4480"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        61,
+        70
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 2,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_53162ec2be",
+      "display_name": "order_id:sub_4479",
+      "handles": [
+        [
+          "order_id",
+          "sub_4479"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        51
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 1,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_81810131b3",
+      "display_name": "order_id:sub_4473",
+      "handles": [
+        [
+          "order_id",
+          "sub_4473"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        81
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 1,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_86c4daec67",
       "display_name": "Ishaan N.",
       "handles": [
         [
@@ -746,7 +1006,7 @@
         "cart-recovery"
       ],
       "call_ids": [
-        16
+        97
       ],
       "summary": {
         "agent_count": 1,
@@ -757,45 +1017,31 @@
       }
     },
     {
-      "id": "ent_83fa56686f",
-      "display_name": "Lakshmi M.",
+      "id": "ent_8ad7dcd40b",
+      "display_name": "order_id:sub_4489",
       "handles": [
         [
-          "customer_id",
-          "cust_4490"
-        ],
-        [
-          "email",
-          "lakshmi19@example.com"
-        ],
-        [
           "order_id",
-          "order_4490"
-        ],
-        [
-          "phone",
-          "+919800000040"
+          "sub_4489"
         ]
       ],
-      "state": {
-        "dispute_status": "none"
-      },
+      "state": {},
       "agents": [
-        "cart-recovery"
+        "subscription-recovery"
       ],
       "call_ids": [
-        14
+        53
       ],
       "summary": {
         "agent_count": 1,
         "calls": 1,
-        "discount_pct": 5.0,
+        "discount_pct": 0,
         "promotional_contacts": 0,
         "violations": 0
       }
     },
     {
-      "id": "ent_aba28e976a",
+      "id": "ent_a0df8bdc55",
       "display_name": "Manish R.",
       "handles": [
         [
@@ -807,12 +1053,46 @@
           "manish18@example.com"
         ],
         [
+          "phone",
+          "+919800000039"
+        ]
+      ],
+      "state": {
+        "dispute_status": "none"
+      },
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        54
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 1,
+        "discount_pct": 5.0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
+    },
+    {
+      "id": "ent_c8c8a05a8a",
+      "display_name": "Dev S.",
+      "handles": [
+        [
+          "customer_id",
+          "cust_4487"
+        ],
+        [
+          "email",
+          "dev16@example.com"
+        ],
+        [
           "order_id",
-          "order_4489"
+          "order_4487"
         ],
         [
           "phone",
-          "+919800000039"
+          "+919800000037"
         ]
       ],
       "state": {
@@ -822,7 +1102,7 @@
         "cart-recovery"
       ],
       "call_ids": [
-        11
+        98
       ],
       "summary": {
         "agent_count": 1,
@@ -831,152 +1111,42 @@
         "promotional_contacts": 0,
         "violations": 0
       }
+    },
+    {
+      "id": "ent_de34c4db41",
+      "display_name": "order_id:sub_4476",
+      "handles": [
+        [
+          "order_id",
+          "sub_4476"
+        ]
+      ],
+      "state": {},
+      "agents": [
+        "subscription-recovery"
+      ],
+      "call_ids": [
+        24
+      ],
+      "summary": {
+        "agent_count": 1,
+        "calls": 1,
+        "discount_pct": 0,
+        "promotional_contacts": 0,
+        "violations": 0
+      }
     }
   ],
   "calls": [
     {
       "id": 1,
-      "ts": "2026-08-26T13:39:23.501+00:00",
-      "sim_ts": "2026-09-01T23:18:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_f58c5b36e5",
-      "entity_ref": "+919800000023",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 434,
-      "args": {
-        "customer_email": "meera2@example.com",
-        "customer_contact": "+919800000023",
-        "notes": {
-          "discount_pct": "10%"
-        },
-        "description": "Subscription payment retry with 10% discount.",
-        "amount": 9000,
-        "customer_name": "Meera R.",
-        "currency": "INR"
-      },
-      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 2,
-      "ts": "2026-08-26T13:39:23.953+00:00",
-      "sim_ts": "2026-09-01T23:18:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_f58c5b36e5",
-      "entity_ref": "+919800000023",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 8,
-      "args": {
-        "body": "Hi Meera, your recent subscription payment failed. Please use this link to retry your payment and keep your subscription active: [Link]",
-        "kind": "transactional",
-        "to": "+919800000023"
-      },
-      "result": {
-        "id": "msg_000141",
-        "channel": "whatsapp",
-        "to": "+919800000023",
-        "body": "Hi Meera, your recent subscription payment failed. Please use this link to retry your payment and keep your subscription active: [Link]",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:23.958+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 3,
-      "ts": "2026-08-26T13:39:32.709+00:00",
-      "sim_ts": "2026-09-02T03:15:00.000+00:00",
+      "ts": "2026-08-27T06:51:43.506+00:00",
+      "sim_ts": "2026-09-01T15:49:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_f58c5b36e5",
-      "entity_ref": "+919800000023",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4473",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 543,
-      "args": {
-        "amount": 826500,
-        "currency": "INR",
-        "customer_contact": "+919800000023",
-        "customer_email": "meera2@example.com",
-        "customer_name": "Meera R.",
-        "description": "Payment for abandoned cart order_4473",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4473"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 4,
-      "ts": "2026-08-26T13:39:33.282+00:00",
-      "sim_ts": "2026-09-03T06:04:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_bf0fc89704",
-      "entity_ref": "+919800000032",
-      "magnitude": 0.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 417,
-      "args": {
-        "customer_name": "Rahul M.",
-        "customer_contact": "+919800000032",
-        "amount": 100000,
-        "description": "Subscription renewal payment for Rahul M.",
-        "customer_email": "rahul11@example.com",
-        "currency": "INR",
-        "notes": {
-          "discount_pct": "0"
-        }
-      },
-      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 5,
-      "ts": "2026-08-26T13:39:33.746+00:00",
-      "sim_ts": "2026-09-03T08:07:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_bf0fc89704",
+      "entity_id": "ent_f67636e64e",
       "entity_ref": "+919800000032",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
@@ -984,19 +1154,19 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 388,
+      "latency_ms": 456,
       "args": {
-        "amount": 693500,
+        "amount": 304000,
         "currency": "INR",
         "customer_contact": "+919800000032",
         "customer_email": "rahul11@example.com",
         "customer_name": "Rahul M.",
-        "description": "Payment for your cart items",
+        "description": "Complete your purchase of Rs 3,200 with a 5% discount",
         "notes": {
           "discount_pct": "5"
         },
-        "notify_email": false,
-        "notify_sms": false,
+        "notify_email": true,
+        "notify_sms": true,
         "reference_id": "order_4482"
       },
       "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
@@ -1004,36 +1174,186 @@
       "violations": []
     },
     {
+      "id": 2,
+      "ts": "2026-08-27T06:51:45.121+00:00",
+      "sim_ts": "2026-09-01T15:49:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_f67636e64e",
+      "entity_ref": "+919800000032",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 21,
+      "args": {
+        "body": "Hi Rahul, we noticed you left items worth \u20b93,200 in your cart. Use code SAVE5 for 5% off and complete your purchase now!",
+        "kind": "promotional",
+        "to": "+919800000032"
+      },
+      "result": {
+        "id": "msg_000001",
+        "channel": "whatsapp",
+        "to": "+919800000032",
+        "body": "Hi Rahul, we noticed you left items worth \u20b93,200 in your cart. Use code SAVE5 for 5% off and complete your purchase now!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:51:45.134+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 3,
+      "ts": "2026-08-27T06:51:46.188+00:00",
+      "sim_ts": "2026-09-01T19:50:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_3c91d4b59a",
+      "entity_ref": "sub_4482",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 450,
+      "args": {
+        "order_id": "sub_4482"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 4,
+      "ts": "2026-08-27T06:51:46.670+00:00",
+      "sim_ts": "2026-09-01T19:50:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_f67636e64e",
+      "entity_ref": "+919800000032",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 401,
+      "args": {
+        "currency": "INR",
+        "notes": {
+          "discount_pct": "5%"
+        },
+        "customer_contact": "+919800000032",
+        "customer_email": "rahul11@example.com",
+        "customer_name": "Rahul M.",
+        "amount": 100000,
+        "description": "Retry payment for subscription sub_4482 with 5% discount."
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 5,
+      "ts": "2026-08-27T06:51:47.109+00:00",
+      "sim_ts": "2026-09-01T19:50:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_f67636e64e",
+      "entity_ref": "+919800000032",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "DEFER",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 16,
+      "args": {
+        "to": "+919800000032",
+        "kind": "transactional",
+        "body": "Hi Rahul, your recent subscription payment failed. Please contact our support team to resolve this and keep your subscription active."
+      },
+      "result": {
+        "id": "msg_000002",
+        "channel": "whatsapp",
+        "to": "+919800000032",
+        "body": "Hi Rahul, your recent subscription payment failed. Please contact our support team to resolve this and keep your subscription active.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:51:47.120+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by cart-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "cart-recovery"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by cart-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "cart-recovery"
+          }
+        }
+      ]
+    },
+    {
       "id": 6,
-      "ts": "2026-08-26T13:39:34.165+00:00",
-      "sim_ts": "2026-09-03T08:32:00.000+00:00",
+      "ts": "2026-08-27T06:51:48.095+00:00",
+      "sim_ts": "2026-09-02T08:47:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_ceda0195a7",
-      "entity_ref": "+919800000036",
+      "entity_id": "ent_c725193c53",
+      "entity_ref": "+919800000034",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
-      "resource": "order_4486",
+      "resource": "order_4484",
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 381,
+      "latency_ms": 419,
       "args": {
-        "amount": 418000,
+        "amount": 332500,
         "currency": "INR",
-        "customer_contact": "+919800000036",
-        "customer_email": "tara15@example.com",
-        "customer_name": "Tara D.",
-        "description": "Complete your purchase of Rs 4,400 with a 5% discount",
+        "customer_contact": "+919800000034",
+        "customer_email": "nisha13@example.com",
+        "customer_name": "Nisha P.",
+        "description": "Complete your purchase of items worth Rs 3,500 with a 5% discount.",
         "notes": {
           "discount_pct": "5",
-          "order_id": "order_4486"
+          "order_id": "order_4484"
         },
         "notify_email": true,
         "notify_sms": true,
-        "reference_id": "order_4486"
+        "reference_id": "order_4484"
       },
       "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
       "rules_fired": [],
@@ -1041,872 +1361,13 @@
     },
     {
       "id": 7,
-      "ts": "2026-08-26T13:39:34.578+00:00",
-      "sim_ts": "2026-09-03T10:57:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_ceda0195a7",
-      "entity_ref": "+919800000036",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 36,
-      "args": {
-        "currency": "INR",
-        "amount": 100000,
-        "description": "Subscription renewal payment with 5% discount.",
-        "customer_name": "Tara D.",
-        "customer_email": "tara15@example.com",
-        "notes": {
-          "discount_pct": "5%"
-        },
-        "customer_contact": "+919800000036"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 8,
-      "ts": "2026-08-26T13:39:34.638+00:00",
-      "sim_ts": "2026-09-03T10:57:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_ceda0195a7",
-      "entity_ref": "+919800000036",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 9,
-      "args": {
-        "kind": "transactional",
-        "body": "Hi Tara, your recent subscription payment failed. Please use this link to retry and keep your service active: [Link]",
-        "to": "+919800000036"
-      },
-      "result": {
-        "id": "msg_000142",
-        "channel": "whatsapp",
-        "to": "+919800000036",
-        "body": "Hi Tara, your recent subscription payment failed. Please use this link to retry and keep your service active: [Link]",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:34.645+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 9,
-      "ts": "2026-08-26T13:39:35.532+00:00",
-      "sim_ts": "2026-09-03T22:35:00.000+00:00",
-      "agent_id": "dispute-responder",
-      "upstream": "razorpay",
-      "tool": "fetch_payment",
-      "action_class": "read",
-      "entity_id": null,
-      "entity_ref": null,
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 512,
-      "args": {
-        "payment_id": "pay_4473"
-      },
-      "result": "fetching payment failed: The id provided does not exist",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 10,
-      "ts": "2026-08-26T13:39:37.954+00:00",
-      "sim_ts": "2026-09-03T22:35:00.000+00:00",
-      "agent_id": "dispute-responder",
-      "upstream": "messaging",
-      "tool": "send_email",
-      "action_class": "promotional_message",
-      "entity_id": "ent_f58c5b36e5",
-      "entity_ref": "meera2@example.com",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "BLOCK",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 12,
-      "args": {
-        "body": "Dear Meera R., we are investigating the dispute for Rs 2,100 and will contact you shortly with an update.",
-        "to": "meera2@example.com",
-        "kind": "transactional",
-        "subject": "Update regarding your dispute"
-      },
-      "result": {
-        "id": "msg_000143",
-        "channel": "email",
-        "to": "meera2@example.com",
-        "body": "Dear Meera R., we are investigating the dispute for Rs 2,100 and will contact you shortly with an update.",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:37.963+00:00",
-        "template": null
-      },
-      "rules_fired": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ],
-      "violations": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ]
-    },
-    {
-      "id": 11,
-      "ts": "2026-08-26T13:39:37.996+00:00",
-      "sim_ts": "2026-09-03T23:47:00.000+00:00",
+      "ts": "2026-08-27T06:51:50.373+00:00",
+      "sim_ts": "2026-09-02T13:50:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_aba28e976a",
-      "entity_ref": "+919800000039",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 48,
-      "args": {
-        "amount": 551000,
-        "currency": "INR",
-        "customer_contact": "+919800000039",
-        "customer_email": "manish18@example.com",
-        "customer_name": "Manish R.",
-        "description": "Cart payment for order_4489",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4489",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 12,
-      "ts": "2026-08-26T13:39:38.085+00:00",
-      "sim_ts": "2026-09-04T01:25:00.000+00:00",
-      "agent_id": "rto-shield",
-      "upstream": "razorpay",
-      "tool": "fetch_order",
-      "action_class": "read",
-      "entity_id": "ent_f58c5b36e5",
-      "entity_ref": "order_4473",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 676,
-      "args": {
-        "order_id": "order_4473"
-      },
-      "result": "fetching order failed: 4473 is not a valid id",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 13,
-      "ts": "2026-08-26T13:39:38.794+00:00",
-      "sim_ts": "2026-09-04T01:25:00.000+00:00",
-      "agent_id": "rto-shield",
-      "upstream": "razorpay",
-      "tool": "fetch_all_orders",
-      "action_class": "read",
-      "entity_id": null,
-      "entity_ref": null,
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 435,
-      "args": {
-        "count": 50
-      },
-      "result": {
-        "count": 1,
-        "entity": "collection",
-        "items": [
-          {
-            "amount": 420000,
-            "amount_due": 420000,
-            "amount_paid": null,
-            "attempts": 0,
-            "created_at": 1787639626,
-            "currency": "INR",
-            "entity": "order",
-            "id": "order_TTuBJxzWhnyR6f",
-            "notes": {
-              "payment_restriction": "prepaid_only",
-              "rto_risk_score": "0.63"
-            },
-            "offer_id": null,
-            "receipt": "",
-            "status": "created"
-          }
-        ]
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 14,
-      "ts": "2026-08-26T13:39:39.258+00:00",
-      "sim_ts": "2026-09-07T01:04:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_83fa56686f",
-      "entity_ref": "+919800000040",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4490",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 38,
-      "args": {
-        "amount": 95000,
-        "currency": "INR",
-        "customer_contact": "+919800000040",
-        "customer_email": "lakshmi19@example.com",
-        "customer_name": "Lakshmi M.",
-        "description": "Complete your purchase of items worth Rs 1,000 with a 5% discount.",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4490"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4490",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 15,
-      "ts": "2026-08-26T13:39:39.332+00:00",
-      "sim_ts": "2026-09-10T19:13:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_960f320cab",
-      "entity_ref": "+919800000025",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 36,
-      "args": {
-        "amount": 370500,
-        "currency": "INR",
-        "customer_contact": "+919800000025",
-        "customer_email": "ananya4@example.com",
-        "customer_name": "Ananya N.",
-        "description": "Cart purchase",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4475"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 16,
-      "ts": "2026-08-26T13:39:39.397+00:00",
-      "sim_ts": "2026-09-11T14:01:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_15abc15ba7",
-      "entity_ref": "+919800000033",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4483",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 39,
-      "args": {
-        "amount": 123500,
-        "currency": "INR",
-        "customer_contact": "+919800000033",
-        "customer_email": "ishaan12@example.com",
-        "customer_name": "Ishaan N.",
-        "description": "Payment for your cart items",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4483"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4483",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 17,
-      "ts": "2026-08-26T13:39:40.499+00:00",
-      "sim_ts": "2026-09-11T21:44:00.000+00:00",
-      "agent_id": "dispute-responder",
-      "upstream": "razorpay",
-      "tool": "fetch_payment",
-      "action_class": "read",
-      "entity_id": null,
-      "entity_ref": null,
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 495,
-      "args": {
-        "payment_id": "pay_4475"
-      },
-      "result": "fetching payment failed: The id provided does not exist",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 18,
-      "ts": "2026-08-26T13:39:43.297+00:00",
-      "sim_ts": "2026-09-11T21:44:00.000+00:00",
-      "agent_id": "dispute-responder",
-      "upstream": "messaging",
-      "tool": "send_email",
-      "action_class": "promotional_message",
-      "entity_id": "ent_960f320cab",
-      "entity_ref": "ananya4@example.com",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "BLOCK",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 15,
-      "args": {
-        "kind": "transactional",
-        "subject": "Regarding your dispute",
-        "body": "Dear Ananya, we noticed a dispute regarding a charge of Rs 600. Could you please provide the payment ID so we can investigate this for you?",
-        "to": "ananya4@example.com"
-      },
-      "result": {
-        "id": "msg_000144",
-        "channel": "email",
-        "to": "ananya4@example.com",
-        "body": "Dear Ananya, we noticed a dispute regarding a charge of Rs 600. Could you please provide the payment ID so we can investigate this for you?",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:43.308+00:00",
-        "template": null
-      },
-      "rules_fired": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ],
-      "violations": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ]
-    },
-    {
-      "id": 19,
-      "ts": "2026-08-26T13:39:44.282+00:00",
-      "sim_ts": "2026-09-13T23:16:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_20dfdaf909",
-      "entity_ref": "+919800000034",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 37,
-      "args": {
-        "amount": 494000,
-        "currency": "INR",
-        "customer_contact": "+919800000034",
-        "customer_email": "nisha13@example.com",
-        "customer_name": "Nisha P.",
-        "description": "Payment for your cart items",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4484",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 20,
-      "ts": "2026-08-26T13:39:44.358+00:00",
-      "sim_ts": "2026-09-14T06:59:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_20dfdaf909",
-      "entity_ref": "+919800000034",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 49,
-      "args": {
-        "description": "Subscription payment retry with 10% discount.",
-        "customer_email": "nisha13@example.com",
-        "notes": {
-          "discount_pct": "10%"
-        },
-        "customer_contact": "+919800000034",
-        "amount": 9000,
-        "currency": "INR",
-        "customer_name": "Nisha P."
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 21,
-      "ts": "2026-08-26T13:39:44.442+00:00",
-      "sim_ts": "2026-09-15T09:15:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_50d0ba2881",
-      "entity_ref": "+919800000026",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 37,
-      "args": {
-        "amount": 304000,
-        "currency": "INR",
-        "customer_contact": "+919800000026",
-        "customer_email": "vikram5@example.com",
-        "customer_name": "Vikram P.",
-        "description": "Complete your purchase of Rs 3,200 with 5% discount",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": false,
-        "notify_sms": false,
-        "reference_id": "order_4476"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 22,
-      "ts": "2026-08-26T13:39:44.495+00:00",
-      "sim_ts": "2026-09-15T09:15:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_50d0ba2881",
-      "entity_ref": "+919800000026",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 8,
-      "args": {
-        "body": "Hi Vikram, complete your purchase of \u20b93,200 with a 5% discount using code SAVE5. Click here to pay: [link]",
-        "kind": "promotional",
-        "to": "+919800000026"
-      },
-      "result": {
-        "id": "msg_000145",
-        "channel": "whatsapp",
-        "to": "+919800000026",
-        "body": "Hi Vikram, complete your purchase of \u20b93,200 with a 5% discount using code SAVE5. Click here to pay: [link]",
-        "kind": "promotional",
-        "sent_at": "2026-08-26T13:39:44.501+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 23,
-      "ts": "2026-08-26T13:39:47.268+00:00",
-      "sim_ts": "2026-09-15T11:44:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_50d0ba2881",
-      "entity_ref": "+919800000026",
-      "magnitude": 0.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 35,
-      "args": {
-        "customer_email": "vikram5@example.com",
-        "description": "Subscription renewal payment for Vikram P.",
-        "customer_contact": "+919800000026",
-        "notes": {
-          "discount_pct": "0"
-        },
-        "amount": 100000,
-        "customer_name": "Vikram P.",
-        "currency": "INR"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 24,
-      "ts": "2026-08-26T13:39:47.341+00:00",
-      "sim_ts": "2026-09-16T09:46:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_6571f2ff0a",
-      "entity_ref": "+919800000029",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 30,
-      "args": {
-        "amount": 218500,
-        "currency": "INR",
-        "customer_contact": "+919800000029",
-        "customer_email": "divya8@example.com",
-        "customer_name": "Divya S.",
-        "description": "Payment for your cart items",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": true,
-        "notify_sms": false,
-        "reference_id": "order_4479",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 25,
-      "ts": "2026-08-26T13:39:47.402+00:00",
-      "sim_ts": "2026-09-16T15:36:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_6571f2ff0a",
-      "entity_ref": "+919800000029",
-      "magnitude": 0.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 28,
-      "args": {
-        "customer_name": "Divya S.",
-        "description": "Subscription payment retry for Divya S.",
-        "notes": {
-          "discount_pct": "0"
-        },
-        "customer_contact": "+919800000029",
-        "currency": "INR",
-        "customer_email": "divya8@example.com",
-        "amount": 100000
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 26,
-      "ts": "2026-08-26T13:39:47.469+00:00",
-      "sim_ts": "2026-09-18T02:50:00.000+00:00",
-      "agent_id": "rto-shield",
-      "upstream": "razorpay",
-      "tool": "fetch_order",
-      "action_class": "read",
-      "entity_id": "ent_50d0ba2881",
-      "entity_ref": "order_4476",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 405,
-      "args": {
-        "order_id": "order_4476"
-      },
-      "result": "fetching order failed: 4476 is not a valid id",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 27,
-      "ts": "2026-08-26T13:39:47.890+00:00",
-      "sim_ts": "2026-09-18T02:50:00.000+00:00",
-      "agent_id": "rto-shield",
-      "upstream": "razorpay",
-      "tool": "fetch_all_orders",
-      "action_class": "read",
-      "entity_id": null,
-      "entity_ref": null,
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 545,
-      "args": {
-        "count": 50
-      },
-      "result": {
-        "count": 1,
-        "entity": "collection",
-        "items": [
-          {
-            "amount": 420000,
-            "amount_due": 420000,
-            "amount_paid": null,
-            "attempts": 0,
-            "created_at": 1787639626,
-            "currency": "INR",
-            "entity": "order",
-            "id": "order_TTuBJxzWhnyR6f",
-            "notes": {
-              "payment_restriction": "prepaid_only",
-              "rto_risk_score": "0.63"
-            },
-            "offer_id": null,
-            "receipt": "",
-            "status": "created"
-          }
-        ]
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 28,
-      "ts": "2026-08-26T13:39:48.454+00:00",
-      "sim_ts": "2026-09-18T02:50:00.000+00:00",
-      "agent_id": "rto-shield",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_50d0ba2881",
-      "entity_ref": "+919800000026",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 9,
-      "args": {
-        "to": "+919800000026",
-        "body": "Hi Vikram, your order has been set to prepaid-only due to high return risk. Please complete payment to confirm.",
-        "kind": "transactional"
-      },
-      "result": {
-        "id": "msg_000146",
-        "channel": "whatsapp",
-        "to": "+919800000026",
-        "body": "Hi Vikram, your order has been set to prepaid-only due to high return risk. Please complete payment to confirm.",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:48.460+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 29,
-      "ts": "2026-08-26T13:39:48.493+00:00",
-      "sim_ts": "2026-09-19T03:37:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_c8606fc790",
-      "entity_ref": "+919800000028",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4478",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 82,
-      "args": {
-        "amount": 313500,
-        "currency": "INR",
-        "customer_contact": "+919800000028",
-        "customer_email": "aditya7@example.com",
-        "customer_name": "Aditya D.",
-        "description": "Payment for your cart items",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4478"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4478",
-        "reminder_enable": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 30,
-      "ts": "2026-08-26T13:39:48.597+00:00",
-      "sim_ts": "2026-09-19T03:37:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_c8606fc790",
-      "entity_ref": "+919800000028",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 11,
-      "args": {
-        "body": "Hi Aditya, we saved your cart and added a 5% discount. Complete your purchase here: [payment link].",
-        "kind": "promotional",
-        "to": "+919800000028"
-      },
-      "result": {
-        "id": "msg_000147",
-        "channel": "whatsapp",
-        "to": "+919800000028",
-        "body": "Hi Aditya, we saved your cart and added a 5% discount. Complete your purchase here: [payment link].",
-        "kind": "promotional",
-        "sent_at": "2026-08-26T13:39:48.604+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 31,
-      "ts": "2026-08-26T13:39:48.643+00:00",
-      "sim_ts": "2026-09-19T06:28:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_6e2bf7f7bf",
+      "entity_id": "ent_01968ea937",
       "entity_ref": "+919800000022",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
@@ -1914,342 +1375,160 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 51,
+      "latency_ms": 403,
       "args": {
-        "amount": 560500,
+        "amount": 190000,
         "currency": "INR",
         "customer_contact": "+919800000022",
         "customer_email": "arjun1@example.com",
         "customer_name": "Arjun K.",
-        "description": "Complete your purchase of Rs 5,900 with a 5% discount.",
+        "description": "Cart purchase with 5% discount",
         "notes": {
           "discount_pct": "5",
           "order_id": "order_4472"
         },
         "notify_email": true,
         "notify_sms": true,
-        "reference_id": "order_4472"
+        "reference_id": "order_4472_5pct"
       },
-      "result": "creating payment link failed: Too many requests",
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
       "rules_fired": [],
       "violations": []
     },
     {
-      "id": 32,
-      "ts": "2026-08-26T13:39:48.722+00:00",
-      "sim_ts": "2026-09-19T08:29:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_c8606fc790",
-      "entity_ref": "+919800000028",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 40,
-      "args": {
-        "notify_sms": true,
-        "notes": {
-          "discount_pct": "10%"
-        },
-        "amount": 90000,
-        "currency": "INR",
-        "customer_name": "Aditya D.",
-        "description": "Subscription payment retry with 10% discount.",
-        "notify_email": true,
-        "customer_email": "aditya7@example.com",
-        "customer_contact": "+919800000028"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 33,
-      "ts": "2026-08-26T13:39:48.810+00:00",
-      "sim_ts": "2026-09-19T09:38:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_6e2bf7f7bf",
+      "id": 8,
+      "ts": "2026-08-27T06:51:50.805+00:00",
+      "sim_ts": "2026-09-02T13:50:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_01968ea937",
       "entity_ref": "+919800000022",
-      "magnitude": 0.0,
-      "magnitude_unit": "percent",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 22,
+      "args": {
+        "body": "Hi Arjun, complete your purchase of \u20b92,000 with a 5% discount using code SAVE5 at checkout. Let us know if you need help!",
+        "kind": "promotional",
+        "to": "+919800000022"
+      },
+      "result": {
+        "id": "msg_000003",
+        "channel": "whatsapp",
+        "to": "+919800000022",
+        "body": "Hi Arjun, complete your purchase of \u20b92,000 with a 5% discount using code SAVE5 at checkout. Let us know if you need help!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:51:50.821+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 9,
+      "ts": "2026-08-27T06:51:51.697+00:00",
+      "sim_ts": "2026-09-02T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_9b0af6c508",
+      "entity_ref": "sub_4471",
+      "magnitude": null,
+      "magnitude_unit": null,
       "resource": null,
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 35,
+      "latency_ms": 442,
       "args": {
-        "description": "Subscription payment retry for Arjun K.",
-        "customer_contact": "+919800000022",
+        "order_id": "sub_4471"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 10,
+      "ts": "2026-08-27T06:51:52.155+00:00",
+      "sim_ts": "2026-09-02T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_6312881022",
+      "entity_ref": "+919800000021",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4471",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 387,
+      "args": {
+        "customer_contact": "+919800000021",
+        "customer_email": "priya0@example.com",
+        "description": "Subscription renewal for sub_4471 with 10% discount due to payment failure.",
+        "currency": "INR",
+        "amount": 90000,
+        "customer_name": "Priya S.",
+        "notes": {
+          "subscription_id": "sub_4471",
+          "discount_pct": "10"
+        }
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 11,
+      "ts": "2026-08-27T06:51:52.595+00:00",
+      "sim_ts": "2026-09-02T17:28:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_01968ea937",
+      "entity_ref": "+919800000022",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4472",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 47,
+      "args": {
+        "amount": 9000,
+        "customer_email": "arjun1@example.com",
+        "currency": "INR",
+        "description": "Retry payment for subscription sub_4472 with 10% discount.",
         "customer_name": "Arjun K.",
-        "currency": "INR",
-        "amount": 100000,
         "notes": {
-          "discount_pct": "0"
-        },
-        "customer_email": "arjun1@example.com"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 34,
-      "ts": "2026-08-26T13:39:48.890+00:00",
-      "sim_ts": "2026-09-19T19:26:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_2b124e6733",
-      "entity_ref": "+919800000027",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4477",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 29,
-      "args": {
-        "amount": 294500,
-        "currency": "INR",
-        "customer_contact": "+919800000027",
-        "customer_email": "kavya6@example.com",
-        "customer_name": "Kavya V.",
-        "description": "Payment for your cart items",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4477"
-        },
-        "notify_email": true,
-        "notify_sms": true,
-        "reference_id": "order_4477"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 35,
-      "ts": "2026-08-26T13:39:48.957+00:00",
-      "sim_ts": "2026-09-19T22:48:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_2b124e6733",
-      "entity_ref": "+919800000027",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 27,
-      "args": {
-        "customer_name": "Kavya V.",
-        "customer_contact": "+919800000027",
-        "customer_email": "kavya6@example.com",
-        "notes": {
+          "subscription_id": "sub_4472",
           "discount_pct": "10"
         },
-        "description": "Subscription renewal payment with 10% discount due to previous failure.",
-        "amount": 90000,
-        "currency": "INR"
+        "customer_contact": "+919800000022"
       },
       "result": "creating payment link failed: Too many requests",
       "rules_fired": [],
       "violations": []
     },
     {
-      "id": 36,
-      "ts": "2026-08-26T13:39:49.023+00:00",
-      "sim_ts": "2026-09-20T21:08:00.000+00:00",
+      "id": 12,
+      "ts": "2026-08-27T06:51:55.830+00:00",
+      "sim_ts": "2026-09-02T17:44:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_61cff8852b",
-      "entity_ref": "+919800000031",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 36,
-      "args": {
-        "amount": 779000,
-        "currency": "INR",
-        "customer_contact": "+919800000031",
-        "customer_email": "sneha10@example.com",
-        "customer_name": "Sneha R.",
-        "description": "Payment for abandoned cart order_4481",
-        "notes": {
-          "discount_pct": "5"
-        },
-        "notify_email": false,
-        "notify_sms": false,
-        "reference_id": "order_4481"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 37,
-      "ts": "2026-08-26T13:39:49.085+00:00",
-      "sim_ts": "2026-09-20T21:08:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_61cff8852b",
-      "entity_ref": "+919800000031",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 8,
-      "args": {
-        "body": "Hi Sneha, complete your order for \u20b97,790 (5% off) using the payment link we sent. Let us know if you need any help!",
-        "kind": "promotional",
-        "to": "+919800000031"
-      },
-      "result": {
-        "id": "msg_000148",
-        "channel": "whatsapp",
-        "to": "+919800000031",
-        "body": "Hi Sneha, complete your order for \u20b97,790 (5% off) using the payment link we sent. Let us know if you need any help!",
-        "kind": "promotional",
-        "sent_at": "2026-08-26T13:39:49.091+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 38,
-      "ts": "2026-08-26T13:39:49.123+00:00",
-      "sim_ts": "2026-09-20T23:44:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_75172ecd34",
-      "entity_ref": "+919800000035",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": "order_4485",
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 43,
-      "args": {
-        "amount": 351500,
-        "currency": "INR",
-        "customer_contact": "+919800000035",
-        "customer_email": "aarav14@example.com",
-        "customer_name": "Aarav V.",
-        "description": "Cart payment for order_4485",
-        "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4485"
-        },
-        "notify_email": true,
-        "notify_sms": false,
-        "reference_id": "order_4485_5pct"
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 39,
-      "ts": "2026-08-26T13:39:49.181+00:00",
-      "sim_ts": "2026-09-20T23:44:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "messaging",
-      "tool": "send_whatsapp",
-      "action_class": "promotional_message",
-      "entity_id": "ent_75172ecd34",
-      "entity_ref": "+919800000035",
-      "magnitude": null,
-      "magnitude_unit": null,
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 9,
-      "args": {
-        "body": "Hi Aarav, complete your order of \u20b93,700 with a 5% discount using code SAVE5. Tap to pay: https://example.com/pay?order=order_4485",
-        "kind": "promotional",
-        "to": "+919800000035"
-      },
-      "result": {
-        "id": "msg_000149",
-        "channel": "whatsapp",
-        "to": "+919800000035",
-        "body": "Hi Aarav, complete your order of \u20b93,700 with a 5% discount using code SAVE5. Tap to pay: https://example.com/pay?order=order_4485",
-        "kind": "promotional",
-        "sent_at": "2026-08-26T13:39:49.188+00:00",
-        "template": null
-      },
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 40,
-      "ts": "2026-08-26T13:39:50.720+00:00",
-      "sim_ts": "2026-09-21T04:21:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_61cff8852b",
-      "entity_ref": "+919800000031",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 48,
-      "args": {
-        "customer_contact": "+919800000031",
-        "currency": "INR",
-        "customer_name": "Sneha R.",
-        "amount": 90000,
-        "description": "Subscription payment retry with 10% discount.",
-        "notes": {
-          "discount_pct": "10"
-        },
-        "customer_email": "sneha10@example.com",
-        "notify_email": true,
-        "notify_sms": true
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 41,
-      "ts": "2026-08-26T13:39:50.806+00:00",
-      "sim_ts": "2026-09-21T17:27:00.000+00:00",
-      "agent_id": "cart-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_acfd1e4d9e",
+      "entity_id": "ent_6312881022",
       "entity_ref": "+919800000021",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
@@ -2257,7 +1536,7 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 37,
+      "latency_ms": 115,
       "args": {
         "amount": 399000,
         "currency": "INR",
@@ -2277,41 +1556,9 @@
       "violations": []
     },
     {
-      "id": 42,
-      "ts": "2026-08-26T13:39:50.878+00:00",
-      "sim_ts": "2026-09-22T00:46:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_acfd1e4d9e",
-      "entity_ref": "+919800000021",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 27,
-      "args": {
-        "notes": {
-          "discount_pct": "10"
-        },
-        "customer_email": "priya0@example.com",
-        "description": "Subscription payment retry with 10% discount.",
-        "customer_name": "Priya S.",
-        "customer_contact": "+919800000021",
-        "currency": "INR",
-        "amount": 9000
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 43,
-      "ts": "2026-08-26T13:39:52.176+00:00",
-      "sim_ts": "2026-09-22T08:10:00.000+00:00",
+      "id": 13,
+      "ts": "2026-08-27T06:51:56.005+00:00",
+      "sim_ts": "2026-09-03T02:21:00.000+00:00",
       "agent_id": "dispute-responder",
       "upstream": "razorpay",
       "tool": "fetch_payment",
@@ -2324,145 +1571,91 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 472,
+      "latency_ms": 476,
       "args": {
-        "payment_id": "pay_4481"
+        "payment_id": "pay_4482"
       },
       "result": "fetching payment failed: The id provided does not exist",
       "rules_fired": [],
       "violations": []
     },
     {
-      "id": 44,
-      "ts": "2026-08-26T13:39:58.200+00:00",
-      "sim_ts": "2026-09-22T08:10:00.000+00:00",
+      "id": 14,
+      "ts": "2026-08-27T06:51:56.521+00:00",
+      "sim_ts": "2026-09-03T02:21:00.000+00:00",
       "agent_id": "dispute-responder",
       "upstream": "messaging",
       "tool": "send_email",
-      "action_class": "promotional_message",
-      "entity_id": "ent_61cff8852b",
-      "entity_ref": "sneha10@example.com",
+      "action_class": "transactional_message",
+      "entity_id": "ent_f67636e64e",
+      "entity_ref": "rahul11@example.com",
       "magnitude": null,
       "magnitude_unit": null,
       "resource": null,
-      "decision": "BLOCK",
-      "forwarded": true,
-      "is_error": false,
-      "latency_ms": 16,
-      "args": {
-        "kind": "transactional",
-        "subject": "Update regarding your dispute",
-        "to": "sneha10@example.com",
-        "body": "Dear Sneha R., we are investigating the dispute for Rs 3,900 and will contact you shortly with an update."
-      },
-      "result": {
-        "id": "msg_000150",
-        "channel": "email",
-        "to": "sneha10@example.com",
-        "body": "Dear Sneha R., we are investigating the dispute for Rs 3,900 and will contact you shortly with an update.",
-        "kind": "transactional",
-        "sent_at": "2026-08-26T13:39:58.210+00:00",
-        "template": null
-      },
-      "rules_fired": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ],
-      "violations": [
-        {
-          "rule_id": "no_promo_during_dispute",
-          "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
-          "observed": null,
-          "limit": null,
-          "detail": {
-            "state_key": "dispute_status",
-            "state_value": "open"
-          }
-        }
-      ]
-    },
-    {
-      "id": 45,
-      "ts": "2026-08-26T13:39:59.143+00:00",
-      "sim_ts": "2026-09-22T12:59:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_a5c37f0757",
-      "entity_ref": "+919800000024",
-      "magnitude": 10.0,
-      "magnitude_unit": "percent",
-      "resource": null,
       "decision": "ALLOW",
       "forwarded": true,
-      "is_error": true,
-      "latency_ms": 85,
+      "is_error": false,
+      "latency_ms": 11,
       "args": {
-        "customer_name": "Rohan M.",
-        "amount": 9000,
-        "notes": {
-          "discount_pct": "10"
-        },
-        "customer_contact": "+919800000024",
-        "customer_email": "rohan3@example.com",
-        "currency": "INR",
-        "description": "Subscription payment retry with 10% discount"
+        "body": "Dear Rahul M., we are investigating the dispute for Rs 1,900 and will contact you shortly with an update.",
+        "to": "rahul11@example.com",
+        "subject": "Update regarding your dispute",
+        "template": "dispute_response",
+        "kind": "transactional"
       },
-      "result": "creating payment link failed: Too many requests",
+      "result": {
+        "id": "msg_000004",
+        "channel": "email",
+        "to": "rahul11@example.com",
+        "body": "Dear Rahul M., we are investigating the dispute for Rs 1,900 and will contact you shortly with an update.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:51:56.529+00:00",
+        "subject": "Update regarding your dispute",
+        "template": "dispute_response"
+      },
       "rules_fired": [],
       "violations": []
     },
     {
-      "id": 46,
-      "ts": "2026-08-26T13:39:59.279+00:00",
-      "sim_ts": "2026-09-22T13:23:00.000+00:00",
+      "id": 15,
+      "ts": "2026-08-27T06:51:58.969+00:00",
+      "sim_ts": "2026-09-03T19:12:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_a5c37f0757",
-      "entity_ref": "+919800000024",
+      "entity_id": "ent_321ee54424",
+      "entity_ref": "+919800000038",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
-      "resource": "order_4474",
+      "resource": null,
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 33,
+      "latency_ms": 31,
       "args": {
-        "amount": 313500,
+        "amount": 418000,
         "currency": "INR",
-        "customer_contact": "+919800000024",
-        "customer_email": "rohan3@example.com",
-        "customer_name": "Rohan M.",
+        "customer_contact": "+919800000038",
+        "customer_email": "riya17@example.com",
+        "customer_name": "Riya K.",
         "description": "Payment for your cart items",
         "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4474"
+          "discount_pct": "5"
         },
         "notify_email": true,
         "notify_sms": true,
-        "reference_id": "order_4474"
+        "reference_id": "order_4488",
+        "reminder_enable": true
       },
       "result": "creating payment link failed: Too many requests",
       "rules_fired": [],
       "violations": []
     },
     {
-      "id": 47,
-      "ts": "2026-08-26T13:40:00.487+00:00",
-      "sim_ts": "2026-09-23T10:09:00.000+00:00",
+      "id": 16,
+      "ts": "2026-08-27T06:52:03.378+00:00",
+      "sim_ts": "2026-09-04T12:47:00.000+00:00",
       "agent_id": "dispute-responder",
       "upstream": "razorpay",
       "tool": "fetch_payment",
@@ -2475,7 +1668,7 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 682,
+      "latency_ms": 445,
       "args": {
         "payment_id": "pay_4471"
       },
@@ -2484,42 +1677,112 @@
       "violations": []
     },
     {
-      "id": 48,
-      "ts": "2026-08-26T13:40:08.912+00:00",
-      "sim_ts": "2026-09-23T10:09:00.000+00:00",
+      "id": 17,
+      "ts": "2026-08-27T06:52:03.862+00:00",
+      "sim_ts": "2026-09-04T12:47:00.000+00:00",
       "agent_id": "dispute-responder",
       "upstream": "messaging",
       "tool": "send_email",
-      "action_class": "promotional_message",
-      "entity_id": "ent_acfd1e4d9e",
+      "action_class": "transactional_message",
+      "entity_id": "ent_6312881022",
       "entity_ref": "priya0@example.com",
       "magnitude": null,
       "magnitude_unit": null,
       "resource": null,
-      "decision": "BLOCK",
+      "decision": "ALLOW",
       "forwarded": true,
       "is_error": false,
-      "latency_ms": 12,
+      "latency_ms": 10,
       "args": {
-        "kind": "transactional",
-        "body": "Dear Priya S., we are unable to locate the payment associated with your dispute. Could you please provide the payment ID so we can investigate this further?",
-        "subject": "Regarding your payment dispute",
-        "to": "priya0@example.com"
+        "to": "priya0@example.com",
+        "body": "Dear Priya S., we are investigating the dispute for Rs 2,800 and will contact you shortly with an update.",
+        "template": "dispute_response",
+        "subject": "Update regarding your dispute",
+        "kind": "transactional"
       },
       "result": {
-        "id": "msg_000151",
+        "id": "msg_000005",
         "channel": "email",
         "to": "priya0@example.com",
-        "body": "Dear Priya S., we are unable to locate the payment associated with your dispute. Could you please provide the payment ID so we can investigate this further?",
+        "body": "Dear Priya S., we are investigating the dispute for Rs 2,800 and will contact you shortly with an update.",
         "kind": "transactional",
-        "sent_at": "2026-08-26T13:40:08.920+00:00",
-        "template": null
+        "sent_at": "2026-08-27T06:52:03.868+00:00",
+        "subject": "Update regarding your dispute",
+        "template": "dispute_response"
       },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 18,
+      "ts": "2026-08-27T06:52:03.911+00:00",
+      "sim_ts": "2026-09-04T19:50:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_3c91d4b59a",
+      "entity_ref": "sub_4482",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 423,
+      "args": {
+        "order_id": "sub_4482"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 19,
+      "ts": "2026-08-27T06:52:04.368+00:00",
+      "sim_ts": "2026-09-04T19:50:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_f67636e64e",
+      "entity_ref": "+919800000032",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 52,
+      "args": {
+        "customer_contact": "+919800000032",
+        "amount": 9000,
+        "customer_name": "Rahul M.",
+        "description": "Retry payment for subscription sub_4482 with 10% discount.",
+        "currency": "INR",
+        "customer_email": "rahul11@example.com",
+        "notes": {
+          "discount_pct": "10"
+        }
+      },
+      "result": "creating payment link failed: Too many requests",
       "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "10 + 10 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 10.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
         {
           "rule_id": "no_promo_during_dispute",
           "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
+          "reason": "discount_grant while dispute_status=open",
           "observed": null,
           "limit": null,
           "detail": {
@@ -2530,9 +1793,21 @@
       ],
       "violations": [
         {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "10 + 10 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 10.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
           "rule_id": "no_promo_during_dispute",
           "verdict": "BLOCK",
-          "reason": "promotional_message while dispute_status=open",
+          "reason": "discount_grant while dispute_status=open",
           "observed": null,
           "limit": null,
           "detail": {
@@ -2543,46 +1818,14 @@
       ]
     },
     {
-      "id": 49,
-      "ts": "2026-08-26T13:40:08.958+00:00",
-      "sim_ts": "2026-09-23T11:21:00.000+00:00",
-      "agent_id": "subscription-recovery",
-      "upstream": "razorpay",
-      "tool": "create_payment_link",
-      "action_class": "discount_grant",
-      "entity_id": "ent_9e8a74f003",
-      "entity_ref": "+919800000030",
-      "magnitude": 5.0,
-      "magnitude_unit": "percent",
-      "resource": null,
-      "decision": "ALLOW",
-      "forwarded": true,
-      "is_error": true,
-      "latency_ms": 107,
-      "args": {
-        "notes": {
-          "discount_pct": "5%"
-        },
-        "customer_contact": "+919800000030",
-        "description": "Subscription payment retry for Karthik K. with 5% discount.",
-        "currency": "INR",
-        "customer_email": "karthik9@example.com",
-        "amount": 100000,
-        "customer_name": "Karthik K."
-      },
-      "result": "creating payment link failed: Too many requests",
-      "rules_fired": [],
-      "violations": []
-    },
-    {
-      "id": 50,
-      "ts": "2026-08-26T13:40:09.121+00:00",
-      "sim_ts": "2026-09-23T13:03:00.000+00:00",
+      "id": 20,
+      "ts": "2026-08-27T06:52:05.752+00:00",
+      "sim_ts": "2026-09-05T00:03:00.000+00:00",
       "agent_id": "rto-shield",
       "upstream": "razorpay",
       "tool": "fetch_order",
       "action_class": "read",
-      "entity_id": "ent_acfd1e4d9e",
+      "entity_id": "ent_6312881022",
       "entity_ref": "order_4471",
       "magnitude": null,
       "magnitude_unit": null,
@@ -2590,7 +1833,7 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 422,
+      "latency_ms": 438,
       "args": {
         "order_id": "order_4471"
       },
@@ -2599,9 +1842,9 @@
       "violations": []
     },
     {
-      "id": 51,
-      "ts": "2026-08-26T13:40:09.576+00:00",
-      "sim_ts": "2026-09-23T13:03:00.000+00:00",
+      "id": 21,
+      "ts": "2026-08-27T06:52:06.234+00:00",
+      "sim_ts": "2026-09-05T00:03:00.000+00:00",
       "agent_id": "rto-shield",
       "upstream": "razorpay",
       "tool": "fetch_all_orders",
@@ -2614,7 +1857,7 @@
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": false,
-      "latency_ms": 413,
+      "latency_ms": 1387,
       "args": {
         "count": 50
       },
@@ -2645,49 +1888,3078 @@
       "violations": []
     },
     {
-      "id": 52,
-      "ts": "2026-08-26T13:40:10.030+00:00",
-      "sim_ts": "2026-09-23T13:51:00.000+00:00",
+      "id": 22,
+      "ts": "2026-08-27T06:52:07.666+00:00",
+      "sim_ts": "2026-09-05T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_9b0af6c508",
+      "entity_ref": "sub_4471",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 570,
+      "args": {
+        "order_id": "sub_4471"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 23,
+      "ts": "2026-08-27T06:52:08.269+00:00",
+      "sim_ts": "2026-09-05T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_6312881022",
+      "entity_ref": "+919800000021",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 40,
+      "args": {
+        "amount": 45000,
+        "description": "Retry payment for subscription sub_4471 with 10% discount.",
+        "notify_email": true,
+        "customer_contact": "+919800000021",
+        "notify_sms": true,
+        "notes": {
+          "discount_pct": "10"
+        },
+        "customer_name": "Priya S.",
+        "customer_email": "priya0@example.com",
+        "currency": "INR"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 10 = 25% in 30d, cap 15",
+          "observed": 25.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 10 = 25% in 30d, cap 15",
+          "observed": 25.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "ts": "2026-08-27T06:52:12.500+00:00",
+      "sim_ts": "2026-09-05T18:32:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_de34c4db41",
+      "entity_ref": "sub_4476",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 490,
+      "args": {
+        "order_id": "sub_4476"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 25,
+      "ts": "2026-08-27T06:52:13.012+00:00",
+      "sim_ts": "2026-09-05T18:32:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_299f96cf84",
+      "entity_ref": "+919800000026",
+      "magnitude": 0.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4476",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 43,
+      "args": {
+        "customer_contact": "+919800000026",
+        "description": "Retry payment for subscription sub_4476 with 0% discount.",
+        "customer_name": "Vikram P.",
+        "customer_email": "vikram5@example.com",
+        "notes": {
+          "subscription_id": "sub_4476",
+          "discount_pct": "0%"
+        },
+        "currency": "INR",
+        "amount": 100000
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 26,
+      "ts": "2026-08-27T06:52:15.906+00:00",
+      "sim_ts": "2026-09-05T19:38:00.000+00:00",
       "agent_id": "cart-recovery",
       "upstream": "razorpay",
       "tool": "create_payment_link",
       "action_class": "discount_grant",
-      "entity_id": "ent_9e8a74f003",
-      "entity_ref": "+919800000030",
+      "entity_id": "ent_299f96cf84",
+      "entity_ref": "+919800000026",
       "magnitude": 5.0,
       "magnitude_unit": "percent",
-      "resource": "order_4480",
+      "resource": "order_4476",
       "decision": "ALLOW",
       "forwarded": true,
       "is_error": true,
-      "latency_ms": 39,
+      "latency_ms": 66,
       "args": {
-        "amount": 836000,
+        "amount": 446500,
+        "currency": "INR",
+        "customer_contact": "+919800000026",
+        "customer_email": "vikram5@example.com",
+        "customer_name": "Vikram P.",
+        "description": "Cart payment for order_4476",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4476"
+        },
+        "notify_email": true,
+        "notify_sms": false,
+        "reference_id": "order_4476_4476",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 27,
+      "ts": "2026-08-27T06:52:17.129+00:00",
+      "sim_ts": "2026-09-06T19:54:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_9470cb18ee",
+      "entity_ref": "sub_4490",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 497,
+      "args": {
+        "order_id": "sub_4490"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 28,
+      "ts": "2026-08-27T06:52:17.657+00:00",
+      "sim_ts": "2026-09-06T19:54:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_78111c74c5",
+      "entity_ref": "+919800000040",
+      "magnitude": 0.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 46,
+      "args": {
+        "customer_contact": "+919800000040",
+        "notes": {
+          "discount_pct": "0%"
+        },
+        "description": "Retry payment for subscription sub_4490 with 0% discount.",
+        "customer_email": "lakshmi19@example.com",
+        "currency": "INR",
+        "customer_name": "Lakshmi M.",
+        "amount": 100000
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 29,
+      "ts": "2026-08-27T06:52:21.924+00:00",
+      "sim_ts": "2026-09-06T20:55:43.742+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_6312881022",
+      "entity_ref": "+919800000021",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4471_2",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 62,
+      "args": {
+        "amount": 589000,
+        "currency": "INR",
+        "customer_contact": "+919800000021",
+        "customer_email": "priya0@example.com",
+        "customer_name": "Priya S.",
+        "description": "Complete your purchase with a 5% discount",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4471_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4471_2"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "25 + 5 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 25.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "25 + 5 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 25.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "ts": "2026-08-27T06:52:41.792+00:00",
+      "sim_ts": "2026-09-07T17:48:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b14b12f563",
+      "entity_ref": "+919800000036",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4486",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 102,
+      "args": {
+        "amount": 237500,
+        "currency": "INR",
+        "customer_contact": "+919800000036",
+        "customer_email": "tara15@example.com",
+        "customer_name": "Tara D.",
+        "description": "Payment for your cart items",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4486"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4486"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 31,
+      "ts": "2026-08-27T06:52:52.608+00:00",
+      "sim_ts": "2026-09-07T17:48:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_b14b12f563",
+      "entity_ref": "+919800000036",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 15,
+      "args": {
+        "body": "Hi Tara, we noticed you left items worth \u20b92,500 in your cart. Use code SAVE5 for a 5% discount and complete your purchase now!",
+        "kind": "promotional",
+        "to": "+919800000036"
+      },
+      "result": {
+        "id": "msg_000006",
+        "channel": "whatsapp",
+        "to": "+919800000036",
+        "body": "Hi Tara, we noticed you left items worth \u20b92,500 in your cart. Use code SAVE5 for a 5% discount and complete your purchase now!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:52:52.618+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 32,
+      "ts": "2026-08-27T06:53:05.627+00:00",
+      "sim_ts": "2026-09-07T20:58:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_e579d0026a",
+      "entity_ref": "+919800000024",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4474",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 499,
+      "args": {
+        "currency": "INR",
+        "notes": {
+          "subscription_id": "sub_4474",
+          "discount_pct": "10"
+        },
+        "description": "Retry payment for subscription sub_4474 with 10% discount.",
+        "amount": 90000,
+        "customer_name": "Rohan M.",
+        "customer_contact": "+919800000024",
+        "customer_email": "rohan3@example.com"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 33,
+      "ts": "2026-08-27T06:53:06.149+00:00",
+      "sim_ts": "2026-09-07T20:58:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_e579d0026a",
+      "entity_ref": "+919800000024",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 9,
+      "args": {
+        "to": "+919800000024",
+        "body": "Hi Rohan, your recent subscription payment failed. Please use this link to retry and get a 5% discount: [Link]. We'd love to keep you subscribed!",
+        "kind": "transactional"
+      },
+      "result": {
+        "id": "msg_000007",
+        "channel": "whatsapp",
+        "to": "+919800000024",
+        "body": "Hi Rohan, your recent subscription payment failed. Please use this link to retry and get a 5% discount: [Link]. We'd love to keep you subscribed!",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:53:06.155+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 34,
+      "ts": "2026-08-27T06:53:07.758+00:00",
+      "sim_ts": "2026-09-07T21:41:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_e579d0026a",
+      "entity_ref": "+919800000024",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 393,
+      "args": {
+        "amount": 750500,
+        "currency": "INR",
+        "customer_contact": "+919800000024",
+        "customer_email": "rohan3@example.com",
+        "customer_name": "Rohan M.",
+        "description": "Payment for abandoned cart order_4474",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": false,
+        "reference_id": "order_4474",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 35,
+      "ts": "2026-08-27T06:53:08.176+00:00",
+      "sim_ts": "2026-09-07T21:41:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_e579d0026a",
+      "entity_ref": "+919800000024",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "DEFER",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 14,
+      "args": {
+        "body": "Hi Rohan, complete your purchase of \u20b97,900 with a 5% discount using code SAVE5 at checkout. Let us know if you need any help!",
+        "kind": "promotional",
+        "to": "+919800000024"
+      },
+      "result": {
+        "id": "msg_000008",
+        "channel": "whatsapp",
+        "to": "+919800000024",
+        "body": "Hi Rohan, complete your purchase of \u20b97,900 with a 5% discount using code SAVE5 at checkout. Let us know if you need any help!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:53:08.187+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by subscription-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "subscription-recovery"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by subscription-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "subscription-recovery"
+          }
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "ts": "2026-08-27T06:53:12.736+00:00",
+      "sim_ts": "2026-09-08T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_9b0af6c508",
+      "entity_ref": "sub_4471",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 496,
+      "args": {
+        "order_id": "sub_4471"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 37,
+      "ts": "2026-08-27T06:53:13.254+00:00",
+      "sim_ts": "2026-09-08T14:05:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_6312881022",
+      "entity_ref": "+919800000021",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4471",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 401,
+      "args": {
+        "currency": "INR",
+        "description": "Subscription renewal for sub_4471 with 10% discount.",
+        "customer_contact": "+919800000021",
+        "amount": 90000,
+        "customer_name": "Priya S.",
+        "notes": {
+          "subscription_id": "sub_4471",
+          "discount_pct": "10"
+        },
+        "customer_email": "priya0@example.com"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "ts": "2026-08-27T06:53:22.407+00:00",
+      "sim_ts": "2026-09-09T01:31:12.164+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_01968ea937",
+      "entity_ref": "+919800000022",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4472_2",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 504,
+      "args": {
+        "amount": 465500,
+        "callback_method": "get",
+        "callback_url": "https://example.com/payment_success",
+        "currency": "INR",
+        "customer_contact": "+919800000022",
+        "customer_email": "arjun1@example.com",
+        "customer_name": "Arjun K.",
+        "description": "Complete your purchase of items worth Rs 4,900 with a 5% discount.",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4472_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "ts": "2026-08-27T06:53:35.701+00:00",
+      "sim_ts": "2026-09-09T06:34:04.564+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_c725193c53",
+      "entity_ref": "+919800000034",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 513,
+      "args": {
+        "amount": 171000,
+        "currency": "INR",
+        "customer_contact": "+919800000034",
+        "customer_email": "nisha13@example.com",
+        "customer_name": "Nisha P.",
+        "description": "Payment for your cart",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": false,
+        "notify_sms": false,
+        "reference_id": "order_4484_2",
+        "reminder_enable": false
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 40,
+      "ts": "2026-08-27T06:53:46.712+00:00",
+      "sim_ts": "2026-09-09T19:54:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_9470cb18ee",
+      "entity_ref": "sub_4490",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 574,
+      "args": {
+        "order_id": "sub_4490"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 41,
+      "ts": "2026-08-27T06:53:47.307+00:00",
+      "sim_ts": "2026-09-09T19:54:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_78111c74c5",
+      "entity_ref": "+919800000040",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 72,
+      "args": {
+        "notify_sms": true,
+        "currency": "INR",
+        "customer_email": "lakshmi19@example.com",
+        "description": "Retry payment for subscription sub_4490 with 10% discount.",
+        "notes": {
+          "discount_pct": "10"
+        },
+        "customer_contact": "+919800000040",
+        "amount": 90000,
+        "customer_name": "Lakshmi M.",
+        "notify_email": true
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 42,
+      "ts": "2026-08-27T06:53:55.957+00:00",
+      "sim_ts": "2026-09-10T16:27:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_959ac9e5ab",
+      "entity_ref": "+919800000031",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 122,
+      "args": {
+        "amount": 190000,
+        "currency": "INR",
+        "customer_contact": "+919800000031",
+        "customer_email": "sneha10@example.com",
+        "customer_name": "Sneha R.",
+        "description": "Payment for your cart items",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4481",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 43,
+      "ts": "2026-08-27T06:54:05.354+00:00",
+      "sim_ts": "2026-09-10T17:52:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_959ac9e5ab",
+      "entity_ref": "+919800000031",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 186,
+      "args": {
+        "currency": "INR",
+        "notes": {
+          "discount_pct": "10%"
+        },
+        "amount": 90000,
+        "reference_id": "sub_4481_retry",
+        "customer_name": "Sneha R.",
+        "customer_email": "sneha10@example.com",
+        "customer_contact": "+919800000031",
+        "description": "Subscription renewal for sub_4481 with 10% discount due to payment failure."
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 44,
+      "ts": "2026-08-27T06:54:05.593+00:00",
+      "sim_ts": "2026-09-10T20:58:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_e579d0026a",
+      "entity_ref": "+919800000024",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4474",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 72,
+      "args": {
+        "description": "Retry payment for subscription sub_4474 with 10% discount.",
+        "customer_name": "Rohan M.",
+        "notes": {
+          "subscription_id": "sub_4474",
+          "discount_pct": "10"
+        },
+        "customer_contact": "+919800000024",
+        "customer_email": "rohan3@example.com",
+        "amount": 90000,
+        "currency": "INR"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 45,
+      "ts": "2026-08-27T06:54:06.958+00:00",
+      "sim_ts": "2026-09-12T08:11:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_959ac9e5ab",
+      "entity_ref": "order_4481",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 610,
+      "args": {
+        "order_id": "order_4481"
+      },
+      "result": "fetching order failed: 4481 is not a valid id",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 46,
+      "ts": "2026-08-27T06:54:09.196+00:00",
+      "sim_ts": "2026-09-12T08:11:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_all_orders",
+      "action_class": "read",
+      "entity_id": null,
+      "entity_ref": null,
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 547,
+      "args": {
+        "count": 50
+      },
+      "result": {
+        "count": 1,
+        "entity": "collection",
+        "items": [
+          {
+            "amount": 420000,
+            "amount_due": 420000,
+            "amount_paid": null,
+            "attempts": 0,
+            "created_at": 1787639626,
+            "currency": "INR",
+            "entity": "order",
+            "id": "order_TTuBJxzWhnyR6f",
+            "notes": {
+              "payment_restriction": "prepaid_only",
+              "rto_risk_score": "0.63"
+            },
+            "offer_id": null,
+            "receipt": "",
+            "status": "created"
+          }
+        ]
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 47,
+      "ts": "2026-08-27T06:54:09.781+00:00",
+      "sim_ts": "2026-09-12T12:30:00.000+00:00",
+      "agent_id": "dispute-responder",
+      "upstream": "razorpay",
+      "tool": "fetch_payment",
+      "action_class": "read",
+      "entity_id": null,
+      "entity_ref": null,
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 518,
+      "args": {
+        "payment_id": "pay_4481"
+      },
+      "result": "fetching payment failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 48,
+      "ts": "2026-08-27T06:54:10.334+00:00",
+      "sim_ts": "2026-09-12T12:30:00.000+00:00",
+      "agent_id": "dispute-responder",
+      "upstream": "messaging",
+      "tool": "send_email",
+      "action_class": "transactional_message",
+      "entity_id": "ent_959ac9e5ab",
+      "entity_ref": "sneha10@example.com",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 12,
+      "args": {
+        "to": "sneha10@example.com",
+        "subject": "Update regarding your dispute",
+        "body": "We are investigating the dispute for Rs 1,300 and will get back to you shortly.",
+        "template": "dispute_response",
+        "kind": "transactional"
+      },
+      "result": {
+        "id": "msg_000009",
+        "channel": "email",
+        "to": "sneha10@example.com",
+        "body": "We are investigating the dispute for Rs 1,300 and will get back to you shortly.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:54:10.341+00:00",
+        "subject": "Update regarding your dispute",
+        "template": "dispute_response"
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 49,
+      "ts": "2026-08-27T06:54:11.757+00:00",
+      "sim_ts": "2026-09-13T09:15:51.285+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_321ee54424",
+      "entity_ref": "+919800000038",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4488_2",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 388,
+      "args": {
+        "amount": 465500,
+        "currency": "INR",
+        "customer_contact": "+919800000038",
+        "customer_email": "riya17@example.com",
+        "customer_name": "Riya K.",
+        "description": "Complete your purchase with 5% discount",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4488_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4488_2",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 50,
+      "ts": "2026-08-27T06:54:23.754+00:00",
+      "sim_ts": "2026-09-13T17:27:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_5870c2c03b",
+      "entity_ref": "+919800000029",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 566,
+      "args": {
+        "amount": 617500,
+        "currency": "INR",
+        "customer_contact": "+919800000029",
+        "customer_email": "divya8@example.com",
+        "customer_name": "Divya S.",
+        "description": "Payment for your cart items",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": false,
+        "notify_sms": false,
+        "reference_id": "order_4479"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 51,
+      "ts": "2026-08-27T06:54:28.287+00:00",
+      "sim_ts": "2026-09-13T22:01:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_53162ec2be",
+      "entity_ref": "sub_4479",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 655,
+      "args": {
+        "order_id": "sub_4479"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 52,
+      "ts": "2026-08-27T06:54:28.967+00:00",
+      "sim_ts": "2026-09-13T22:01:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_5870c2c03b",
+      "entity_ref": "+919800000029",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 402,
+      "args": {
+        "customer_name": "Divya S.",
+        "notes": {
+          "discount_pct": "10%"
+        },
+        "currency": "INR",
+        "notify_email": true,
+        "customer_contact": "+919800000029",
+        "description": "Subscription renewal for sub_4479 with 10% discount.",
+        "notify_sms": true,
+        "amount": 90000,
+        "customer_email": "divya8@example.com"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 53,
+      "ts": "2026-08-27T06:54:29.422+00:00",
+      "sim_ts": "2026-09-14T15:23:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_8ad7dcd40b",
+      "entity_ref": "sub_4489",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 694,
+      "args": {
+        "order_id": "sub_4489"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 54,
+      "ts": "2026-08-27T06:54:30.143+00:00",
+      "sim_ts": "2026-09-14T15:23:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_a0df8bdc55",
+      "entity_ref": "+919800000039",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 396,
+      "args": {
+        "currency": "INR",
+        "customer_name": "Manish R.",
+        "description": "Retry payment for subscription sub_4489 with 5% discount.",
+        "customer_contact": "+919800000039",
+        "notes": {
+          "discount_pct": "5%"
+        },
+        "amount": 100000,
+        "notify_email": true,
+        "customer_email": "manish18@example.com",
+        "notify_sms": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 55,
+      "ts": "2026-08-27T06:54:30.597+00:00",
+      "sim_ts": "2026-09-14T20:34:00.000+00:00",
+      "agent_id": "dispute-responder",
+      "upstream": "razorpay",
+      "tool": "fetch_payment",
+      "action_class": "read",
+      "entity_id": null,
+      "entity_ref": null,
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 470,
+      "args": {
+        "payment_id": "pay_4479"
+      },
+      "result": "fetching payment failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 56,
+      "ts": "2026-08-27T06:54:36.501+00:00",
+      "sim_ts": "2026-09-15T00:50:01.915+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b14b12f563",
+      "entity_ref": "+919800000036",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4486_2",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 452,
+      "args": {
+        "amount": 503500,
+        "currency": "INR",
+        "customer_contact": "+919800000036",
+        "customer_email": "tara15@example.com",
+        "customer_name": "Tara D.",
+        "description": "Complete your purchase with a 5% discount",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4486_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4486_2"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 57,
+      "ts": "2026-08-27T06:54:46.702+00:00",
+      "sim_ts": "2026-09-17T15:28:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 97,
+      "args": {
+        "amount": 788500,
         "currency": "INR",
         "customer_contact": "+919800000030",
         "customer_email": "karthik9@example.com",
         "customer_name": "Karthik K.",
         "description": "Payment for abandoned cart order_4480",
         "notes": {
-          "discount_pct": "5",
-          "order_id": "order_4480"
+          "discount_pct": "5"
         },
-        "notify_email": false,
-        "notify_sms": false,
-        "reference_id": "order_4480"
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4480",
+        "reminder_enable": true
       },
       "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 58,
+      "ts": "2026-08-27T06:54:51.409+00:00",
+      "sim_ts": "2026-09-17T15:28:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 16,
+      "args": {
+        "body": "Hi Karthik, complete your order of \u20b98,300 with a 5% discount using code SAVE5. Just visit your cart to finish the purchase!",
+        "kind": "promotional",
+        "to": "+919800000030"
+      },
+      "result": {
+        "id": "msg_000010",
+        "channel": "whatsapp",
+        "to": "+919800000030",
+        "body": "Hi Karthik, complete your order of \u20b98,300 with a 5% discount using code SAVE5. Just visit your cart to finish the purchase!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:54:51.419+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 59,
+      "ts": "2026-08-27T06:55:08.268+00:00",
+      "sim_ts": "2026-09-17T15:31:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_a76400ead4",
+      "entity_ref": "+919800000028",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 83,
+      "args": {
+        "amount": 551000,
+        "currency": "INR",
+        "customer_contact": "+919800000028",
+        "customer_email": "aditya7@example.com",
+        "customer_name": "Aditya D.",
+        "description": "Payment for abandoned cart order_4478",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4478"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 60,
+      "ts": "2026-08-27T06:55:17.945+00:00",
+      "sim_ts": "2026-09-17T15:31:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_a76400ead4",
+      "entity_ref": "+919800000028",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 21,
+      "args": {
+        "body": "Hi Aditya, complete your purchase of \u20b95,800 and enjoy a 5% discount with code SAVE5 at checkout. Let us know if you need any help!",
+        "kind": "promotional",
+        "to": "+919800000028"
+      },
+      "result": {
+        "id": "msg_000011",
+        "channel": "whatsapp",
+        "to": "+919800000028",
+        "body": "Hi Aditya, complete your purchase of \u20b95,800 and enjoy a 5% discount with code SAVE5 at checkout. Let us know if you need any help!",
+        "kind": "promotional",
+        "sent_at": "2026-08-27T06:55:17.961+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 61,
+      "ts": "2026-08-27T06:55:30.674+00:00",
+      "sim_ts": "2026-09-17T16:17:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_fefa1fff38",
+      "entity_ref": "sub_4480",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 630,
+      "args": {
+        "order_id": "sub_4480"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 62,
+      "ts": "2026-08-27T06:55:31.334+00:00",
+      "sim_ts": "2026-09-17T16:17:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": 0.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4480",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 421,
+      "args": {
+        "amount": 100000,
+        "customer_contact": "+919800000030",
+        "description": "Retry payment for subscription sub_4480 with 0% discount.",
+        "notes": {
+          "discount_pct": "0%",
+          "subscription_id": "sub_4480"
+        },
+        "customer_name": "Karthik K.",
+        "currency": "INR",
+        "customer_email": "karthik9@example.com"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 63,
+      "ts": "2026-08-27T06:55:31.780+00:00",
+      "sim_ts": "2026-09-17T16:17:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "DEFER",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 16,
+      "args": {
+        "body": "Hi Karthik, your recent subscription payment failed. Please contact our support team to resolve this and keep your subscription active.",
+        "to": "+919800000030",
+        "kind": "transactional"
+      },
+      "result": {
+        "id": "msg_000012",
+        "channel": "whatsapp",
+        "to": "+919800000030",
+        "body": "Hi Karthik, your recent subscription payment failed. Please contact our support team to resolve this and keep your subscription active.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:55:31.792+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by cart-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "cart-recovery"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "msg_frequency",
+          "verdict": "DEFER",
+          "reason": "2 promotional_message in 24h, limit 1 (last by cart-recovery)",
+          "observed": 2.0,
+          "limit": 1.0,
+          "detail": {
+            "window": "24h",
+            "prior_agent": "cart-recovery"
+          }
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "ts": "2026-08-27T06:55:40.945+00:00",
+      "sim_ts": "2026-09-18T07:25:56.941+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_5870c2c03b",
+      "entity_ref": "+919800000029",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 452,
+      "args": {
+        "amount": 142500,
+        "currency": "INR",
+        "customer_contact": "+919800000029",
+        "customer_email": "divya8@example.com",
+        "customer_name": "Divya S.",
+        "description": "Cart payment for order_4479_2",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4479_2",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "ts": "2026-08-27T06:55:52.627+00:00",
+      "sim_ts": "2026-09-19T01:49:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "order_4480",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 575,
+      "args": {
+        "order_id": "order_4480"
+      },
+      "result": "fetching order failed: 4480 is not a valid id",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 66,
+      "ts": "2026-08-27T06:55:54.826+00:00",
+      "sim_ts": "2026-09-19T01:49:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_all_orders",
+      "action_class": "read",
+      "entity_id": null,
+      "entity_ref": null,
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 828,
+      "args": {
+        "count": 50
+      },
+      "result": {
+        "count": 1,
+        "entity": "collection",
+        "items": [
+          {
+            "amount": 420000,
+            "amount_due": 420000,
+            "amount_paid": null,
+            "attempts": 0,
+            "created_at": 1787639626,
+            "currency": "INR",
+            "entity": "order",
+            "id": "order_TTuBJxzWhnyR6f",
+            "notes": {
+              "payment_restriction": "prepaid_only",
+              "rto_risk_score": "0.63"
+            },
+            "offer_id": null,
+            "receipt": "",
+            "status": "created"
+          }
+        ]
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 67,
+      "ts": "2026-08-27T06:55:55.699+00:00",
+      "sim_ts": "2026-09-19T14:38:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4473",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 444,
+      "args": {
+        "amount": 171000,
+        "currency": "INR",
+        "customer_contact": "+919800000023",
+        "customer_email": "meera2@example.com",
+        "customer_name": "Meera R.",
+        "description": "Payment for your cart items",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4473"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4473"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 68,
+      "ts": "2026-08-27T06:55:57.293+00:00",
+      "sim_ts": "2026-09-19T18:39:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4473",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 381,
+      "args": {
+        "description": "Retry payment for subscription sub_4473 with 10% discount.",
+        "amount": 90000,
+        "customer_email": "meera2@example.com",
+        "notes": {
+          "subscription_id": "sub_4473",
+          "discount_pct": "10"
+        },
+        "customer_name": "Meera R.",
+        "currency": "INR",
+        "customer_contact": "+919800000023"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 69,
+      "ts": "2026-08-27T06:55:57.710+00:00",
+      "sim_ts": "2026-09-19T18:39:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 15,
+      "args": {
+        "to": "+919800000023",
+        "kind": "transactional",
+        "body": "Hi Meera, your subscription payment failed. Please retry here to avoid interruption: [Link]. Use code SAVE5 for 5% off."
+      },
+      "result": {
+        "id": "msg_000013",
+        "channel": "whatsapp",
+        "to": "+919800000023",
+        "body": "Hi Meera, your subscription payment failed. Please retry here to avoid interruption: [Link]. Use code SAVE5 for 5% off.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:55:57.722+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 70,
+      "ts": "2026-08-27T06:55:59.161+00:00",
+      "sim_ts": "2026-09-20T16:17:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_fefa1fff38",
+      "entity_ref": "sub_4480",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 535,
+      "args": {
+        "order_id": "sub_4480"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 71,
+      "ts": "2026-08-27T06:55:59.729+00:00",
+      "sim_ts": "2026-09-20T16:17:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 456,
+      "args": {
+        "amount": 90000,
+        "notify_email": true,
+        "notes": {
+          "discount_pct": "10"
+        },
+        "customer_name": "Karthik K.",
+        "customer_contact": "+919800000030",
+        "description": "Retry payment for subscription sub_4480 with 10% discount.",
+        "customer_email": "karthik9@example.com",
+        "notify_sms": true,
+        "currency": "INR"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 72,
+      "ts": "2026-08-27T06:56:01.147+00:00",
+      "sim_ts": "2026-09-21T01:10:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "update_order",
+      "action_class": "fulfilment_restriction",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "order_4473",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": "order_4473",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 53,
+      "args": {
+        "notes": {
+          "rto_risk": "high",
+          "payment_restriction": "prepaid_only"
+        },
+        "order_id": "order_4473"
+      },
+      "result": "updating order failed: ",
+      "rules_fired": [
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "ALLOW",
+          "reason": "fulfilment_restriction overrides discount_grant previously applied by subscription-recovery",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "loser_agent": "subscription-recovery",
+            "loser_class": "discount_grant",
+            "override": true
+          }
+        }
+      ],
+      "violations": []
+    },
+    {
+      "id": 73,
+      "ts": "2026-08-27T06:56:02.198+00:00",
+      "sim_ts": "2026-09-21T01:10:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "messaging",
+      "tool": "send_whatsapp",
+      "action_class": "promotional_message",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 14,
+      "args": {
+        "kind": "transactional",
+        "to": "+919800000023",
+        "body": "Hi Meera, your recent order order_4473 has a high return risk flag, so we've switched it to prepaid payment. Please complete the payment to proceed."
+      },
+      "result": {
+        "id": "msg_000014",
+        "channel": "whatsapp",
+        "to": "+919800000023",
+        "body": "Hi Meera, your recent order order_4473 has a high return risk flag, so we've switched it to prepaid payment. Please complete the payment to proceed.",
+        "kind": "transactional",
+        "sent_at": "2026-08-27T06:56:02.208+00:00",
+        "subject": null,
+        "template": null
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 74,
+      "ts": "2026-08-27T06:56:04.893+00:00",
+      "sim_ts": "2026-09-21T11:43:21.607+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_959ac9e5ab",
+      "entity_ref": "+919800000031",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4481_2",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 55,
+      "args": {
+        "amount": 399000,
+        "currency": "INR",
+        "customer_contact": "+919800000031",
+        "customer_email": "sneha10@example.com",
+        "customer_name": "Sneha R.",
+        "description": "Payment for abandoned cart order_4481_2 with 5% discount",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4481_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4481_2",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "no_promo_during_dispute",
+          "verdict": "BLOCK",
+          "reason": "discount_grant while dispute_status=open",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "state_key": "dispute_status",
+            "state_value": "open"
+          }
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "ts": "2026-08-27T06:56:05.955+00:00",
+      "sim_ts": "2026-09-21T16:41:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_6cbbd4a4fa",
+      "entity_ref": "sub_4475",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 717,
+      "args": {
+        "order_id": "sub_4475"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 76,
+      "ts": "2026-08-27T06:56:06.698+00:00",
+      "sim_ts": "2026-09-21T16:41:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_eb4323f816",
+      "entity_ref": "+919800000025",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 38,
+      "args": {
+        "description": "Retry payment for subscription sub_4475 with 5% discount.",
+        "customer_name": "Ananya N.",
+        "customer_email": "ananya4@example.com",
+        "customer_contact": "+919800000025",
+        "notes": {
+          "discount_pct": "5%"
+        },
+        "currency": "INR",
+        "amount": 100000
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 77,
+      "ts": "2026-08-27T06:56:06.779+00:00",
+      "sim_ts": "2026-09-21T18:35:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_eb4323f816",
+      "entity_ref": "+919800000025",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 138,
+      "args": {
+        "amount": 76000,
+        "currency": "INR",
+        "customer_contact": "+919800000025",
+        "customer_email": "ananya4@example.com",
+        "customer_name": "Ananya N.",
+        "description": "Payment for your cart items",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4475"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 78,
+      "ts": "2026-08-27T06:56:07.718+00:00",
+      "sim_ts": "2026-09-22T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_cfbb9bd257",
+      "entity_ref": "sub_4477",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 599,
+      "args": {
+        "order_id": "sub_4477"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 79,
+      "ts": "2026-08-27T06:56:08.340+00:00",
+      "sim_ts": "2026-09-22T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "+919800000027",
+      "magnitude": 0.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4477",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 35,
+      "args": {
+        "amount": 100000,
+        "currency": "INR",
+        "customer_email": "kavya6@example.com",
+        "description": "Retry payment for subscription sub_4477 with 0% discount.",
+        "customer_name": "Kavya V.",
+        "notes": {
+          "discount_pct": "0%",
+          "subscription_id": "sub_4477"
+        },
+        "customer_contact": "+919800000027"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 80,
+      "ts": "2026-08-27T06:56:15.873+00:00",
+      "sim_ts": "2026-09-22T11:29:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "+919800000027",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4477",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 165,
+      "args": {
+        "amount": 313500,
+        "callback_method": "get",
+        "callback_url": "https://example.com/payment_success",
+        "currency": "INR",
+        "customer_contact": "+919800000027",
+        "customer_email": "kavya6@example.com",
+        "customer_name": "Kavya V.",
+        "description": "Complete your purchase of Rs 3,300 with a 5% discount",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4477"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 81,
+      "ts": "2026-08-27T06:56:25.509+00:00",
+      "sim_ts": "2026-09-22T18:39:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_81810131b3",
+      "entity_ref": "sub_4473",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 508,
+      "args": {
+        "order_id": "sub_4473"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 82,
+      "ts": "2026-08-27T06:56:26.044+00:00",
+      "sim_ts": "2026-09-22T18:39:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": "sub_4473",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 51,
+      "args": {
+        "notes": {
+          "discount_pct": "10",
+          "subscription_id": "sub_4473"
+        },
+        "customer_contact": "+919800000023",
+        "customer_email": "meera2@example.com",
+        "amount": 90000,
+        "customer_name": "Meera R.",
+        "description": "Retry payment for subscription sub_4473 with 10% discount.",
+        "currency": "INR"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "ts": "2026-08-27T06:56:37.507+00:00",
+      "sim_ts": "2026-09-23T16:40:42.966+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4473_2",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 97,
+      "args": {
+        "amount": 503500,
+        "currency": "INR",
+        "customer_contact": "+919800000023",
+        "customer_email": "meera2@example.com",
+        "customer_name": "Meera R.",
+        "description": "Complete your purchase of Rs 5,300 with a 5% discount.",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4473_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4473_2"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "ts": "2026-08-27T06:56:48.751+00:00",
+      "sim_ts": "2026-09-24T08:53:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_eb4323f816",
+      "entity_ref": "order_4475",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 639,
+      "args": {
+        "order_id": "order_4475"
+      },
+      "result": "fetching order failed: 4475 is not a valid id",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 85,
+      "ts": "2026-08-27T06:56:51.202+00:00",
+      "sim_ts": "2026-09-24T08:53:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "update_order",
+      "action_class": "fulfilment_restriction",
+      "entity_id": "ent_eb4323f816",
+      "entity_ref": "order_4475",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": "order_4475",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 46,
+      "args": {
+        "notes": {
+          "rto_risk": "high",
+          "payment_restriction": "prepaid_only"
+        },
+        "order_id": "order_4475"
+      },
+      "result": "updating order failed: ",
+      "rules_fired": [
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "ALLOW",
+          "reason": "fulfilment_restriction overrides discount_grant previously applied by cart-recovery",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "loser_agent": "cart-recovery",
+            "loser_class": "discount_grant",
+            "override": true
+          }
+        }
+      ],
+      "violations": []
+    },
+    {
+      "id": 86,
+      "ts": "2026-08-27T06:56:51.275+00:00",
+      "sim_ts": "2026-09-24T16:41:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_6cbbd4a4fa",
+      "entity_ref": "sub_4475",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 506,
+      "args": {
+        "order_id": "sub_4475"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 87,
+      "ts": "2026-08-27T06:56:51.809+00:00",
+      "sim_ts": "2026-09-24T16:41:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_eb4323f816",
+      "entity_ref": "+919800000025",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 438,
+      "args": {
+        "description": "Retry payment for subscription sub_4475 with 10% discount.",
+        "notify_email": true,
+        "notify_sms": true,
+        "notes": {
+          "discount_pct": "10"
+        },
+        "customer_name": "Ananya N.",
+        "customer_contact": "+919800000025",
+        "amount": 90000,
+        "customer_email": "ananya4@example.com",
+        "currency": "INR"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "10 + 10 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 10.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "10 + 10 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 10.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "ts": "2026-08-27T06:56:53.131+00:00",
+      "sim_ts": "2026-09-25T01:00:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "order_4477",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 660,
+      "args": {
+        "order_id": "order_4477"
+      },
+      "result": "fetching order failed: 4477 is not a valid id",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 89,
+      "ts": "2026-08-27T06:56:55.509+00:00",
+      "sim_ts": "2026-09-25T01:00:00.000+00:00",
+      "agent_id": "rto-shield",
+      "upstream": "razorpay",
+      "tool": "fetch_all_orders",
+      "action_class": "read",
+      "entity_id": null,
+      "entity_ref": null,
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": false,
+      "latency_ms": 442,
+      "args": {
+        "count": 50
+      },
+      "result": {
+        "count": 1,
+        "entity": "collection",
+        "items": [
+          {
+            "amount": 420000,
+            "amount_due": 420000,
+            "amount_paid": null,
+            "attempts": 0,
+            "created_at": 1787639626,
+            "currency": "INR",
+            "entity": "order",
+            "id": "order_TTuBJxzWhnyR6f",
+            "notes": {
+              "payment_restriction": "prepaid_only",
+              "rto_risk_score": "0.63"
+            },
+            "offer_id": null,
+            "receipt": "",
+            "status": "created"
+          }
+        ]
+      },
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 90,
+      "ts": "2026-08-27T06:56:55.990+00:00",
+      "sim_ts": "2026-09-25T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_cfbb9bd257",
+      "entity_ref": "sub_4477",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 475,
+      "args": {
+        "order_id": "sub_4477"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 91,
+      "ts": "2026-08-27T06:56:56.502+00:00",
+      "sim_ts": "2026-09-25T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "+919800000027",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 405,
+      "args": {
+        "customer_email": "kavya6@example.com",
+        "amount": 90000,
+        "notify_email": true,
+        "currency": "INR",
+        "notes": {
+          "discount_pct": "10%"
+        },
+        "customer_name": "Kavya V.",
+        "description": "Retry payment for subscription sub_4477 with 10% discount.",
+        "notify_sms": true,
+        "customer_contact": "+919800000027"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 92,
+      "ts": "2026-08-27T06:56:56.950+00:00",
+      "sim_ts": "2026-09-25T18:39:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_2c88a3ae27",
+      "entity_ref": "+919800000023",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 404,
+      "args": {
+        "customer_name": "Meera R.",
+        "customer_contact": "+919800000023",
+        "amount": 9000,
+        "currency": "INR",
+        "notes": {
+          "discount_pct": "10"
+        },
+        "customer_email": "meera2@example.com",
+        "description": "Subscription renewal for sub_4473 with 10% discount.",
+        "reference_id": "sub_4473_retry_3"
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        },
+        {
+          "rule_id": "restriction_beats_incentive",
+          "verdict": "BLOCK",
+          "reason": "discount_grant contradicts fulfilment_restriction set by rto-shield within 7d",
+          "observed": null,
+          "limit": null,
+          "detail": {
+            "winner_agent": "rto-shield",
+            "winner_class": "fulfilment_restriction"
+          }
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "ts": "2026-08-27T06:56:58.805+00:00",
+      "sim_ts": "2026-09-27T20:21:12.772+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "+919800000027",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 413,
+      "args": {
+        "amount": 152000,
+        "callback_method": "get",
+        "currency": "INR",
+        "customer_contact": "+919800000027",
+        "customer_email": "kavya6@example.com",
+        "customer_name": "Kavya V.",
+        "description": "Payment for your abandoned cart",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4477_2",
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "ts": "2026-08-27T06:57:01.339+00:00",
+      "sim_ts": "2026-09-28T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "fetch_order",
+      "action_class": "read",
+      "entity_id": "ent_cfbb9bd257",
+      "entity_ref": "sub_4477",
+      "magnitude": null,
+      "magnitude_unit": null,
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 421,
+      "args": {
+        "order_id": "sub_4477"
+      },
+      "result": "fetching order failed: The id provided does not exist",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 95,
+      "ts": "2026-08-27T06:57:01.790+00:00",
+      "sim_ts": "2026-09-28T10:43:00.000+00:00",
+      "agent_id": "subscription-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_bed60ff8c3",
+      "entity_ref": "+919800000027",
+      "magnitude": 10.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 52,
+      "args": {
+        "notify_email": true,
+        "customer_contact": "+919800000027",
+        "notes": {
+          "discount_pct": "10"
+        },
+        "currency": "INR",
+        "notify_sms": true,
+        "customer_name": "Kavya V.",
+        "customer_email": "kavya6@example.com",
+        "amount": 100000,
+        "description": "Retry payment for subscription sub_4477 with 10% discount."
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "20 + 10 = 30% in 30d, cap 15",
+          "observed": 30.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 20.0,
+            "requested": 10.0,
+            "window": "30d"
+          }
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "ts": "2026-08-27T06:57:07.833+00:00",
+      "sim_ts": "2026-09-28T12:30:26.263+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_b72849f3a0",
+      "entity_ref": "+919800000030",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4480_2",
+      "decision": "BLOCK",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 188,
+      "args": {
+        "amount": 57000,
+        "currency": "INR",
+        "customer_contact": "+919800000030",
+        "customer_email": "karthik9@example.com",
+        "customer_name": "Karthik K.",
+        "description": "Cart payment for order_4480_2",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4480_2"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4480_2"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ],
+      "violations": [
+        {
+          "rule_id": "discount_cap",
+          "verdict": "BLOCK",
+          "reason": "15 + 5 = 20% in 30d, cap 15",
+          "observed": 20.0,
+          "limit": 15.0,
+          "detail": {
+            "already": 15.0,
+            "requested": 5.0,
+            "window": "30d"
+          }
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "ts": "2026-08-27T06:57:27.272+00:00",
+      "sim_ts": "2026-09-30T22:29:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_86c4daec67",
+      "entity_ref": "+919800000033",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": null,
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 94,
+      "args": {
+        "amount": 389500,
+        "currency": "INR",
+        "customer_contact": "+919800000033",
+        "customer_email": "ishaan12@example.com",
+        "customer_name": "Ishaan N.",
+        "description": "Payment for abandoned cart order_4483",
+        "notes": {
+          "discount_pct": "5"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reference_id": "order_4483"
+      },
+      "result": "creating payment link failed: Too many requests",
+      "rules_fired": [],
+      "violations": []
+    },
+    {
+      "id": 98,
+      "ts": "2026-08-27T06:57:47.508+00:00",
+      "sim_ts": "2026-10-01T06:38:00.000+00:00",
+      "agent_id": "cart-recovery",
+      "upstream": "razorpay",
+      "tool": "create_payment_link",
+      "action_class": "discount_grant",
+      "entity_id": "ent_c8c8a05a8a",
+      "entity_ref": "+919800000037",
+      "magnitude": 5.0,
+      "magnitude_unit": "percent",
+      "resource": "order_4487",
+      "decision": "ALLOW",
+      "forwarded": true,
+      "is_error": true,
+      "latency_ms": 565,
+      "args": {
+        "amount": 57000,
+        "callback_method": "get",
+        "callback_url": "https://example.com/payment_success",
+        "currency": "INR",
+        "customer_contact": "+919800000037",
+        "customer_email": "dev16@example.com",
+        "customer_name": "Dev S.",
+        "description": "Payment for your cart",
+        "notes": {
+          "discount_pct": "5",
+          "order_id": "order_4487"
+        },
+        "notify_email": true,
+        "notify_sms": true,
+        "reminder_enable": true
+      },
+      "result": "creating payment link failed: test mode limit of 30 reached for payment_link",
       "rules_fired": [],
       "violations": []
     }
   ],
   "stats": {
-    "calls": 52,
-    "forwarded": 52,
+    "calls": 98,
+    "forwarded": 98,
     "stopped": 0,
-    "entities": 18,
-    "multi_agent_entities": 14,
-    "violations": 4,
-    "total_discount_pct": 170.0
+    "entities": 29,
+    "multi_agent_entities": 11,
+    "violations": 26,
+    "total_discount_pct": 320.0
   }
 }

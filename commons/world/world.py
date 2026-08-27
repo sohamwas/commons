@@ -17,6 +17,9 @@ from commons.world.customers import (
     COD_SHARE,
     COD_RTO_RATE,
     DISPUTE_RATE,
+    DUNNING_INTERVAL_DAYS,
+    MAX_CART_ABANDONMENTS,
+    MAX_MANDATE_ATTEMPTS,
     UPI_AUTOPAY_FAILURE_RATE,
     Customer,
 )
@@ -83,9 +86,11 @@ class World:
 
     def _give_all_conditions(self, c: Customer) -> None:
         c.has_abandoned_cart = True
+        c.cart_abandonments = MAX_CART_ABANDONMENTS
         c.cart_value_paise = 420_000  # Rs 4,200 — the cart from the demo script
         c.subscription_active = True
         c.mandate_will_fail = True
+        c.mandate_attempts = MAX_MANDATE_ATTEMPTS
         c.pays_cod = True
         c.high_rto_risk = True
         c.will_dispute = True
@@ -98,10 +103,14 @@ class World:
         genuinely happens. Whether the agents then collide is up to the agents.
         """
         c.has_abandoned_cart = True
+        c.cart_abandonments = self.rng.randint(1, MAX_CART_ABANDONMENTS)
         c.cart_value_paise = self.rng.randrange(80_000, 900_000, 10_000)
 
         c.subscription_active = True
         c.mandate_will_fail = self.rng.random() < 0.85
+        c.mandate_attempts = (
+            self.rng.randint(1, MAX_MANDATE_ATTEMPTS) if c.mandate_will_fail else 0
+        )
 
         c.pays_cod = self.rng.random() < COD_SHARE + 0.2
         c.high_rto_risk = c.pays_cod and self.rng.random() < 0.5
@@ -112,10 +121,14 @@ class World:
         """Everyone else gets ordinary, published base rates."""
         c.has_abandoned_cart = self.rng.random() < CART_ABANDONMENT_RATE
         if c.has_abandoned_cart:
+            c.cart_abandonments = 1 if self.rng.random() < 0.6 else 2
             c.cart_value_paise = self.rng.randrange(50_000, 600_000, 10_000)
 
         c.subscription_active = self.rng.random() < 0.35
         c.mandate_will_fail = c.subscription_active and self.rng.random() < UPI_AUTOPAY_FAILURE_RATE
+        c.mandate_attempts = (
+            self.rng.randint(1, MAX_MANDATE_ATTEMPTS) if c.mandate_will_fail else 0
+        )
 
         c.pays_cod = self.rng.random() < COD_SHARE
         c.high_rto_risk = c.pays_cod and self.rng.random() < COD_RTO_RATE
@@ -151,22 +164,53 @@ class World:
                 return anchor + timedelta(minutes=int(self.rng.uniform(lo * 60, hi * 60)))
 
             if c.has_abandoned_cart:
+                # DISTINCT carts, not one cart re-nudged. Each is its own order, so a
+                # discount on each is genuinely new margin rather than the same offer
+                # counted twice. A shopper who abandons in week one often abandons again
+                # in week four.
                 c.order_id = f"order_{c.id[5:]}"
-                self.clock.schedule(
-                    cfg.start + moment((0, 6)),
-                    EventType.CART_ABANDONED,
-                    c.id,
-                    cart_value_paise=c.cart_value_paise,
-                    order_id=c.order_id,
-                )
+                first = moment((0, 6))
+                for n in range(max(c.cart_abandonments, 1)):
+                    order_id = c.order_id if n == 0 else f"order_{c.id[5:]}_{n + 1}"
+                    # Later carts land days apart, still inside the window.
+                    offset = first + timedelta(
+                        days=n * self.rng.uniform(4.0, 11.0)
+                    ) if n else first
+                    if offset > horizon:
+                        break
+                    value = (
+                        c.cart_value_paise
+                        if n == 0
+                        else self.rng.randrange(50_000, 700_000, 10_000)
+                    )
+                    self.clock.schedule(
+                        cfg.start + offset,
+                        EventType.CART_ABANDONED,
+                        c.id,
+                        cart_value_paise=value,
+                        order_id=order_id,
+                        attempt=n + 1,
+                    )
 
             if c.subscription_active and c.mandate_will_fail:
-                self.clock.schedule(
-                    cfg.start + moment((0.5, 10)),
-                    EventType.MANDATE_FAILED,
-                    c.id,
-                    reason="upi_autopay_declined",
-                )
+                # Dunning. A declined mandate is retried on a schedule — which is why the
+                # published UPI Autopay success rate is a range rather than a single
+                # number. Each retry wakes Subscription Recovery again.
+                first = moment((0.5, 10))
+                for n in range(max(c.mandate_attempts, 1)):
+                    offset = first + timedelta(days=n * DUNNING_INTERVAL_DAYS)
+                    if offset > horizon:
+                        break
+                    self.clock.schedule(
+                        cfg.start + offset,
+                        EventType.MANDATE_FAILED,
+                        c.id,
+                        reason="upi_autopay_declined",
+                        attempt=n + 1,
+                        # Stable across retries, so three offers on ONE subscription are
+                        # not mistaken for three separate giveaways.
+                        subscription_id=f"sub_{c.id[5:]}",
+                    )
 
             if c.will_dispute:
                 self.clock.schedule(

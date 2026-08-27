@@ -822,6 +822,70 @@ handoff §15.3 predicted.
 
 ---
 
+### Day 8b — 27 Aug — getting violations HONESTLY
+
+The Day 7 run had **zero** violations once a bug was removed. Rather than lower the cap
+to manufacture some, the question was asked properly: *why* were there none?
+
+#### Diagnosis — two of my own simplifications, not agent restraint
+
+1. **Only 2 of the 4 agents can grant a discount at all.** Dispute Responder emails; RTO
+   Shield updates orders. A customer with "4 agents" never had more than 2 discounters, so
+   "add more agents" would not have helped. That earlier suggestion was wrong.
+2. **Every customer got each event exactly once — zero repeats, ever.** So each agent
+   acted on each customer once in their entire life. That is the *less* realistic model:
+   cart recovery is a day-0/2/5 cadence, and UPI Autopay retry is dunning — the published
+   30–50% success figure exists precisely *because* mandates get retried.
+
+Modelling sequences is a correction, not a thumb on the scale. **No agent prompt changed.**
+
+#### Result — all four rules fire, and every breach is cross-agent
+
+```
+discount_cap                 13      customers worked by 2+ agents   12
+no_promo_during_dispute       6      discounted by 2+ agents         11
+restriction_beats_incentive   4      at/over the 15% cap             10
+msg_frequency                 3      contradictions detected          6
+customers affected           10      agent errors            2 / 61 (3%)
+```
+
+**9 customers over cap, 9 cross-agent, 0 single-agent.** Cart Recovery alone reaches
+exactly 10% and stops. It takes the second agent to break the merchant's limit — which is
+the whole claim, arrived at without touching a threshold.
+
+#### A correctness fix found along the way
+
+Three dunning retries at 10% each is **not** 30% of margin — the customer redeems one
+link. Repeat *carts* are distinct orders and genuinely do add up; repeat *retries* are one
+offer re-extended. `CumulativeBudget` now takes the **largest offer per resource, summed
+across resources**, and the reporting query uses the same accounting — otherwise the
+dashboard would show 30% while the engine enforced 10%.
+
+#### Honest caveat now reported in every run
+
+**27 of 51 discount grants (53%) named no order or subscription**, so they could not be
+recognised as re-offers and were each counted as a separate giveaway. Totals are therefore
+conservative — inflated, not understated. This is a genuine governance lesson worth its own
+line in the writeup: **policy enforcement depends on agents recording what their action
+relates to.** Half of these did not, and the gateway had to assume the worst.
+
+#### The operational lesson: requests/day, not tokens
+
+Cart Recovery bounced across three providers during debugging, exhausting each. The
+binding constraint was never tokens — each call is **~400 tokens**, because least privilege
+exposes it 3 tools instead of Razorpay's 42 — it was **requests per day**, where Groq's
+1000 dwarfs a Gemini free bucket. Cart Recovery's ~90 calls is 9% of Groq's daily budget
+and exhausts a Gemini bucket outright.
+
+**The security decision and the cost decision turn out to be the same decision.** Least
+privilege is what makes a four-agent fleet affordable on free tiers.
+
+Also learned: **every config change invalidates the LLM cache**, so each fix cost a full
+run's quota. Cache hit rate went 96% → 0% across a day of iteration. Batch changes, then
+run once.
+
+---
+
 ### Day 8 (original plan, for reference) — dashboard: hero + ledger
 
 - Next.js, dark-first, monospaced numerals, **red reserved exclusively for violations**. Fintech

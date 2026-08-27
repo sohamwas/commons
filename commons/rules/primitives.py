@@ -131,9 +131,24 @@ class CumulativeBudget(Rule):
             return None
 
         window, cap = self.scope["window"], float(self.scope["cap"])
-        already = ctx.ledger.sum_magnitude(
-            facts.entity_id, classes, ctx.since(window), ctx.run_id
-        )
+
+        # Count what the customer can actually RECEIVE, not how many times it was offered.
+        #
+        # Three dunning retries on one failing subscription, each offering 10%, is 10% of
+        # margin at risk — not 30%. The customer redeems one link. Three abandoned carts
+        # are three separate orders, so those genuinely do add up. So: take the largest
+        # offer per resource, then sum across resources.
+        #
+        # Without this, a single agent re-offering on one resource looks like cross-agent
+        # accumulation, which is exactly the confusion this project must not create.
+        if self.scope.get("per_resource", True):
+            already = ctx.ledger.sum_max_magnitude_per_resource(
+                facts.entity_id, classes, ctx.since(window), facts.resource, ctx.run_id
+            )
+        else:
+            already = ctx.ledger.sum_magnitude(
+                facts.entity_id, classes, ctx.since(window), ctx.run_id
+            )
         total = already + facts.magnitude
         if total <= cap:
             return None

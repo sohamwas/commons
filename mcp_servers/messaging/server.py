@@ -103,6 +103,15 @@ TOOLS = [
                 "subject": {"type": "string"},
                 "body": {"type": "string"},
                 "kind": {"type": "string", "enum": ["promotional", "transactional"]},
+                # send_whatsapp had this and send_email did not, which meant an agent
+                # told to send under an approved template had no way to say so. Every
+                # dispute email was therefore classified as marketing and flagged as
+                # "promotional message to a customer in dispute" — four identical false
+                # positives, and every violation in the run was this one bug.
+                "template": {
+                    "type": "string",
+                    "description": "Name of a merchant-approved template, if this message uses one.",
+                },
             },
             "required": ["to", "body"],
         },

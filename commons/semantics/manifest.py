@@ -154,9 +154,19 @@ def load_manifests(directory: Path = MANIFEST_DIR) -> dict[str, Manifest]:
 # --------------------------------------------------------------------------------------
 
 
-def dig(obj: Any, path: str) -> Any:
+def dig(obj: Any, path: str | list[str]) -> Any:
     """Walk a dotted path. Tolerates JSON-encoded strings mid-path, which Razorpay's
-    `notes` field routinely contains."""
+    `notes` field routinely contains.
+
+    A list of paths is tried in order and the first hit wins — a subscription retry and
+    a cart both identify "the thing being discounted", but under different argument names.
+    """
+    if isinstance(path, list):
+        for candidate in path:
+            found = dig(obj, candidate)
+            if found is not None:
+                return found
+        return None
     if not path:
         return None
     cur = obj

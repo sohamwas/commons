@@ -206,6 +206,38 @@ class Ledger:
         ).fetchone()
         return float(row["s"])
 
+    def sum_max_magnitude_per_resource(
+        self,
+        entity_id: str,
+        action_classes: tuple[str, ...],
+        since_iso: str,
+        exclude_resource: str | None = None,
+        run_id: str | None = None,
+    ) -> float:
+        """Largest magnitude per resource, summed across resources.
+
+        What a customer can actually receive, rather than how many times it was offered.
+        The resource the candidate call is about is EXCLUDED, because the candidate is
+        a re-offer on it and will be compared against the cap itself — otherwise a repeat
+        offer would be counted twice. Calls with no resource are each treated as distinct,
+        since nothing says they are the same thing.
+        """
+        marks = ", ".join("?" for _ in action_classes)
+        rows = self.conn.execute(
+            f"""SELECT resource, MAX(magnitude) AS m, COUNT(*) AS n FROM call
+                WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+                  AND action_class IN ({marks}) AND sim_ts >= ?
+                  AND magnitude IS NOT NULL
+                GROUP BY COALESCE(resource, 'call:' || id)""",
+            (entity_id, run_id or self.run_id, *action_classes, since_iso),
+        ).fetchall()
+        total = 0.0
+        for row in rows:
+            if exclude_resource is not None and row["resource"] == exclude_resource:
+                continue
+            total += float(row["m"] or 0)
+        return total
+
     def last_actor_on_resource(
         self, resource: str, since_iso: str, run_id: str | None = None
     ) -> tuple[str, str] | None:

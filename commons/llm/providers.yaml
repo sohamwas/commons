@@ -20,7 +20,14 @@ providers:
     api_key_env: OPENROUTER_API_KEY
 
 roles:
-  # Highest-volume agent on the fastest inference. 1000 RPD / 8000 TPM.
+  # Highest-volume agent, on the largest request budget: 1000 requests/day.
+  #
+  # It bounced between providers during Day 8 debugging, which taught the real lesson:
+  # the binding constraint is REQUESTS PER DAY, not tokens. Each call here is only ~400
+  # tokens, because least privilege exposes this agent 3 tools rather than Razorpay's 42
+  # — so the 8000 TPM ceiling allows ~20 calls a minute and never bites. Cart Recovery's
+  # ~90 calls per run is 9% of Groq's daily budget; the same load exhausts a Gemini
+  # bucket outright. Volume belongs where the REQUEST headroom is.
   cart-recovery:
     provider: groq
     model: openai/gpt-oss-120b
@@ -50,10 +57,14 @@ roles:
     provider: gemini
     model: models/gemini-3.5-flash-lite
 
-  # Spare Gemini bucket, kept free for failover.
+  # Spare buckets kept free for failover.
   spare:
     provider: gemini
     model: models/gemini-2.5-flash-lite
+
+  spare2:
+    provider: gemini
+    model: models/gemini-flash-lite-latest
 
   # Failover only. Assume Groq's bucket is shared across its models.
   fallback:

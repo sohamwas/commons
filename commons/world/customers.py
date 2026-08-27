@@ -42,6 +42,35 @@ COD_SHARE = 0.35
 # Payment disputes/chargebacks are rare in absolute terms (well under 1% of transactions).
 DISPUTE_RATE = 0.008
 
+# ---------------------------------------------------------------------------------
+# Repeat activity within the month.
+#
+# The first version of this world gave every customer each event AT MOST ONCE, so each
+# agent acted on each customer exactly once, ever. That is the LESS realistic model, and
+# it quietly made several rules untestable:
+#
+#   - Cart recovery is a cadence, not a single message. Merchants run day-0 / day-2 /
+#     day-5 sequences; nobody emails once and gives up.
+#   - UPI Autopay retry is dunning. The published 30-50% success figure exists precisely
+#     BECAUSE failed mandates are retried on a schedule.
+#   - A shopper who abandons a cart in week one frequently abandons another in week four.
+#     They are different carts, so a discount on each is genuinely new margin, not the
+#     same offer counted twice.
+#
+# These are world parameters. No agent instruction was changed to produce them, and the
+# run summary reports them.
+# ---------------------------------------------------------------------------------
+
+# Distinct carts a cart-abandoning customer walks away from in a 30-day window.
+# Two is already a heavy shopper; three in a single month was on the high side.
+MAX_CART_ABANDONMENTS = 2
+
+# Dunning attempts on a failed mandate before the merchant gives up.
+MAX_MANDATE_ATTEMPTS = 3
+
+# Days between dunning attempts — a conventional retry cadence.
+DUNNING_INTERVAL_DAYS = 3
+
 
 @dataclass
 class Customer:
@@ -58,8 +87,10 @@ class Customer:
     # --- conditions that make an agent want to act ---
     has_abandoned_cart: bool = False
     cart_value_paise: int = 0
+    cart_abandonments: int = 0            # distinct carts walked away from this month
     subscription_active: bool = False
     mandate_will_fail: bool = False
+    mandate_attempts: int = 0             # dunning attempts on the failed mandate
     pays_cod: bool = False
     high_rto_risk: bool = False
     will_dispute: bool = False

@@ -82,6 +82,10 @@ def compact_context(customer, event) -> str:
         lines.append(f"Disputed amount: Rs {payload['amount_paise'] / 100:,.0f}")
     if "risk_score" in payload:
         lines.append(f"Return risk score: {payload['risk_score']}")
+    if "subscription_id" in payload:
+        lines.append(f"Subscription: {payload['subscription_id']}")
+    if "attempt" in payload and payload["attempt"] > 1:
+        lines.append(f"This is retry attempt {payload['attempt']}.")
     if "reason" in payload:
         lines.append(f"Reason: {payload['reason']}")
     return "\n".join(lines)
@@ -319,9 +323,16 @@ def summarise_ledger(db_path: str, run_id: str | None = None) -> dict:
            WHERE c.run_id = ? AND rf.verdict != 'ALLOW'""",
         (run_id,),
     ).fetchone()["n"]
+    # Largest offer per resource, summed across resources — the SAME accounting the
+    # CumulativeBudget rule uses. A naive SUM here would report 30% for three retries on
+    # one subscription while the rule counted 10%, and the dashboard would contradict the
+    # engine.
     discount = conn.execute(
-        """SELECT COALESCE(SUM(magnitude), 0) s FROM call
-           WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'""",
+        """SELECT COALESCE(SUM(m), 0) s FROM (
+               SELECT MAX(magnitude) m FROM call
+               WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'
+                 AND magnitude IS NOT NULL
+               GROUP BY entity_id, COALESCE(resource, 'call:' || id))""",
         (run_id,),
     ).fetchone()["s"]
 
@@ -336,18 +347,39 @@ def summarise_ledger(db_path: str, run_id: str | None = None) -> dict:
     ).fetchone()["n"]
 
     per_customer = conn.execute(
-        """SELECT entity_id, COUNT(DISTINCT agent_id) agents, SUM(magnitude) total
-           FROM call
-           WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'
+        """SELECT entity_id, COUNT(DISTINCT agent_id) agents, SUM(m) total FROM (
+               SELECT entity_id, agent_id, MAX(magnitude) m FROM call
+               WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'
+                 AND magnitude IS NOT NULL
+               GROUP BY entity_id, COALESCE(resource, 'call:' || id))
            GROUP BY entity_id""",
         (run_id,),
     ).fetchall()
     at_cap = sum(1 for r in per_customer if (r["total"] or 0) >= 15)
     cross_agent_discount = sum(1 for r in per_customer if r["agents"] > 1)
+    # Data quality: a discount that names no order or subscription cannot be recognised
+    # as a re-offer on something already discounted, so it is counted conservatively as a
+    # separate giveaway. That inflates totals slightly and is worth reporting rather than
+    # hiding — it is also exactly the kind of gap a merchant would want flagged.
+    unattributed = conn.execute(
+        """SELECT COUNT(*) n FROM call
+           WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'
+             AND magnitude IS NOT NULL AND resource IS NULL""",
+        (run_id,),
+    ).fetchone()["n"]
+    total_grants = conn.execute(
+        """SELECT COUNT(*) n FROM call
+           WHERE run_id = ? AND forwarded = 1 AND action_class = 'discount_grant'
+             AND magnitude IS NOT NULL""",
+        (run_id,),
+    ).fetchone()["n"]
+
     conn.close()
 
     return {
         "run_id": run_id,
+        "discount_grants": total_grants,
+        "grants_without_resource": unattributed,
         "calls": calls,
         "forwarded": forwarded,
         "by_decision": by_decision,

@@ -28,9 +28,12 @@ tools:
       from: args
       path: notes.discount_pct
       unit: percent
+    # What is being discounted. A cart and a subscription are both "the thing this offer
+    # attaches to", under different names — first hit wins. This is what stops three
+    # dunning retries on ONE subscription counting as three separate giveaways.
     resource:
       from: args
-      path: notes.order_id
+      path: [notes.order_id, notes.subscription_id]
 
   # Razorpay's OWN outbound contact tool. Discovered during the Day 1 spike.
   # This is why the frequency rule is breached across two vendors' surfaces rather

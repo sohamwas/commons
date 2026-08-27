@@ -102,22 +102,69 @@ def test_demo_customer_has_all_four_conditions():
     }
 
 
-def test_clustered_customers_have_events_within_days_not_weeks():
-    """A shared root cause produces correlated events. Without this the 24h frequency
-    rule could never fire, and the run would prove nothing."""
+def test_the_onset_of_a_customers_troubles_is_clustered():
+    """A shared root cause produces correlated events. The FIRST of each kind lands
+    within days; the follow-up sequences then extend over the month."""
     events = build_world(seed=4471).generate()
     priya = [e for e in events if e.customer_id == "cust_4471"]
-    assert len(priya) == 4
-    span = max(e.at for e in priya) - min(e.at for e in priya)
-    assert span <= timedelta(days=4), f"Priya's events span {span}, too far apart to collide"
+
+    firsts = {}
+    for e in sorted(priya, key=lambda e: e.at):
+        firsts.setdefault(e.type, e.at)
+
+    span = max(firsts.values()) - min(firsts.values())
+    assert span <= timedelta(days=4), f"onset spans {span}, too far apart to collide"
 
 
 def test_cart_and_mandate_land_within_the_frequency_window():
     """The headline collision: two agents woken by two events inside 24 hours."""
     events = build_world(seed=4471).generate()
-    by_type = {e.type: e.at for e in events if e.customer_id == "cust_4471"}
-    gap = abs(by_type[EventType.MANDATE_FAILED] - by_type[EventType.CART_ABANDONED])
+    firsts: dict = {}
+    for e in sorted(
+        (e for e in events if e.customer_id == "cust_4471"), key=lambda e: e.at
+    ):
+        firsts.setdefault(e.type, e.at)
+    gap = abs(firsts[EventType.MANDATE_FAILED] - firsts[EventType.CART_ABANDONED])
     assert gap < timedelta(hours=24)
+
+
+def test_agents_are_woken_repeatedly_not_once():
+    """Real agent workflows are SEQUENCES.
+
+    Cart recovery is a cadence; a declined mandate is retried on a dunning schedule —
+    which is precisely why the published UPI Autopay success rate is a range. Modelling
+    each agent as acting once per customer forever was the less realistic choice, and it
+    quietly made several rules impossible to breach.
+    """
+    events = build_world(seed=4471).generate()
+    priya = [e for e in events if e.customer_id == "cust_4471"]
+
+    carts = [e for e in priya if e.type == EventType.CART_ABANDONED]
+    mandates = [e for e in priya if e.type == EventType.MANDATE_FAILED]
+
+    assert len(carts) > 1, "a shopper who abandons once often abandons again"
+    assert len(mandates) > 1, "a declined mandate is retried, not abandoned"
+
+    # Repeat carts are DISTINCT orders, so a discount on each is genuinely new margin
+    # rather than the same offer counted twice.
+    assert len({e.payload["order_id"] for e in carts}) == len(carts)
+
+    # Dunning attempts are numbered so the agent can see which retry this is.
+    assert [e.payload["attempt"] for e in mandates] == list(range(1, len(mandates) + 1))
+
+
+def test_follow_ups_can_land_after_a_dispute_opens():
+    """The situation no per-agent check can catch: an agent doing its ordinary job on a
+    customer who has since started disputing a charge."""
+    events = build_world(seed=4471).generate()
+    priya = sorted(
+        (e for e in events if e.customer_id == "cust_4471"), key=lambda e: e.at
+    )
+    disputes = [e for e in priya if e.type == EventType.DISPUTE_FILED]
+    assert disputes, "demo customer should file a dispute"
+
+    after = [e for e in priya if e.at > disputes[0].at and e.type.agent]
+    assert after, "no agent is woken after the dispute opens — nothing could collide"
 
 
 def test_low_overlap_world_produces_fewer_multi_condition_customers():
