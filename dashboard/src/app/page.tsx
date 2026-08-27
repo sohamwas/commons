@@ -6,39 +6,43 @@ import Nav from "@/components/Nav";
 import Timeline from "@/components/Timeline";
 import {
   LIVE_SOURCE,
-  RECORDED_RUNS,
   loadRun,
   handleOf,
   laneColor,
   maskPhone,
-  type Source,
 } from "@/lib/datasource";
 import type { RunData } from "@/lib/types";
 
+/**
+ * The merchant's own customers.
+ *
+ * Reads the LIVE proxy and nothing else. This page used to offer a choice between two
+ * recorded runs and the live one, which conflated two unrelated things: OBSERVE and
+ * ENFORCE are gateway MODES a merchant moves between over time (watch, review, then
+ * enforce), not datasets to flip between. The two recordings are demo evidence and
+ * belong on the marketing site, not in the tool a merchant runs on their own machine.
+ */
 export default function Page() {
-  const [mode, setMode] = useState<"observe" | "enforce" | "live">("observe");
   const [data, setData] = useState<RunData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [entityId, setEntityId] = useState<string | null>(null);
   const [callId, setCallId] = useState<number | null>(null);
 
   useEffect(() => {
-    const source: Source = mode === "live" ? LIVE_SOURCE : RECORDED_RUNS[mode];
     setData(null);
     setError(null);
-    loadRun(source)
+    loadRun(LIVE_SOURCE)
       .then((d) => {
         setData(d);
         setEntityId((current) => {
-          // Keep the same customer selected when flipping modes. The point is to watch
-          // ONE person's timeline change.
+          // Keep the selection across refreshes rather than snapping back to the top.
           if (current && d.entities.some((e) => e.id === current)) return current;
           return d.entities[0]?.id ?? null;
         });
         setCallId(null);
       })
       .catch((e: Error) => setError(e.message));
-  }, [mode]);
+  }, []);
 
   const entity = useMemo(
     () => data?.entities.find((e) => e.id === entityId) ?? null,
@@ -57,28 +61,11 @@ export default function Page() {
       <div className="shell">
         <h1>Customers</h1>
 
-        {/* Without this the page could only ever show the two recorded runs, so a
-            merchant watching their own agent had nowhere to look. */}
-        <div className="modes">
-          {(
-            [
-              ["live", "live"],
-              ["observe", "demo observe"],
-              ["enforce", "demo enforce"],
-            ] as const
-          ).map(([m, label]) => (
-            <button key={m} data-active={mode === m} onClick={() => setMode(m)}>
-              {label}
-            </button>
-          ))}
-        </div>
 
         {error && (
           <div className="err">
             {error}
-            {mode === "live" && (
-              <div className="mono">python scripts/run_proxy.py</div>
-            )}
+            <div className="mono">python scripts/run_proxy.py</div>
           </div>
         )}
 
