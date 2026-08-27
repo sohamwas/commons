@@ -19,6 +19,11 @@ import type { Call, RunData } from "@/lib/types";
  * and you may well agree with one and dispute the other.
  */
 
+/** The note the merchant left last time, so re-deciding starts from what they wrote. */
+function existingNote(call: Call, ruleId: string): string | undefined {
+  return call.reviews?.find((r) => r.rule_id === ruleId)?.note ?? undefined;
+}
+
 const VERDICTS: { value: ReviewVerdict; label: string; hint: string }[] = [
   { value: "correct", label: "Right call", hint: "Commons should stop this in ENFORCE" },
   { value: "incorrect", label: "Wrong call", hint: "this was fine — the rule needs changing" },
@@ -32,6 +37,20 @@ export default function ReviewPage() {
   const [pending, setPending] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [showDone, setShowDone] = useState(false);
+  // Keys currently being re-decided. "Change" previously wrote "unsure" straight away,
+  // which threw the old answer away and still gave no way to pick a new one — so a
+  // verdict was effectively permanent. It should reopen the choice, not overwrite it.
+  const [editing, setEditing] = useState<Set<string>>(new Set());
+
+  const reopen = (key: string) =>
+    setEditing((s) => new Set(s).add(key));
+
+  const closeEditing = (key: string) =>
+    setEditing((s) => {
+      const next = new Set(s);
+      next.delete(key);
+      return next;
+    });
 
   const load = () =>
     Promise.all([loadRun(LIVE_SOURCE), getPolicy()])
@@ -82,6 +101,7 @@ export default function ReviewPage() {
     setPending(key);
     try {
       await submitReview({ call_id: callId, rule_id: ruleId, verdict, note: notes[key] ?? "" });
+      closeEditing(key);
       await load();
     } catch (e) {
       setError((e as Error).message);
@@ -187,13 +207,16 @@ export default function ReviewPage() {
                       </div>
                     )}
 
-                    {verdict ? (
+                    {verdict && !editing.has(key) ? (
                       <div className="review-done">
-                        You said: <strong>{VERDICTS.find((v) => v.value === verdict)?.label}</strong>
-                        <button
-                          className="btn btn-quiet"
-                          onClick={() => decide(call.id, ruleId, "unsure")}
-                        >
+                        You said:{" "}
+                        <strong>{VERDICTS.find((v) => v.value === verdict)?.label}</strong>
+                        {existingNote(call, ruleId) && (
+                          <span style={{ color: "var(--text-faint)" }}>
+                            — “{existingNote(call, ruleId)}”
+                          </span>
+                        )}
+                        <button className="btn btn-quiet" onClick={() => reopen(key)}>
                           change
                         </button>
                       </div>
@@ -202,7 +225,7 @@ export default function ReviewPage() {
                         <input
                           className="note-input"
                           placeholder="Why? (optional — helps when you revisit this rule)"
-                          value={notes[key] ?? ""}
+                          value={notes[key] ?? existingNote(call, ruleId) ?? ""}
                           onChange={(e) =>
                             setNotes((n) => ({ ...n, [key]: e.target.value }))
                           }
@@ -212,13 +235,23 @@ export default function ReviewPage() {
                             <button
                               key={v.value}
                               className={`btn btn-${v.value}`}
+                              data-current={v.value === verdict}
                               title={v.hint}
                               disabled={pending === key}
                               onClick={() => decide(call.id, ruleId, v.value)}
                             >
                               {v.label}
+                              {v.value === verdict ? " ✓" : ""}
                             </button>
                           ))}
+                          {verdict && (
+                            <button
+                              className="btn btn-quiet"
+                              onClick={() => closeEditing(key)}
+                            >
+                              cancel
+                            </button>
+                          )}
                         </div>
                       </>
                     )}

@@ -95,6 +95,19 @@ export const submitReview = (body: {
 
 export const getEntities = () => call<AdminEntity[]>("/admin/entities");
 
+export interface SyncResult {
+  source: string;
+  found: number;
+  imported: number;
+  dry_run: boolean;
+  warnings: string[];
+  preview: Array<{ display_name: string; handles: Record<string, string> }>;
+}
+
+/** Pull customers from a vendor the merchant already uses. */
+export const syncCustomers = (body: { source?: string; limit?: number; dry_run?: boolean }) =>
+  call<SyncResult>("/api/sync", { method: "POST", body: JSON.stringify(body) });
+
 export const declareEntities = (
   entities: Array<{
     ref?: string;

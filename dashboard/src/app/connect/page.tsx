@@ -79,10 +79,77 @@ export default function ConnectPage() {
               to {health.upstreams.join(" and ")}, {health.rules.length} rules loaded.
             </div>
 
+            <h2>What Commons can and cannot sit in front of</h2>
+            <div className="ledger" style={{ marginBottom: 8 }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 300 }}>Agent</th>
+                    <th style={{ width: 110 }}>Works today</th>
+                    <th>Why</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Agents you run yourself — your own code, Claude Desktop, Cursor,
+                      VS Code, n8n, LangChain</td>
+                    <td className="verdict" data-v="ALLOW">YES</td>
+                    <td style={{ color: "var(--text-dim)" }}>
+                      You control the MCP config, so you can point it anywhere.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>A third-party agent you deploy and configure</td>
+                    <td className="verdict" data-v="ALLOW">YES</td>
+                    <td style={{ color: "var(--text-dim)" }}>
+                      Commons needs its tool schema, not its source.
+                    </td>
+                  </tr>
+                  <tr data-violation="true">
+                    <td>Razorpay Agent Studio agents</td>
+                    <td className="verdict" data-v="BLOCK">NOT YET</td>
+                    <td style={{ color: "var(--text-dim)" }}>
+                      They run on Razorpay&apos;s infrastructure and expose no
+                      merchant-configurable MCP endpoint. See below.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="warn">
+              <strong>Agent Studio agents cannot be routed through Commons today</strong>,
+              and it is worth being precise about why — there are two separate blockers.
+              <br />
+              <br />
+              <strong>1. Reachability.</strong> Those agents execute on Razorpay&apos;s
+              servers. Commons runs on your machine at{" "}
+              <span className="mono">127.0.0.1</span>, which Razorpay cannot reach. A
+              tunnel (ngrok, Cloudflare Tunnel) solves this half — but it means exposing a
+              gateway that sees your payment traffic to the public internet, so it is a
+              decision to make deliberately rather than a default.
+              <br />
+              <br />
+              <strong>2. Configurability, which is the real blocker.</strong> Agent Studio
+              is a managed marketplace. It does not let a merchant change where an agent
+              sends its tool calls, so even a publicly reachable Commons has nothing to
+              point at it. A tunnel does not fix this.
+              <br />
+              <br />
+              This is not a gap in Commons so much as the gap Commons exists to describe.
+              Razorpay has said third-party builders{" "}
+              <em>will be able to</em> publish agents to Agent Studio. At that point a
+              merchant will be running agents from several parties at once, and the
+              question of who enforces limits across all of them becomes unavoidable — it
+              needs either a merchant-configurable endpoint, or this arbitration built into
+              the platform itself.
+            </div>
+
             <h2>Step 1 — repoint each agent</h2>
             <p className="lede">
-              This is the entire integration. Replace the vendor URL in the agent&apos;s MCP
-              configuration with its Commons URL.
+              For every agent you control, this is the entire integration: replace the
+              vendor URL in its MCP configuration with its Commons URL. Nothing inside the
+              agent changes, which is why it works for agents you did not write.
             </p>
 
             {[...byAgent.entries()].map(([agent, paths]) => (

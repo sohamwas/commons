@@ -7,7 +7,9 @@ import {
   declareEntities,
   getEntities,
   parseCustomerCsv,
+  syncCustomers,
   type AdminEntity,
+  type SyncResult,
 } from "@/lib/api";
 
 /**
@@ -30,6 +32,22 @@ export default function DataPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sync, setSync] = useState<SyncResult | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const runSync = async (dryRun: boolean) => {
+    setSyncing(true);
+    setError(null);
+    try {
+      const res = await syncCustomers({ source: "razorpay", limit: 100, dry_run: dryRun });
+      setSync(res);
+      if (!dryRun) await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const load = () =>
     getEntities()
@@ -75,9 +93,73 @@ export default function DataPage() {
 
         {error && <div className="err">{error}</div>}
 
-        <h2>Import your customer list</h2>
+        <h2>Sync from Razorpay — recommended</h2>
         <p className="lede">
-          Paste CSV with any of these columns:{" "}
+          Your customers are already in Razorpay, and Commons is holding the same API keys
+          your agents use. Nothing to export, no new credential. This reads registered
+          customers and, because guest checkout creates none, the contacts on recent
+          payments too.
+        </p>
+
+        <div className="review-actions">
+          <button className="btn" disabled={syncing} onClick={() => runSync(true)}>
+            {syncing ? "checking…" : "Preview what would import"}
+          </button>
+          {sync && sync.dry_run && sync.found > 0 && (
+            <button className="btn" disabled={syncing} onClick={() => runSync(false)}>
+              Import {sync.found} customers
+            </button>
+          )}
+        </div>
+
+        {sync && (
+          <div style={{ marginTop: 14 }}>
+            <div className={sync.found ? "ok-banner" : "warn"}>
+              {sync.dry_run
+                ? `Found ${sync.found} customers in Razorpay.`
+                : `Imported ${sync.imported} customers.`}
+            </div>
+            {sync.warnings.map((w, i) => (
+              <div className="warn" key={i}>
+                {w}
+              </div>
+            ))}
+            {sync.preview.length > 0 && (
+              <div className="ledger" style={{ marginTop: 12 }}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 220 }}>Customer</th>
+                      <th>Handles</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sync.preview.map((p, i) => (
+                      <tr key={i}>
+                        <td>{p.display_name}</td>
+                        <td className="mono" style={{ color: "var(--text-dim)" }}>
+                          {Object.entries(p.handles)
+                            .map(([k, v]) => `${k}=${v}`)
+                            .join("  ·  ")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        <h2>Or import a CSV</h2>
+        <p className="lede">
+          For a customer master that lives somewhere else — a CRM, your storefront, a
+          spreadsheet. Every one of them exports CSV, which is why this is the fallback
+          rather than a database connection: handing a gateway read access to your
+          production database is a far bigger ask than exporting a file you already have.
+        </p>
+        <p className="lede">
+          Use any of these columns:{" "}
           <span className="mono">customer_id, name, phone, email, order_id</span>. Only the
           ones you have — every extra handle is another way an agent can refer to that
           person and still be recognised.

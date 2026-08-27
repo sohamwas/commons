@@ -231,6 +231,45 @@ def create_app(
             return _cors({"error": str(exc)}, status=400)
         return _cors(settings.policy())
 
+    async def api_sync(request):
+        """Import the merchant's customers from a vendor they already use.
+
+        POST /api/sync {"source": "razorpay", "limit": 100, "dry_run": true}
+
+        Their customers are already in Razorpay, and Commons is holding the same keys
+        their agents use — so this needs no new credential and no export. `dry_run`
+        returns what WOULD be imported, so nothing is written until they have looked.
+        """
+        from commons.identity.sources import sync_from_razorpay
+
+        body = await request.json() if await request.body() else {}
+        if body.get("source", "razorpay") != "razorpay":
+            return _cors({"error": "only 'razorpay' is supported"}, 400)
+
+        try:
+            result = sync_from_razorpay(limit=int(body.get("limit", 100)))
+        except RuntimeError as exc:
+            return _cors({"error": str(exc)}, 400)
+
+        entities = result.as_entities()
+        imported = 0
+        if not body.get("dry_run"):
+            for item in entities:
+                entity_id = ledger.create_entity(item["display_name"])
+                resolver.declare(entity_id, item["handles"], source="razorpay-sync")
+                imported += 1
+
+        return _cors(
+            {
+                "source": result.source,
+                "found": result.found,
+                "imported": imported,
+                "dry_run": bool(body.get("dry_run")),
+                "warnings": result.warnings,
+                "preview": entities[:10],
+            }
+        )
+
     async def api_review(request):
         """Record the merchant's verdict on something Commons flagged.
 
@@ -325,6 +364,7 @@ def create_app(
             Route("/api/run", api_run),
             Route("/api/policy", api_policy, methods=["GET", "PUT"]),
             Route("/api/review", api_review, methods=["POST"]),
+            Route("/api/sync", api_sync, methods=["POST"]),
             Route("/admin/run", start_run, methods=["POST"]),
             Route("/admin/clock", set_clock, methods=["POST"]),
             Route("/admin/state", set_state, methods=["POST"]),

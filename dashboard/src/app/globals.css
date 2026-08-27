@@ -937,3 +937,9 @@ h2 .btn {
   text-transform: none;
   letter-spacing: 0;
 }
+
+/* The verdict currently recorded, when re-deciding. */
+.btn[data-current="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
