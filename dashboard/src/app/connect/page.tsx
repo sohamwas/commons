@@ -84,7 +84,8 @@ export default function ConnectPage() {
             <h2>URL pattern</h2>
             <Copyable text={`${PROXY_URL}/mcp/{agent}/{vendor}`} />
             <p className="note">
-              <span className="mono">{"{agent}"}</span> is any agent you register.{" "}
+              <span className="mono">{"{agent}"}</span> is any stable id. Commons uses it to attribute
+              calls, nothing more.{" "}
               <span className="mono">{"{vendor}"}</span> is one of{" "}
               <span className="mono">{health.upstreams.join(", ")}</span>. Each agent gets
               its own address so Commons knows who is calling.

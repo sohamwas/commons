@@ -5,8 +5,6 @@
 # servers. Inside one vendor everything already carries a customer_id; the hard part is
 # recognising that a phone number here and a customer id there are one human.
 
-upstream: messaging
-
 # A shipping update is not a marketing touch, and frequency caps should apply only to
 # the latter. But note WHERE that distinction is allowed to come from.
 #
