@@ -95,6 +95,16 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
                 "result": _json(r["result_json"]),
                 "rules_fired": fired,
                 "violations": [f for f in fired if f["verdict"] != "ALLOW"],
+                # A discount that does not say WHAT it discounts cannot be recognised as
+                # a re-offer on something already discounted, so it is counted as a
+                # separate giveaway and inflates the total. Surface it on the call
+                # itself — an aggregate footnote is not enough for someone reading a
+                # single customer's timeline and wondering why the maths looks high.
+                "unattributed": (
+                    r["action_class"] == "discount_grant"
+                    and r["magnitude"] is not None
+                    and r["resource"] is None
+                ),
             }
         )
 
@@ -125,17 +135,30 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
         }
 
         agents_involved = sorted({c["agent_id"] for c in entity_calls})
-        discount = sum(
-            c["magnitude"] or 0
-            for c in entity_calls
-            if c["action_class"] == "discount_grant" and c["forwarded"]
-        )
+
+        # Largest offer per resource, summed across resources — the SAME accounting the
+        # CumulativeBudget rule uses. A naive sum here would show a customer 40% on the
+        # timeline while the engine had enforced against 30%, and the dashboard would be
+        # quietly contradicting the gateway.
+        by_resource: dict[str, float] = {}
+        for c in entity_calls:
+            if c["action_class"] != "discount_grant" or not c["forwarded"]:
+                continue
+            if c["magnitude"] is None:
+                continue
+            # No resource means we cannot tell it apart from a re-offer, so it is kept
+            # distinct — conservative, and flagged per call as `unattributed`.
+            key = c["resource"] or f"call:{c['id']}"
+            by_resource[key] = max(by_resource.get(key, 0.0), float(c["magnitude"]))
+        discount = sum(by_resource.values())
         contacts = sum(
             1
             for c in entity_calls
             if c["action_class"] == "promotional_message" and c["forwarded"]
         )
         violations = sum(len(c["violations"]) for c in entity_calls)
+        breaching_calls = sum(1 for c in entity_calls if c["violations"])
+        unattributed = sum(1 for c in entity_calls if c.get("unattributed"))
 
         entities.append(
             {
@@ -151,6 +174,11 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
                     "discount_pct": round(discount, 2),
                     "promotional_contacts": contacts,
                     "violations": violations,
+                    # Rule breaches and the calls they happened on are different counts:
+                    # one call can breach two rules at once. Showing only the first makes
+                    # the timeline look like it is hiding rows.
+                    "breaching_calls": breaching_calls,
+                    "unattributed_grants": unattributed,
                 },
             }
         )

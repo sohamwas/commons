@@ -30,6 +30,7 @@ export interface Call {
   result: unknown;
   rules_fired: RuleFiring[];
   violations: RuleFiring[];
+  unattributed?: boolean;
 }
 
 export interface EntitySummary {
@@ -38,6 +39,8 @@ export interface EntitySummary {
   discount_pct: number;
   promotional_contacts: number;
   violations: number;
+  breaching_calls: number;
+  unattributed_grants: number;
 }
 
 export interface Entity {

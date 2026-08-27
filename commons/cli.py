@@ -109,6 +109,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         f"  (one agent restricting who another incentivises)"
     )
 
+    if led.get("grants_without_resource"):
+        print(
+            f"\ndata quality: {led['grants_without_resource']}/{led['discount_grants']} "
+            "discount grants named no order or subscription, so each was counted as a "
+            "separate giveaway — totals above are conservative (inflated, not understated)"
+        )
+
     reactions = {}
     for r in report.reactions:
         reactions[r["reaction"]] = reactions.get(r["reaction"], 0) + 1

@@ -113,7 +113,10 @@ AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
         job=(
             "Your job is reducing return-to-origin losses on cash-on-delivery orders. When an "
             "order is flagged as high risk of being returned undelivered, restrict that order "
-            "to prepaid payment by updating it, and tell the customer why."
+            "to prepaid payment by updating it, and tell the customer why.\n"
+            'When you message the customer you MUST pass template="order_update". That is '
+            "the merchant's approved template for order-status changes; a message sent "
+            "without it is treated as marketing."
         ),
         handles=("rto_risk_flagged",),
     ),

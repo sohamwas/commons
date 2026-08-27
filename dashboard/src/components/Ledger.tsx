@@ -76,6 +76,19 @@ export default function Ledger({
                         · {call.action_class.replace(/_/g, " ")}
                       </span>
                     )}
+                    {call.unattributed && (
+                      <div
+                        style={{
+                          fontSize: 11.5,
+                          color: "var(--defer)",
+                          fontFamily: "var(--mono)",
+                          marginTop: 3,
+                        }}
+                        title="No order or subscription named, so this could not be recognised as a re-offer and was counted as a separate giveaway."
+                      >
+                        no order/subscription named — counted as a separate giveaway
+                      </div>
+                    )}
                     {call.violations.map((v, i) => (
                       <div className="reason" key={i}>
                         {v.rule_id}: {v.reason}

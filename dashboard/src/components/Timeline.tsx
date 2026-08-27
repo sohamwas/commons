@@ -87,9 +87,21 @@ export default function Timeline({
           </span>
           {disputeOpen && <span className="badge alert">dispute open</span>}
           {entity.summary.violations > 0 && (
+            // A single call can breach two rules at once, so the two counts differ.
+            // Showing only the breach count makes the timeline look like it is hiding rows.
             <span className="badge alert">
-              {entity.summary.violations} violation
-              {entity.summary.violations === 1 ? "" : "s"}
+              {entity.summary.violations} rule breach
+              {entity.summary.violations === 1 ? "" : "es"} on{" "}
+              {entity.summary.breaching_calls} call
+              {entity.summary.breaching_calls === 1 ? "" : "s"}
+            </span>
+          )}
+          {entity.summary.unattributed_grants > 0 && (
+            <span
+              className="badge"
+              title="These discounts did not say which order or subscription they applied to, so each was counted as a separate giveaway. The total above is therefore conservative."
+            >
+              {entity.summary.unattributed_grants} unattributed
             </span>
           )}
         </div>

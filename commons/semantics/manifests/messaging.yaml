@@ -34,6 +34,11 @@ transactional_templates: &transactional_templates
   # that stops marketing at a customer who is in dispute. Without this the merchant's own
   # dispute handler would be silenced at precisely the moment it needs to write.
   - dispute_response
+  # Telling a customer their order now requires prepayment is an order-status alert, not
+  # a marketing touch. Without this, RTO Shield's own notification counts against the
+  # marketing frequency cap and reads on the timeline as "RTO Shield sent a promotion",
+  # which is simply false.
+  - order_update
 
 tools:
   send_whatsapp:
