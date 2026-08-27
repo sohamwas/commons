@@ -52,6 +52,12 @@ roles:
     provider: gemini
     model: models/gemini-flash-lite-latest
 
+  # The worked example in examples/loyalty_agent.py. Groq carries it because the stress
+  # run makes one request per customer and request budget is the binding constraint.
+  loyalty:
+    provider: groq
+    model: openai/gpt-oss-120b
+
   # Highest request count of all: one call per inbound message.
   personas:
     provider: gemini

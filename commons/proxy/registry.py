@@ -55,6 +55,17 @@ AGENTS: dict[str, AgentSpec] = {
             "messaging": ("send_email",),
         },
     ),
+    # Registered the way a merchant registers their own agent: an id and a tool
+    # allowlist, nothing else. Its prompt lives in examples/loyalty_agent.py, which is a
+    # separate program Commons never reads.
+    "loyalty": AgentSpec(
+        id="loyalty",
+        display_name="Loyalty",
+        tools={
+            "razorpay": ("create_payment_link", "fetch_all_orders", "fetch_order"),
+            "messaging": ("send_whatsapp",),
+        },
+    ),
     "rto-shield": AgentSpec(
         id="rto-shield",
         display_name="RTO Shield",

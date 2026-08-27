@@ -227,9 +227,17 @@ class Ledger:
 
     # ---------------- queries the rule engine needs ----------------
 
-    # Only `forwarded = 1` rows count. In OBSERVE a violating call really happened, so it
-    # consumes budget for everything after it; in ENFORCE it was stopped, so it does not.
-    # That single condition is what makes the A/B comparison mean something.
+    # Only rows that reached the upstream AND were accepted by it count.
+    #
+    # `forwarded = 1`: in OBSERVE a violating call really happened, so it consumes budget
+    # for everything after it; in ENFORCE it was stopped, so it does not. That single
+    # condition is what makes the A/B comparison mean something.
+    #
+    # `is_error = 0`: the vendor answered and refused, so nothing happened to the customer.
+    # Counting it would let a rejected payment link consume a real discount budget, and
+    # silence someone for 24h over a message they never received. A timeout cannot reach
+    # here — it raises before `forwarded` is ever set, leaving the row excluded already,
+    # so is_error means specifically "the vendor said no", never "we do not know".
 
     def count_actions(
         self, entity_id: str, action_classes: tuple[str, ...], since_iso: str, run_id: str | None = None
@@ -237,7 +245,7 @@ class Ledger:
         marks = ", ".join("?" for _ in action_classes)
         row = self.conn.execute(
             f"""SELECT COUNT(*) AS n FROM call
-                WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+                WHERE entity_id = ? AND run_id = ? AND forwarded = 1 AND is_error = 0
                   AND action_class IN ({marks}) AND sim_ts >= ?""",
             (entity_id, run_id or self.run_id, *action_classes, since_iso),
         ).fetchone()
@@ -249,7 +257,7 @@ class Ledger:
         marks = ", ".join("?" for _ in action_classes)
         row = self.conn.execute(
             f"""SELECT COALESCE(SUM(magnitude), 0) AS s FROM call
-                WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+                WHERE entity_id = ? AND run_id = ? AND forwarded = 1 AND is_error = 0
                   AND action_class IN ({marks}) AND sim_ts >= ?""",
             (entity_id, run_id or self.run_id, *action_classes, since_iso),
         ).fetchone()
@@ -274,7 +282,7 @@ class Ledger:
         marks = ", ".join("?" for _ in action_classes)
         rows = self.conn.execute(
             f"""SELECT resource, MAX(magnitude) AS m, COUNT(*) AS n FROM call
-                WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+                WHERE entity_id = ? AND run_id = ? AND forwarded = 1 AND is_error = 0
                   AND action_class IN ({marks}) AND sim_ts >= ?
                   AND magnitude IS NOT NULL
                 GROUP BY COALESCE(resource, 'call:' || id)""",
@@ -301,7 +309,7 @@ class Ledger:
         """Who last touched this resource, and when. Used for mutual exclusion."""
         row = self.conn.execute(
             """SELECT agent_id, sim_ts FROM call
-               WHERE resource = ? AND run_id = ? AND forwarded = 1 AND sim_ts >= ?
+               WHERE resource = ? AND run_id = ? AND forwarded = 1 AND is_error = 0 AND sim_ts >= ?
                ORDER BY sim_ts DESC LIMIT 1""",
             (resource, run_id or self.run_id, since_iso),
         ).fetchone()
@@ -313,7 +321,7 @@ class Ledger:
         """Most recent agent to apply this action class to this entity, and when."""
         row = self.conn.execute(
             """SELECT agent_id, sim_ts FROM call
-               WHERE entity_id = ? AND run_id = ? AND forwarded = 1
+               WHERE entity_id = ? AND run_id = ? AND forwarded = 1 AND is_error = 0
                  AND action_class = ? AND sim_ts >= ?
                ORDER BY sim_ts DESC LIMIT 1""",
             (entity_id, run_id or self.run_id, action_class, since_iso),

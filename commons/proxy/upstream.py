@@ -15,11 +15,21 @@ import httpx2 as httpx
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 from mcp.client.streamable_http import streamable_http_client
+from mcp.shared.memory import create_client_server_memory_streams
 from mcp.types import CallToolResult, Tool
 
 from commons.config import UpstreamConfig
 
 logger = logging.getLogger(__name__)
+
+
+async def _stop(task: asyncio.Task) -> None:
+    """Shut a memory upstream server task down rather than leaving it orphaned."""
+    task.cancel()
+    try:
+        await task
+    except BaseException:  # noqa: BLE001 - teardown, nothing left to salvage
+        pass
 
 
 class Upstream:
@@ -54,9 +64,28 @@ class Upstream:
                 )
             )
         elif cfg.kind == "memory":
-            # Day 4, with the messaging server. Deliberately not written before there is
-            # something real to connect it to.
-            raise NotImplementedError("memory upstreams land with the messaging server (Day 4)")
+            # An MCP server object running in this process, spoken to over paired streams
+            # rather than a socket. Used by the stress harness, where an HTTP hop per call
+            # would be measuring uvicorn rather than Commons, and where a real vendor's
+            # rate limits make load testing impossible.
+            assert cfg.server_factory, f"upstream {cfg.name} has kind=memory but no server_factory"
+            server = cfg.server_factory()
+            client_streams, server_streams = await stack.enter_async_context(
+                create_client_server_memory_streams()
+            )
+            read, write = client_streams
+
+            # The server half has to be pumped by someone. Nothing else runs it, so this
+            # task owns it for the lifetime of the pool.
+            task = asyncio.create_task(
+                server.run(
+                    server_streams[0],
+                    server_streams[1],
+                    server.create_initialization_options(),
+                ),
+                name=f"memory-upstream-{cfg.name}",
+            )
+            stack.push_async_callback(_stop, task)
         else:  # pragma: no cover
             raise ValueError(f"unknown upstream kind: {cfg.kind}")
 

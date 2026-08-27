@@ -63,7 +63,10 @@ CREATE TABLE IF NOT EXISTS call (
     resource        TEXT,               -- e.g. order_id, for mutual exclusion
     decision        TEXT NOT NULL DEFAULT 'ALLOW'
                     CHECK (decision IN ('ALLOW', 'DEFER', 'BLOCK')),
-    forwarded       INTEGER NOT NULL DEFAULT 0,   -- did it actually reach the upstream?
+    -- Did Commons commit to forwarding this? Set at DECISION time, not after the vendor
+    -- answers, so an in-flight call is visible to a concurrent agent evaluating the same
+    -- customer. Rolled back to 0 if the call never reached the vendor.
+    forwarded       INTEGER NOT NULL DEFAULT 0,
     args_json       TEXT,
     result_json     TEXT,
     is_error        INTEGER NOT NULL DEFAULT 0,

@@ -63,6 +63,16 @@ export default function Page() {
       <div className="shell">
         <h1>Customers</h1>
 
+        {/* Without this the page could only ever show the two recorded runs, so a
+            merchant watching their own agent had nowhere to look. */}
+        <div className="modes">
+          {(["observe", "enforce", "live"] as const).map((m) => (
+            <button key={m} data-active={mode === m} onClick={() => setMode(m)}>
+              {m}
+            </button>
+          ))}
+        </div>
+
         {error && (
           <div className="err">
             {error}

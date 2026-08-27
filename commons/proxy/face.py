@@ -146,6 +146,16 @@ def build_face(
         # is what makes run 1 show real damage. In ENFORCE the same decision is honoured.
         honour = mode == ENFORCE and decision.blocked
 
+        # RESERVE the effect now, rather than after the vendor answers.
+        #
+        # `evaluate` and `record_call` are both synchronous, so nothing interleaves
+        # between them. The race is later: while `await upstream.call_tool` is in flight,
+        # a row left at forwarded=0 is invisible to every aggregation, so a concurrent
+        # agent evaluates against a total that excludes it. Three agents granting 6% at
+        # the same instant all read 0 and all pass a 15% cap.
+        #
+        # So forwarded means "Commons committed to forwarding this", and the one path
+        # that can still fail to reach the vendor rolls it back below.
         call_id = ledger.record_call(
             agent_id=agent.id,
             upstream=upstream.name,
@@ -157,7 +167,7 @@ def build_face(
             magnitude_unit=facts.magnitude_unit,
             resource=facts.resource,
             decision=decision.verdict,
-            forwarded=0,
+            forwarded=0 if honour else 1,
             args_json=args,
             sim_ts=sim_now.isoformat(timespec="milliseconds"),
         )
@@ -191,7 +201,17 @@ def build_face(
                 f"Commons {verb} this call under merchant policy across all agents: {reasons}"
             )
 
-        result = await upstream.call_tool(params.name, args)
+        try:
+            result = await upstream.call_tool(params.name, args)
+        except BaseException:
+            # The call never reached the vendor, so the reservation above must stop
+            # consuming this customer's budget.
+            ledger.update_call(
+                call_id,
+                forwarded=0,
+                latency_ms=int((time.perf_counter() - started) * 1000),
+            )
+            raise
         text = _result_text(result)
 
         ledger.update_call(
