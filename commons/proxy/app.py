@@ -20,6 +20,8 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import datetime, timezone
 
 from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
@@ -204,9 +206,8 @@ def create_app(
         return JSONResponse({"entity_id": entity_id, key: value})
 
     def _cors(payload, status: int = 200):
-        return JSONResponse(
-            payload, status_code=status, headers={"Access-Control-Allow-Origin": "*"}
-        )
+        # CORS is handled by middleware now; this wrapper just keeps call sites tidy.
+        return JSONResponse(payload, status_code=status)
 
     async def api_policy(request):
         """Read or change merchant policy without restarting the gateway.
@@ -264,10 +265,7 @@ def create_app(
             data = export_run(db_path, request.query_params.get("run_id"))
         except ValueError as exc:
             return JSONResponse({"error": str(exc)}, status_code=404)
-        return JSONResponse(
-            data,
-            headers={"Access-Control-Allow-Origin": "*"},  # local dashboard on :3000
-        )
+        return JSONResponse(data)
 
     async def list_entities(_request):
         rows = ledger.conn.execute(
@@ -303,7 +301,23 @@ def create_app(
             finally:
                 ledger.end_run()
 
+    # The dashboard is served from a different port than the gateway, so every request
+    # it makes is cross-origin. Per-route headers were not enough: a PUT or POST triggers
+    # a preflight OPTIONS, and a route declaring only GET/PUT answers that with 405, so
+    # editing policy from the browser failed while curl worked fine.
+    #
+    # Scoped to loopback rather than "*", because these endpoints change policy and
+    # declare customers. Commons runs on the merchant's own machine; nothing off it
+    # should be able to drive this API.
+    cors = Middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+        allow_headers=["*"],
+    )
+
     base = Starlette(
+        middleware=[cors],
         routes=[
             Route("/health", health),
             Route("/admin/entities", seed_entities, methods=["POST"]),
