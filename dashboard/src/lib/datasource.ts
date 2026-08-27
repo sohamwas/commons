@@ -73,3 +73,23 @@ export function formatTime(iso: string) {
     hour12: false,
   });
 }
+
+/**
+ * Lane colour for an agent.
+ *
+ * The four demo agents have named colours. Anything else, including an agent a merchant
+ * registered themselves, cycles a palette by position, so a fifth agent gets a real lane
+ * instead of falling back to the same grey as every other unknown one.
+ */
+const NAMED: Record<string, string> = {
+  "cart-recovery": "var(--agent-cart)",
+  "subscription-recovery": "var(--agent-subscription)",
+  "dispute-responder": "var(--agent-dispute)",
+  "rto-shield": "var(--agent-rto)",
+};
+
+const PALETTE = ["#b07cd6", "#e07a5f", "#5fa8d3", "#84a98c", "#d4a373"];
+
+export function laneColor(agentId: string, index = 0): string {
+  return NAMED[agentId] ?? PALETTE[index % PALETTE.length];
+}

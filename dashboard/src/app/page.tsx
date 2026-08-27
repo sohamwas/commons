@@ -9,17 +9,11 @@ import {
   RECORDED_RUNS,
   loadRun,
   handleOf,
+  laneColor,
   maskPhone,
   type Source,
 } from "@/lib/datasource";
 import type { RunData } from "@/lib/types";
-
-const LANE_COLOR: Record<string, string> = {
-  "cart-recovery": "var(--agent-cart)",
-  "subscription-recovery": "var(--agent-subscription)",
-  "dispute-responder": "var(--agent-dispute)",
-  "rto-shield": "var(--agent-rto)",
-};
 
 export default function Page() {
   const [mode, setMode] = useState<"observe" | "enforce" | "live">("observe");
@@ -66,9 +60,15 @@ export default function Page() {
         {/* Without this the page could only ever show the two recorded runs, so a
             merchant watching their own agent had nowhere to look. */}
         <div className="modes">
-          {(["observe", "enforce", "live"] as const).map((m) => (
+          {(
+            [
+              ["live", "live"],
+              ["observe", "demo observe"],
+              ["enforce", "demo enforce"],
+            ] as const
+          ).map(([m, label]) => (
             <button key={m} data-active={mode === m} onClick={() => setMode(m)}>
-              {m}
+              {label}
             </button>
           ))}
         </div>
@@ -133,13 +133,13 @@ export default function Page() {
                     {handleOf(e, "customer_id") ?? maskPhone(handleOf(e, "phone"))}
                   </div>
                   <div className="pips">
-                    {data.agents.map((a) => (
+                    {data.agents.map((a, i) => (
                       <span
                         key={a.id}
                         className="pip"
                         style={
                           e.agents.includes(a.id)
-                            ? { background: LANE_COLOR[a.id] }
+                            ? { background: laneColor(a.id, i) }
                             : undefined
                         }
                       />

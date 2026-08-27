@@ -1,7 +1,7 @@
 "use client";
 
 import type { Agent, Call, Entity } from "@/lib/types";
-import { formatDay, formatTime, handleOf, maskPhone } from "@/lib/datasource";
+import { formatDay, formatTime, handleOf, laneColor, maskPhone } from "@/lib/datasource";
 
 /**
  * The hero screen.
@@ -11,13 +11,6 @@ import { formatDay, formatTime, handleOf, maskPhone } from "@/lib/datasource";
  * converge instead of running in parallel, and the violations are drawn BETWEEN the
  * lanes, because that is literally where they live: in the space no single agent can see.
  */
-
-const LANE_COLOR: Record<string, string> = {
-  "cart-recovery": "var(--agent-cart)",
-  "subscription-recovery": "var(--agent-subscription)",
-  "dispute-responder": "var(--agent-dispute)",
-  "rto-shield": "var(--agent-rto)",
-};
 
 interface Props {
   entity: Entity;
@@ -104,9 +97,9 @@ export default function Timeline({
       </div>
 
       <div className="lanes">
-        {agents.map((agent) => {
+        {agents.map((agent, i) => {
           const laneCalls = calls.filter((c) => c.agent_id === agent.id);
-          const color = LANE_COLOR[agent.id] ?? "var(--text-faint)";
+          const color = laneColor(agent.id, i);
           return (
             <div className="lane-row" key={agent.id}>
               <div className="lane-label">
