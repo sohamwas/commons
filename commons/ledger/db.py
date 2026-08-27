@@ -45,6 +45,27 @@ class Ledger:
         self.run_id = run_id
         return run_id
 
+    def resume_or_start_run(self, mode: str = "OBSERVE", notes: str = "") -> str:
+        """Adopt the open run, or open one if there is none.
+
+        A run is a DEPLOYMENT lifetime, not a process lifetime. Starting a fresh run on
+        every boot looked harmless in a simulation, where each experiment wants its own
+        isolated history, and was severe in production: rule aggregation is scoped by
+        run_id, so restarting the gateway reset every customer's 30-day discount budget,
+        every frequency window and every lease. A customer given 15% yesterday could be
+        given 15% again today because someone deployed.
+
+        Simulations still get isolation by asking for it explicitly via start_run().
+        """
+        row = self.conn.execute(
+            """SELECT id FROM run WHERE ended_at IS NULL
+               ORDER BY started_at DESC LIMIT 1"""
+        ).fetchone()
+        if row:
+            self.run_id = row["id"]
+            return self.run_id
+        return self.start_run(mode=mode, notes=notes)
+
     def end_run(self, run_id: str | None = None) -> None:
         self.conn.execute(
             "UPDATE run SET ended_at = ? WHERE id = ?", (_now(), run_id or self.run_id)

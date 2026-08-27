@@ -35,13 +35,24 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
     conn.row_factory = sqlite3.Row
 
     if run_id is None:
-        # The most recent run that actually did something. The proxy opens a run when it
-        # boots, so "latest" alone would hand the dashboard an empty one every restart.
+        # The OPEN run: the one the gateway is currently writing to. The dashboard has to
+        # show what the merchant's agents are doing right now, so this must agree with
+        # Ledger.resume_or_start_run or the two disagree about what "the run" is.
+        #
+        # It used to pick the most recent run with any activity, a workaround for the
+        # proxy opening an empty run on every boot. That is fixed at the source now, and
+        # the workaround had become a bug: it showed a closed experiment in preference to
+        # live traffic.
         row = conn.execute(
-            """SELECT r.id FROM run r
-               WHERE EXISTS (SELECT 1 FROM call c WHERE c.run_id = r.id)
-               ORDER BY r.started_at DESC LIMIT 1"""
+            "SELECT id FROM run WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1"
         ).fetchone()
+        if row is None:
+            # No open run: reading a database from a finished simulation.
+            row = conn.execute(
+                """SELECT r.id FROM run r
+                   WHERE EXISTS (SELECT 1 FROM call c WHERE c.run_id = r.id)
+                   ORDER BY r.started_at DESC LIMIT 1"""
+            ).fetchone()
         if row is None:
             conn.close()
             raise ValueError(f"no runs with activity in {db_path}")

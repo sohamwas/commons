@@ -328,7 +328,9 @@ def create_app(
             await pool.open_all(stack)
             for sub in sub_apps:
                 await stack.enter_async_context(sub.router.lifespan_context(sub))
-            run_id = ledger.start_run(mode=settings.mode, notes="proxy session")
+            # Resume, never start. A restart must not wipe what every rule aggregates
+            # over; see Ledger.resume_or_start_run.
+            run_id = ledger.resume_or_start_run(mode=settings.mode, notes="deployment")
             logger.info(
                 "commons ready - %d endpoints, mode=%s, run=%s",
                 len(endpoints), settings.mode, run_id,
