@@ -15,11 +15,11 @@ import {
 /**
  * Customer data sync.
  *
- * This is the step that makes cross-vendor policy possible at all. Normalisation unifies
- * different spellings of the SAME detail; it cannot know that a phone number and an email
- * belong to one person. Commons refuses to guess at that — in a system that can block a
- * payment, a wrong merge is far worse than no merge — so the merchant states it, once,
- * from the customer list they already have.
+ * This is what makes cross-vendor policy possible at all. Normalisation unifies different
+ * spellings of the SAME detail; it cannot know that a phone number and an email belong to
+ * one person. Commons refuses to guess at that, because in a system that can block a
+ * payment a wrong merge is far worse than no merge. The merchant states it, once, from the
+ * customer list they already have.
  */
 
 const SAMPLE = `customer_id,name,phone,email,order_id
@@ -35,6 +35,14 @@ export default function DataPage() {
   const [sync, setSync] = useState<SyncResult | null>(null);
   const [syncing, setSyncing] = useState(false);
 
+  const load = () =>
+    getEntities()
+      .then((e) => {
+        setEntities(e);
+        setError(null);
+      })
+      .catch((e: Error) => setError(e.message));
+
   const runSync = async (dryRun: boolean) => {
     setSyncing(true);
     setError(null);
@@ -49,14 +57,6 @@ export default function DataPage() {
     }
   };
 
-  const load = () =>
-    getEntities()
-      .then((e) => {
-        setEntities(e);
-        setError(null);
-      })
-      .catch((e: Error) => setError(e.message));
-
   useEffect(() => {
     load();
   }, []);
@@ -68,7 +68,7 @@ export default function DataPage() {
     setResult(null);
     try {
       const res = await declareEntities(preview);
-      setResult(`Imported ${res.seeded} customers.`);
+      setResult(`Imported ${res.seeded}`);
       setCsv("");
       await load();
     } catch (e) {
@@ -84,40 +84,28 @@ export default function DataPage() {
       <div className="shell">
         <h1>Customer data</h1>
         <p className="lede">
-          Commons will happily unify <span className="mono">+91 98000 00021</span>,{" "}
-          <span className="mono">9800000021</span> and{" "}
-          <span className="mono">09800000021</span> on its own — those are one detail
-          written three ways. What it will <em>not</em> do is guess that a phone number and
-          an email address belong to the same person. You already know that; tell it once.
+          Commons unifies one detail written many ways. It never guesses that a phone and an
+          email are the same person, so tell it once.
         </p>
 
         {error && <div className="err">{error}</div>}
 
-        <h2>Sync from Razorpay — recommended</h2>
-        <p className="lede">
-          Your customers are already in Razorpay, and Commons is holding the same API keys
-          your agents use. Nothing to export, no new credential. This reads registered
-          customers and, because guest checkout creates none, the contacts on recent
-          payments too.
-        </p>
-
+        <h2>Sync from Razorpay</h2>
         <div className="review-actions">
           <button className="btn" disabled={syncing} onClick={() => runSync(true)}>
-            {syncing ? "checking…" : "Preview what would import"}
+            {syncing ? "checking" : "Preview"}
           </button>
           {sync && sync.dry_run && sync.found > 0 && (
             <button className="btn" disabled={syncing} onClick={() => runSync(false)}>
-              Import {sync.found} customers
+              Import {sync.found}
             </button>
           )}
         </div>
 
         {sync && (
-          <div style={{ marginTop: 14 }}>
+          <>
             <div className={sync.found ? "ok-banner" : "warn"}>
-              {sync.dry_run
-                ? `Found ${sync.found} customers in Razorpay.`
-                : `Imported ${sync.imported} customers.`}
+              {sync.dry_run ? `Found ${sync.found}` : `Imported ${sync.imported}`}
             </div>
             {sync.warnings.map((w, i) => (
               <div className="warn" key={i}>
@@ -125,7 +113,7 @@ export default function DataPage() {
               </div>
             ))}
             {sync.preview.length > 0 && (
-              <div className="ledger" style={{ marginTop: 12 }}>
+              <div className="ledger">
                 <table>
                   <thead>
                     <tr>
@@ -148,21 +136,13 @@ export default function DataPage() {
                 </table>
               </div>
             )}
-          </div>
+          </>
         )}
 
-        <h2>Or import a CSV</h2>
+        <h2>Import CSV</h2>
         <p className="lede">
-          For a customer master that lives somewhere else — a CRM, your storefront, a
-          spreadsheet. Every one of them exports CSV, which is why this is the fallback
-          rather than a database connection: handing a gateway read access to your
-          production database is a far bigger ask than exporting a file you already have.
-        </p>
-        <p className="lede">
-          Use any of these columns:{" "}
-          <span className="mono">customer_id, name, phone, email, order_id</span>. Only the
-          ones you have — every extra handle is another way an agent can refer to that
-          person and still be recognised.
+          Columns: <span className="mono">customer_id, name, phone, email, order_id</span>.
+          Only the ones you have.
         </p>
 
         <textarea
@@ -175,54 +155,42 @@ export default function DataPage() {
 
         <div className="review-actions">
           <button className="btn" disabled={!preview.length || busy} onClick={submit}>
-            {busy ? "importing…" : `Import ${preview.length || ""} customers`}
+            {busy ? "importing" : `Import ${preview.length || ""}`}
           </button>
           <button className="btn btn-quiet" onClick={() => setCsv(SAMPLE)}>
-            use the example
+            example
           </button>
           {result && <span className="ok">{result}</span>}
         </div>
 
         {preview.length > 0 && (
-          <>
-            <h2>Preview</h2>
-            <div className="ledger">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Handles Commons will link</th>
+          <div className="ledger">
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: 220 }}>Name</th>
+                  <th>Handles</th>
+                </tr>
+              </thead>
+              <tbody>
+                {preview.slice(0, 8).map((p, i) => (
+                  <tr key={i}>
+                    <td>{p.display_name}</td>
+                    <td className="mono" style={{ color: "var(--text-dim)" }}>
+                      {Object.entries(p.handles)
+                        .map(([k, v]) => `${k}=${v}`)
+                        .join("  ·  ")}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {preview.slice(0, 8).map((p, i) => (
-                    <tr key={i}>
-                      <td>{p.display_name}</td>
-                      <td className="mono" style={{ color: "var(--text-dim)" }}>
-                        {Object.entries(p.handles)
-                          .map(([k, v]) => `${k}=${v}`)
-                          .join("  ·  ")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {preview.length > 8 && (
-              <p className="note">…and {preview.length - 8} more.</p>
-            )}
-          </>
-        )}
-
-        <h2>Customers Commons knows ({entities?.length ?? 0})</h2>
-        {!entities && !error && <div className="loading">loading…</div>}
-        {entities && entities.length === 0 && (
-          <div className="empty">
-            None yet. Import a list above, or let agents create them — a customer seen for
-            the first time gets created automatically, but only with the single handle that
-            call carried.
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
+
+        <h2>Known ({entities?.length ?? 0})</h2>
+        {!entities && !error && <div className="loading">loading</div>}
+        {entities && entities.length === 0 && <div className="empty">None yet.</div>}
         {entities && entities.length > 0 && (
           <div className="ledger">
             <table>
@@ -240,16 +208,16 @@ export default function DataPage() {
                     <td className="mono" style={{ color: "var(--text-dim)" }}>
                       {e.handles.map(([ns, v]) => `${ns}=${v}`).join("  ·  ")}
                       {e.handles.length === 1 && (
-                        <span style={{ color: "var(--defer)" }}>
-                          {"  "}— only one handle, so contact on another channel will not
-                          be recognised as this person
+                        // One handle means another channel will not resolve to this person.
+                        <span style={{ color: "var(--defer)" }} title="Only one handle">
+                          {"  "}!
                         </span>
                       )}
                     </td>
                     <td className="mono" style={{ color: "var(--text-faint)" }}>
                       {Object.entries(e.state)
                         .map(([k, v]) => `${k}=${v}`)
-                        .join(", ") || "—"}
+                        .join(", ")}
                     </td>
                   </tr>
                 ))}
@@ -257,12 +225,6 @@ export default function DataPage() {
             </table>
           </div>
         )}
-
-        <p className="note">
-          Importing again is safe: a handle already pointing at a customer is updated, not
-          duplicated. If two vendors disagree about who a handle belongs to, Commons keeps
-          what it has and reports the conflict rather than silently repointing it.
-        </p>
       </div>
     </>
   );

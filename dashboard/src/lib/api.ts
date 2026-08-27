@@ -4,7 +4,7 @@
  * The dashboard is a LOCAL application: the merchant clones the repo, runs the proxy on
  * their own machine, and this talks to it. Commons sees payment amounts, customer
  * identifiers and refund decisions, so nothing here should ever point at someone else's
- * server — which is why the base URL defaults to loopback and is overridable only by the
+ * server. That is why the base URL defaults to loopback and is overridable only by the
  * person running it.
  */
 

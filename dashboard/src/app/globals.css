@@ -1,5 +1,5 @@
 /*
- * Commons — fintech infrastructure, not an AI product.
+ * Commons: fintech infrastructure, not an AI product.
  *
  * Rules that are not negotiable (handoff §13.3):
  *   - dark first, restrained, Linear/Stripe/Vercel rather than purple gradients;
@@ -95,6 +95,8 @@ header.top {
 }
 
 .wordmark {
+  color: inherit;
+  text-decoration: none;
   font-family: var(--mono);
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -102,19 +104,11 @@ header.top {
   font-size: 13px;
 }
 
-.wordmark span {
-  color: var(--text-faint);
-  font-weight: 400;
-  margin-left: 10px;
-  letter-spacing: 0.04em;
-  text-transform: none;
-}
-
 .spacer {
   flex: 1;
 }
 
-/* Mode toggle — proves one engine, two modes, at a glance (handoff §13.3). */
+/* Mode toggle: one engine, two modes, at a glance (handoff section 13.3). */
 .modes {
   display: flex;
   border: 1px solid var(--border-bright);
@@ -153,7 +147,12 @@ h1 {
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.015em;
-  margin: 0 0 6px;
+  margin: 0 0 22px;
+}
+
+/* Pull a subtitle back up under its heading. */
+h1 + .lede {
+  margin-top: -14px;
 }
 
 h2 {
@@ -162,7 +161,13 @@ h2 {
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--text-faint);
-  margin: 44px 0 14px;
+  margin: 40px 0 14px;
+}
+
+h2 .btn {
+  margin-left: 12px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .lede {
@@ -171,18 +176,15 @@ h2 {
   margin: 0 0 22px;
 }
 
-.thesis {
-  font-size: 17px;
-  line-height: 1.55;
-  color: var(--text);
-  max-width: 68ch;
-  border-left: 2px solid var(--border-bright);
-  padding-left: 18px;
-  margin: 0 0 28px;
+.steps {
+  color: var(--text-dim);
+  max-width: 74ch;
+  margin: 0;
+  padding-left: 20px;
 }
 
-.thesis strong {
-  font-weight: 600;
+.steps li {
+  margin-bottom: 8px;
 }
 
 /* ---------------------------------------------------------------- stats */

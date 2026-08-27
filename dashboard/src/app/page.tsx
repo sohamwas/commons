@@ -29,16 +29,15 @@ export default function Page() {
   const [callId, setCallId] = useState<number | null>(null);
 
   useEffect(() => {
-    const source: Source =
-      mode === "live" ? LIVE_SOURCE : RECORDED_RUNS[mode];
+    const source: Source = mode === "live" ? LIVE_SOURCE : RECORDED_RUNS[mode];
     setData(null);
     setError(null);
     loadRun(source)
       .then((d) => {
         setData(d);
         setEntityId((current) => {
-          // Keep the same customer selected when flipping modes — the whole point is
-          // to watch ONE person's timeline change.
+          // Keep the same customer selected when flipping modes. The point is to watch
+          // ONE person's timeline change.
           if (current && d.entities.some((e) => e.id === current)) return current;
           return d.entities[0]?.id ?? null;
         });
@@ -62,27 +61,18 @@ export default function Page() {
       <Nav />
 
       <div className="shell">
-        <h1>Who is being acted upon</h1>
-        <p className="thesis">
-          Every agent platform scopes permissions to the <strong>agent</strong>. None
-          scope limits to the <strong>customer</strong>. The moment a merchant runs more
-          than one agent, its real exposure lives somewhere nothing can see.
-        </p>
+        <h1>Customers</h1>
 
         {error && (
           <div className="err">
             {error}
             {mode === "live" && (
-              <div style={{ marginTop: 8, color: "var(--text-dim)" }}>
-                Start the proxy: <span className="mono">
-                  python scripts/run_proxy.py
-                </span>
-              </div>
+              <div className="mono">python scripts/run_proxy.py</div>
             )}
           </div>
         )}
 
-        {!data && !error && <div className="loading">loading run…</div>}
+        {!data && !error && <div className="loading">loading</div>}
 
         {data && (
           <>
@@ -90,27 +80,23 @@ export default function Page() {
               <div className="stat">
                 <div className="label">Customers</div>
                 <div className="value">{data.stats.entities}</div>
-                <div className="sub">acted upon this run</div>
               </div>
               <div className="stat">
-                <div className="label">Worked by 2+ agents</div>
+                <div className="label">2+ agents</div>
                 <div className="value alert">{data.stats.multi_agent_entities}</div>
-                <div className="sub">no agent can see this</div>
               </div>
               <div className="stat">
-                <div className="label">Tool calls</div>
+                <div className="label">Calls</div>
                 <div className="value">{data.stats.calls}</div>
-                <div className="sub">{data.stats.forwarded} reached the vendor</div>
               </div>
               <div className="stat">
-                <div className="label">Stopped by Commons</div>
+                <div className="label">Forwarded</div>
+                <div className="value">{data.stats.forwarded}</div>
+              </div>
+              <div className="stat">
+                <div className="label">Stopped</div>
                 <div className={`value${data.stats.stopped ? " alert" : ""}`}>
                   {data.stats.stopped}
-                </div>
-                <div className="sub">
-                  {data.run.mode === "OBSERVE"
-                    ? "observing only"
-                    : "policy enforced"}
                 </div>
               </div>
               <div className="stat">
@@ -118,11 +104,9 @@ export default function Page() {
                 <div className={`value${data.stats.violations ? " alert" : ""}`}>
                   {data.stats.violations}
                 </div>
-                <div className="sub">across all agents</div>
               </div>
             </div>
 
-            <h2>Customers, ranked by how contested they are</h2>
             <div className="customer-grid">
               {data.entities.slice(0, 12).map((e) => (
                 <button
@@ -136,8 +120,7 @@ export default function Page() {
                 >
                   <div className="name">{e.display_name}</div>
                   <div className="ref">
-                    {handleOf(e, "customer_id") ??
-                      maskPhone(handleOf(e, "phone"))}
+                    {handleOf(e, "customer_id") ?? maskPhone(handleOf(e, "phone"))}
                   </div>
                   <div className="pips">
                     {data.agents.map((a) => (
@@ -156,16 +139,14 @@ export default function Page() {
                     <span>{e.summary.agent_count} agents</span>
                     <span>{e.summary.discount_pct}%</span>
                     {e.summary.violations > 0 && (
-                      <span className="bad">
-                        {e.summary.violations}!
-                      </span>
+                      <span className="bad">{e.summary.violations}!</span>
                     )}
                   </div>
                 </button>
               ))}
             </div>
 
-            <h2>One customer, every agent</h2>
+            <h2>Timeline</h2>
             {entity ? (
               <Timeline
                 entity={entity}
@@ -177,24 +158,14 @@ export default function Page() {
             ) : (
               <div className="empty">Select a customer.</div>
             )}
-            <p className="note">
-              Four lanes, one human. Each agent is doing exactly the job it was built
-              for, and each one is individually correct. The dashed marks are where
-              their actions collide — which is between the lanes, where no single agent
-              is looking.
-            </p>
 
-            <h2>Conflict ledger — {entity?.display_name ?? "all"}</h2>
+            <h2>Calls</h2>
             <Ledger
               calls={entityCalls}
               agents={data.agents}
               selectedCallId={callId}
               onSelectCall={setCallId}
             />
-            <p className="note">
-              Click any row for the full trace: the arguments sent, every rule evaluated,
-              and whether the call reached the vendor. No aggregate asks to be trusted.
-            </p>
           </>
         )}
       </div>

@@ -4,46 +4,41 @@ import { useEffect, useMemo, useState } from "react";
 
 import Nav from "@/components/Nav";
 import { LIVE_SOURCE, agentName, formatDay, formatTime, loadRun } from "@/lib/datasource";
-import { getPolicy, submitReview, type Policy, type ReviewVerdict } from "@/lib/api";
+import { submitReview, type ReviewVerdict } from "@/lib/api";
 import type { Call, RunData } from "@/lib/types";
 
 /**
- * The review queue — what joins OBSERVE to ENFORCE.
+ * The review queue, which is what joins OBSERVE to ENFORCE.
  *
- * A dry run that tells you what WOULD have been stopped is half a loop. The other half
- * is you saying whether it should have been, and that judgement outliving the run. A rule
- * you keep marking wrong is a rule that needs changing, and that is a far better signal
- * than expecting anyone to read reason strings.
+ * A dry run that tells you what WOULD have been stopped is half a loop. The other half is
+ * you saying whether it should have been, and that judgement outliving the run.
  *
- * Verdicts attach to a (call, rule) pair, not to a call: one call can breach two rules
- * and you may well agree with one and dispute the other.
+ * Verdicts attach to a (call, rule) pair, not to a call: one call can breach two rules and
+ * you may agree with one and dispute the other.
  */
 
-/** The note the merchant left last time, so re-deciding starts from what they wrote. */
 function existingNote(call: Call, ruleId: string): string | undefined {
   return call.reviews?.find((r) => r.rule_id === ruleId)?.note ?? undefined;
 }
 
 const VERDICTS: { value: ReviewVerdict; label: string; hint: string }[] = [
-  { value: "correct", label: "Right call", hint: "Commons should stop this in ENFORCE" },
-  { value: "incorrect", label: "Wrong call", hint: "this was fine — the rule needs changing" },
-  { value: "unsure", label: "Not sure", hint: "come back to this" },
+  { value: "correct", label: "Right", hint: "Stop this in ENFORCE" },
+  { value: "incorrect", label: "Wrong", hint: "This was fine. The rule needs changing." },
+  { value: "unsure", label: "Unsure", hint: "Come back to this" },
 ];
 
 export default function ReviewPage() {
   const [data, setData] = useState<RunData | null>(null);
-  const [policy, setPolicy] = useState<Policy | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [showDone, setShowDone] = useState(false);
   // Keys currently being re-decided. "Change" previously wrote "unsure" straight away,
-  // which threw the old answer away and still gave no way to pick a new one — so a
-  // verdict was effectively permanent. It should reopen the choice, not overwrite it.
+  // which threw the old answer away and still gave no way to pick a new one, so a verdict
+  // was effectively permanent. It should reopen the choice, not overwrite it.
   const [editing, setEditing] = useState<Set<string>>(new Set());
 
-  const reopen = (key: string) =>
-    setEditing((s) => new Set(s).add(key));
+  const reopen = (key: string) => setEditing((s) => new Set(s).add(key));
 
   const closeEditing = (key: string) =>
     setEditing((s) => {
@@ -53,10 +48,9 @@ export default function ReviewPage() {
     });
 
   const load = () =>
-    Promise.all([loadRun(LIVE_SOURCE), getPolicy()])
-      .then(([run, p]) => {
+    loadRun(LIVE_SOURCE)
+      .then((run) => {
         setData(run);
-        setPolicy(p);
         setError(null);
       })
       .catch((e: Error) => setError(e.message));
@@ -110,19 +104,19 @@ export default function ReviewPage() {
     }
   };
 
+  // A rule you keep marking wrong is a rule that needs changing, not agents that do.
+  const suspect = Object.entries(accuracy).filter(
+    ([, a]) => a.incorrect >= 2 && a.incorrect > a.correct
+  );
+
   return (
     <>
       <Nav />
       <div className="shell">
-        <h1>Review what Commons flagged</h1>
-        <p className="lede">
-          {policy?.mode === "OBSERVE"
-            ? "Nothing here was stopped — Commons is only watching. Say whether each call should have been stopped, and that judgement carries into enforcement."
-            : "Commons is enforcing. These are the calls it acted on; confirming or disputing them keeps the rules honest."}
-        </p>
+        <h1>Review</h1>
 
         {error && <div className="err">{error}</div>}
-        {!data && !error && <div className="loading">loading decisions…</div>}
+        {!data && !error && <div className="loading">loading</div>}
 
         {data && (
           <>
@@ -130,12 +124,12 @@ export default function ReviewPage() {
               <div className="stat">
                 <div className="label">Flagged</div>
                 <div className="value">{items.length}</div>
-                <div className="sub">rule breaches this run</div>
               </div>
               <div className="stat">
                 <div className="label">Reviewed</div>
-                <div className="value">{reviewed}</div>
-                <div className="sub">{items.length - reviewed} still waiting</div>
+                <div className="value">
+                  {reviewed}/{items.length}
+                </div>
               </div>
               {Object.entries(accuracy).map(([ruleId, a]) => (
                 <div className="stat" key={ruleId}>
@@ -143,39 +137,28 @@ export default function ReviewPage() {
                   <div className={`value${a.incorrect > a.correct ? " alert" : ""}`}>
                     {a.correct}/{a.correct + a.incorrect}
                   </div>
-                  <div className="sub">
-                    {a.incorrect > a.correct
-                      ? "mostly wrong — consider changing it"
-                      : "you agreed with these"}
-                  </div>
+                  <div className="sub">agreed</div>
                 </div>
               ))}
             </div>
 
-            {Object.entries(accuracy).some(([, a]) => a.incorrect >= 2 && a.incorrect > a.correct) && (
-              <div className="warn" style={{ marginTop: 18 }}>
-                You have marked the same rule wrong more than once. That usually means the
-                rule needs changing rather than the agents — worth editing it on the Rules
-                page before switching enforcement on.
+            {suspect.length > 0 && (
+              <div className="warn">
+                {suspect.map(([id]) => id.replace(/_/g, " ")).join(", ")} is mostly wrong.
+                Edit it on Rules before enforcing.
               </div>
             )}
 
             <h2>
-              {showDone ? "All decisions" : "Waiting for you"}
-              <button
-                className="btn btn-quiet"
-                style={{ marginLeft: 12 }}
-                onClick={() => setShowDone((s) => !s)}
-              >
-                {showDone ? "show only unreviewed" : "show reviewed too"}
+              {showDone ? "All" : "Waiting"}
+              <button className="btn btn-quiet" onClick={() => setShowDone((s) => !s)}>
+                {showDone ? "unreviewed only" : "show all"}
               </button>
             </h2>
 
             {queue.length === 0 ? (
               <div className="empty">
-                {items.length === 0
-                  ? "Nothing was flagged in this run."
-                  : "Everything has been reviewed."}
+                {items.length === 0 ? "Nothing flagged." : "All reviewed."}
               </div>
             ) : (
               queue.map(({ call, ruleId, reason, verdict }) => {
@@ -188,10 +171,10 @@ export default function ReviewPage() {
                           {formatDay(call.sim_ts)} {formatTime(call.sim_ts)}
                         </span>{" "}
                         <strong>{agentName(data.agents, call.agent_id)}</strong>{" "}
-                        <span style={{ color: "var(--text-dim)" }}>
-                          called <span className="mono">{call.tool}</span> on{" "}
-                          {call.entity_ref}
-                        </span>
+                        <span className="mono" style={{ color: "var(--text-dim)" }}>
+                          {call.tool}
+                        </span>{" "}
+                        <span style={{ color: "var(--text-dim)" }}>{call.entity_ref}</span>
                       </div>
                       <div className="spacer" />
                       <span className="badge alert">{ruleId.replace(/_/g, " ")}</span>
@@ -201,19 +184,17 @@ export default function ReviewPage() {
 
                     {call.unattributed && (
                       <div className="warn">
-                        This discount did not name an order or subscription, so Commons
-                        could not tell it apart from a repeat of an earlier offer. The
-                        breach may be double-counting one offer.
+                        No order or subscription named, so this may be one offer counted
+                        twice.
                       </div>
                     )}
 
                     {verdict && !editing.has(key) ? (
                       <div className="review-done">
-                        You said:{" "}
                         <strong>{VERDICTS.find((v) => v.value === verdict)?.label}</strong>
                         {existingNote(call, ruleId) && (
                           <span style={{ color: "var(--text-faint)" }}>
-                            — “{existingNote(call, ruleId)}”
+                            {existingNote(call, ruleId)}
                           </span>
                         )}
                         <button className="btn btn-quiet" onClick={() => reopen(key)}>
@@ -224,11 +205,9 @@ export default function ReviewPage() {
                       <>
                         <input
                           className="note-input"
-                          placeholder="Why? (optional — helps when you revisit this rule)"
+                          placeholder="Note (optional)"
                           value={notes[key] ?? existingNote(call, ruleId) ?? ""}
-                          onChange={(e) =>
-                            setNotes((n) => ({ ...n, [key]: e.target.value }))
-                          }
+                          onChange={(e) => setNotes((n) => ({ ...n, [key]: e.target.value }))}
                         />
                         <div className="review-actions">
                           {VERDICTS.map((v) => (
@@ -241,14 +220,10 @@ export default function ReviewPage() {
                               onClick={() => decide(call.id, ruleId, v.value)}
                             >
                               {v.label}
-                              {v.value === verdict ? " ✓" : ""}
                             </button>
                           ))}
                           {verdict && (
-                            <button
-                              className="btn btn-quiet"
-                              onClick={() => closeEditing(key)}
-                            >
+                            <button className="btn btn-quiet" onClick={() => closeEditing(key)}>
                               cancel
                             </button>
                           )}

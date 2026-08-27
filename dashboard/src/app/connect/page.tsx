@@ -8,9 +8,9 @@ import { PROXY_URL, getHealth, type Health } from "@/lib/api";
 /**
  * Onboarding.
  *
- * Adopting Commons is one line per agent: point it at a Commons URL instead of the
- * vendor's. Nothing inside the agent changes, which is the whole reason the proxy sits
- * where it does — it works for third-party agents whose code you cannot touch.
+ * Adoption is one line per agent: point it at a Commons URL instead of the vendor's.
+ * Nothing inside the agent changes, which is the whole reason the proxy sits where it
+ * does. It works for third-party agents whose source you cannot touch.
  */
 
 function Copyable({ text }: { text: string }) {
@@ -32,6 +32,14 @@ function Copyable({ text }: { text: string }) {
   );
 }
 
+const WORKS: [string, boolean, string][] = [
+  ["Your own code", true, "You own the MCP config"],
+  ["Claude Desktop, Cursor, VS Code", true, "You own the MCP config"],
+  ["n8n, LangChain, CrewAI, Zapier", true, "All take an MCP URL"],
+  ["Third-party agents you deploy", true, "Commons needs the tool schema, not the source"],
+  ["Razorpay Agent Studio", false, "Managed. No merchant-configurable endpoint."],
+];
+
 export default function ConnectPage() {
   const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,106 +60,46 @@ export default function ConnectPage() {
     <>
       <Nav />
       <div className="shell">
-        <h1>Connect your agents</h1>
+        <h1>Connect</h1>
         <p className="lede">
-          Each agent gets its own Commons address. Point it there instead of at the
-          vendor, and every call it makes becomes visible to policy that spans your whole
-          fleet. You do not modify the agent — which is why this works for agents you did
-          not build.
+          Replace the vendor URL in an agent&apos;s MCP config with its Commons URL. That is
+          the whole integration.
         </p>
 
         {error && (
           <div className="err">
             {error}
-            <div style={{ marginTop: 10, color: "var(--text-dim)" }}>
-              Commons is not running. Start it from the repo you cloned:
-              <pre className="mono" style={{ marginTop: 8 }}>
-                python scripts/run_proxy.py
-              </pre>
-            </div>
+            <div className="mono">python scripts/run_proxy.py</div>
           </div>
         )}
 
         {health && (
           <>
             <div className="ok-banner">
-              Commons is running at <span className="mono">{PROXY_URL}</span> — connected
-              to {health.upstreams.join(" and ")}, {health.rules.length} rules loaded.
+              <span className="mono">{PROXY_URL}</span> · {health.upstreams.join(", ")} ·{" "}
+              {health.rules.length} rules
             </div>
 
-            <h2>What Commons can and cannot sit in front of</h2>
-            <div className="ledger" style={{ marginBottom: 8 }}>
+            <h2>What Commons can sit in front of</h2>
+            <div className="ledger">
               <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: 300 }}>Agent</th>
-                    <th style={{ width: 110 }}>Works today</th>
-                    <th>Why</th>
-                  </tr>
-                </thead>
                 <tbody>
-                  <tr>
-                    <td>Agents you run yourself — your own code, Claude Desktop, Cursor,
-                      VS Code, n8n, LangChain</td>
-                    <td className="verdict" data-v="ALLOW">YES</td>
-                    <td style={{ color: "var(--text-dim)" }}>
-                      You control the MCP config, so you can point it anywhere.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>A third-party agent you deploy and configure</td>
-                    <td className="verdict" data-v="ALLOW">YES</td>
-                    <td style={{ color: "var(--text-dim)" }}>
-                      Commons needs its tool schema, not its source.
-                    </td>
-                  </tr>
-                  <tr data-violation="true">
-                    <td>Razorpay Agent Studio agents</td>
-                    <td className="verdict" data-v="BLOCK">NOT YET</td>
-                    <td style={{ color: "var(--text-dim)" }}>
-                      They run on Razorpay&apos;s infrastructure and expose no
-                      merchant-configurable MCP endpoint. See below.
-                    </td>
-                  </tr>
+                  {WORKS.map(([what, ok, why]) => (
+                    <tr key={what} data-violation={!ok}>
+                      <td style={{ width: 300 }}>{what}</td>
+                      <td style={{ width: 70 }}>
+                        <span className="verdict" data-v={ok ? "ALLOW" : "BLOCK"}>
+                          {ok ? "yes" : "no"}
+                        </span>
+                      </td>
+                      <td style={{ color: "var(--text-dim)" }}>{why}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
 
-            <div className="warn">
-              <strong>Agent Studio agents cannot be routed through Commons today</strong>,
-              and it is worth being precise about why — there are two separate blockers.
-              <br />
-              <br />
-              <strong>1. Reachability.</strong> Those agents execute on Razorpay&apos;s
-              servers. Commons runs on your machine at{" "}
-              <span className="mono">127.0.0.1</span>, which Razorpay cannot reach. A
-              tunnel (ngrok, Cloudflare Tunnel) solves this half — but it means exposing a
-              gateway that sees your payment traffic to the public internet, so it is a
-              decision to make deliberately rather than a default.
-              <br />
-              <br />
-              <strong>2. Configurability, which is the real blocker.</strong> Agent Studio
-              is a managed marketplace. It does not let a merchant change where an agent
-              sends its tool calls, so even a publicly reachable Commons has nothing to
-              point at it. A tunnel does not fix this.
-              <br />
-              <br />
-              This is not a gap in Commons so much as the gap Commons exists to describe.
-              Razorpay has said third-party builders{" "}
-              <em>will be able to</em> publish agents to Agent Studio. At that point a
-              merchant will be running agents from several parties at once, and the
-              question of who enforces limits across all of them becomes unavoidable — it
-              needs either a merchant-configurable endpoint, or this arbitration built into
-              the platform itself.
-            </div>
-
-            <h2>Step 1 — repoint each agent</h2>
-            <p className="lede">
-              For every agent you control, this is the entire integration: replace the
-              vendor URL in its MCP configuration with its Commons URL. Nothing inside the
-              agent changes, which is why it works for agents you did not write.
-            </p>
-
+            <h2>Endpoints</h2>
             {[...byAgent.entries()].map(([agent, paths]) => (
               <section className="rule" key={agent}>
                 <div className="rule-head">
@@ -160,55 +108,51 @@ export default function ConnectPage() {
                 {paths.map((path) => {
                   const upstream = path.split("/")[3];
                   return (
-                    <div key={path} style={{ marginBottom: 12 }}>
-                      <div className="field-label" style={{ marginBottom: 6 }}>
-                        {upstream}
-                      </div>
-                      <Copyable
-                        text={JSON.stringify(
-                          {
-                            mcpServers: {
-                              [upstream]: { url: `${PROXY_URL}${path}` },
-                            },
-                          },
-                          null,
-                          2
-                        )}
-                      />
-                    </div>
+                    <Copyable
+                      key={path}
+                      text={JSON.stringify(
+                        { mcpServers: { [upstream]: { url: `${PROXY_URL}${path}` } } },
+                        null,
+                        2
+                      )}
+                    />
                   );
                 })}
               </section>
             ))}
 
-            <h2>Step 2 — check it is reaching Commons</h2>
-            <p className="lede">
-              Once an agent is repointed, its calls appear on the Customers page. If
-              nothing shows up, the agent is still talking to the vendor directly.
-            </p>
-            <Copyable text={`curl ${PROXY_URL}/health`} />
+            <h2>Then</h2>
+            <ol className="steps">
+              <li>
+                Calls appear on <a href="/">Customers</a>. Nothing there means the agent is
+                still talking to the vendor.
+              </li>
+              <li>
+                Import your customer list on <a href="/data">Data</a> so calls from different
+                vendors resolve to one person.
+              </li>
+              <li>
+                Stay in OBSERVE. Work through <a href="/review">Review</a>, then enforce from{" "}
+                <a href="/rules">Rules</a>.
+              </li>
+            </ol>
 
-            <h2>Step 3 — tell Commons who your customers are</h2>
+            <h2>Agent Studio</h2>
             <p className="lede">
-              Commons never guesses that a phone number and an email belong to the same
-              person. Import your customer list on the{" "}
-              <a href="/data">Customer data</a> page so calls from different vendors
-              resolve to one human.
+              Agent Studio runs agents on Razorpay&apos;s infrastructure and exposes no way
+              for a merchant to change where an agent sends its tool calls. A tunnel would
+              fix reachability but not that.
             </p>
-
-            <h2>Step 4 — watch before you enforce</h2>
             <p className="lede">
-              Leave Commons in OBSERVE. Nothing is blocked, so no agent can break. After a
-              few days, work through the <a href="/review">Review</a> queue and confirm
-              whether each flagged call should have been stopped. Then switch on
-              enforcement from the <a href="/rules">Rules</a> page.
+              This is the gap Commons exists to describe. Once third-party builders publish
+              there, a merchant runs agents from several parties against the same customers,
+              and no vendor can see what the others did. That needs either a
+              merchant-configurable endpoint or this arbitration in the platform.
             </p>
 
             <p className="note">
-              Commons runs entirely on your machine. It sees payment amounts, customer
-              identifiers and refund decisions, so it is never hosted for you — nothing
-              here leaves your network except the calls your agents were already making to
-              their vendors.
+              Commons runs on your machine. Nothing leaves your network except the calls your
+              agents were already making.
             </p>
           </>
         )}

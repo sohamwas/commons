@@ -168,8 +168,8 @@ class CumulativeBudget(Rule):
         # over-spend. Say so in the reason rather than asserting a clean violation.
         unattributed = getattr(ctx.ledger, "last_unattributed_contributors", 0)
         caveat = (
-            f" — note {unattributed} earlier grant(s) named no order or subscription, "
-            "so a repeat offer may be counted twice"
+            f" (note: {unattributed} earlier grant(s) named no order or subscription, "
+            "so a repeat offer may be counted twice)"
             if unattributed
             else ""
         )

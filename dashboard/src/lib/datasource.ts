@@ -22,19 +22,19 @@ export interface Source {
 export const RECORDED_RUNS: Record<string, Source> = {
   observe: {
     kind: "file",
-    label: "OBSERVE — recorded run, seed 4471",
+    label: "OBSERVE recorded run, seed 4471",
     url: "runs/observe-4471.json",
   },
   enforce: {
     kind: "file",
-    label: "ENFORCE — recorded run, seed 4471",
+    label: "ENFORCE recorded run, seed 4471",
     url: "runs/enforce-4471.json",
   },
 };
 
 export const LIVE_SOURCE: Source = {
   kind: "http",
-  label: "LIVE — local Commons proxy",
+  label: "LIVE local Commons proxy",
   url: "http://127.0.0.1:8787/api/run",
 };
 

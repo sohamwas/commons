@@ -15,17 +15,17 @@ import {
  * The merchant's policy, editable.
  *
  * 15% was our demo's number, not everyone's. Each rule shows the plain-English sentence
- * beside the invariant that is actually enforced (handoff §9) — and warns when the two
- * have drifted apart, because a screen that states one number while the gateway enforces
- * another is worse than either being wrong.
+ * beside the invariant actually enforced (handoff section 9), and warns when the two have
+ * drifted apart: a screen stating one number while the gateway enforces another is worse
+ * than either being wrong.
  */
 
 // Which scope keys are safely editable, and how to present them.
 const FIELDS: Record<string, { label: string; hint: string; kind: "number" | "duration" }> = {
-  cap: { label: "Cap", hint: "total allowed in the window", kind: "number" },
-  max: { label: "Max", hint: "how many are allowed", kind: "number" },
-  window: { label: "Window", hint: "e.g. 24h, 30d", kind: "duration" },
-  lease: { label: "Lease", hint: "e.g. 30m", kind: "duration" },
+  cap: { label: "Cap", hint: "", kind: "number" },
+  max: { label: "Max", hint: "", kind: "number" },
+  window: { label: "Window", hint: "24h, 30d", kind: "duration" },
+  lease: { label: "Lease", hint: "30m", kind: "duration" },
 };
 
 export default function RulesPage() {
@@ -89,27 +89,20 @@ export default function RulesPage() {
     <>
       <Nav />
       <div className="shell">
-        <h1>Policy</h1>
-        <p className="lede">
-          These limits apply across <em>every</em> agent acting on a customer, not per
-          agent. Each shows the sentence you wrote beside the invariant actually being
-          enforced, so you can check they still say the same thing.
-        </p>
+        <h1>Rules</h1>
 
         {error && <div className="err">{error}</div>}
-        {!policy && !error && <div className="loading">loading policy…</div>}
+        {!policy && !error && <div className="loading">loading</div>}
 
         {policy && (
           <>
             <div className="mode-card">
               <div>
-                <div className="mode-title">
-                  Currently {policy.mode === "OBSERVE" ? "watching" : "enforcing"}
-                </div>
+                <div className="mode-title">{policy.mode}</div>
                 <div className="mode-sub">
                   {policy.mode === "OBSERVE"
-                    ? "Violations are recorded, nothing is stopped. Review them, confirm the calls were right, then switch on enforcement."
-                    : "Violating calls are stopped before they reach the vendor."}
+                    ? "Recording violations. Nothing is stopped."
+                    : "Violating calls are stopped before the vendor."}
                 </div>
               </div>
               <div className="spacer" />
@@ -145,9 +138,12 @@ export default function RulesPage() {
                       />
                       <div className="rule-compiled mono">
                         {rule.primitive} · {rule.id}
+                        {(scope.action_class as string[] | undefined) && (
+                          <> · {(scope.action_class as string[]).join(", ")}</>
+                        )}
                       </div>
                     </div>
-                    <label className="toggle" title="Turn this rule off without deleting it">
+                    <label className="toggle" title="Turn off without deleting">
                       <input
                         type="checkbox"
                         checked={enabled}
@@ -159,8 +155,7 @@ export default function RulesPage() {
 
                   {rule.english_mismatch && (
                     <div className="warn">
-                      The sentence and the enforced limit disagree — {rule.english_mismatch}.
-                      Update the sentence so the screen and the gateway say the same thing.
+                      Sentence and enforced limit disagree: {rule.english_mismatch}.
                     </div>
                   )}
 
@@ -182,13 +177,13 @@ export default function RulesPage() {
                               )
                             }
                           />
-                          <span className="field-hint">{meta.hint}</span>
+                          {meta.hint && <span className="field-hint">{meta.hint}</span>}
                         </label>
                       ) : null
                     )}
 
                     <label className="field">
-                      <span className="field-label">When breached</span>
+                      <span className="field-label">Breach</span>
                       <select
                         className="mono"
                         value={patch.on_violation ?? rule.on_violation}
@@ -198,19 +193,12 @@ export default function RulesPage() {
                           })
                         }
                       >
-                        <option value="BLOCK">BLOCK — refuse the call</option>
-                        <option value="DEFER">DEFER — hold it for later</option>
+                        <option value="BLOCK">BLOCK</option>
+                        <option value="DEFER">DEFER</option>
                       </select>
-                      <span className="field-hint">only applies in ENFORCE</span>
+                      <span className="field-hint">ENFORCE only</span>
                     </label>
                   </div>
-
-                  {(scope.action_class as string[] | undefined) && (
-                    <div className="rule-applies mono">
-                      applies to:{" "}
-                      {(scope.action_class as string[]).join(", ").replace(/_/g, " ")}
-                    </div>
-                  )}
 
                   <div className="rule-foot">
                     <button
@@ -218,7 +206,7 @@ export default function RulesPage() {
                       disabled={!dirty || saving}
                       onClick={() => save(rule.id)}
                     >
-                      {saving ? "saving…" : "Save"}
+                      {saving ? "saving" : "Save"}
                     </button>
                     {dirty && (
                       <button
@@ -233,16 +221,13 @@ export default function RulesPage() {
                         Discard
                       </button>
                     )}
-                    {saved === rule.id && <span className="ok">saved — live immediately</span>}
+                    {saved === rule.id && <span className="ok">saved</span>}
                   </div>
                 </section>
               );
             })}
 
-            <p className="note">
-              Changes take effect on the next tool call. Your agents stay connected — there
-              is nothing to restart.
-            </p>
+            <p className="note">Live on the next tool call. Nothing to restart.</p>
           </>
         )}
       </div>

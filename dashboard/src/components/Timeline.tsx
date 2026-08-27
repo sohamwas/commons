@@ -6,7 +6,7 @@ import { formatDay, formatTime, handleOf, maskPhone } from "@/lib/datasource";
 /**
  * The hero screen.
  *
- * Every other agent dashboard in existence is organised BY AGENT — one lane, one agent,
+ * Every other agent dashboard in existence is organised BY AGENT: one lane, one agent,
  * one green tick. Commons is organised by the person being acted upon, so the lanes
  * converge instead of running in parallel, and the violations are drawn BETWEEN the
  * lanes, because that is literally where they live: in the space no single agent can see.
@@ -77,29 +77,25 @@ export default function Timeline({
           <span className={`badge${entity.summary.agent_count > 1 ? " alert" : ""}`}>
             {entity.summary.agent_count} agents
           </span>
-          <span className="badge">
-            {entity.summary.promotional_contacts} contacts
-          </span>
-          <span
-            className={`badge${entity.summary.discount_pct >= 15 ? " alert" : ""}`}
-          >
-            {entity.summary.discount_pct}% / 15% discount
+          <span className="badge">{entity.summary.promotional_contacts} contacts</span>
+          <span className={`badge${entity.summary.discount_pct >= 15 ? " alert" : ""}`}>
+            {entity.summary.discount_pct}% / 15%
           </span>
           {disputeOpen && <span className="badge alert">dispute open</span>}
           {entity.summary.violations > 0 && (
             // A single call can breach two rules at once, so the two counts differ.
-            // Showing only the breach count makes the timeline look like it is hiding rows.
-            <span className="badge alert">
-              {entity.summary.violations} rule breach
-              {entity.summary.violations === 1 ? "" : "es"} on{" "}
-              {entity.summary.breaching_calls} call
-              {entity.summary.breaching_calls === 1 ? "" : "s"}
+            // Showing only the breach count makes the timeline look like it hides rows.
+            <span
+              className="badge alert"
+              title={`${entity.summary.violations} breaches on ${entity.summary.breaching_calls} calls`}
+            >
+              {entity.summary.violations} breaches
             </span>
           )}
           {entity.summary.unattributed_grants > 0 && (
             <span
               className="badge"
-              title="These discounts did not say which order or subscription they applied to, so each was counted as a separate giveaway. The total above is therefore conservative."
+              title="These discounts named no order or subscription, so each was counted as a separate giveaway."
             >
               {entity.summary.unattributed_grants} unattributed
             </span>
@@ -118,7 +114,7 @@ export default function Timeline({
                 {agent.display_name}
               </div>
               <div className="lane-track">
-                {/* Violation markers span the lanes — the conflict is between agents. */}
+                {/* Violation markers span the lanes because the conflict is between agents. */}
                 {violations.map((v) => (
                   <div
                     key={`v-${v.id}`}
@@ -142,7 +138,7 @@ export default function Timeline({
                       call.decision
                     }${
                       call.violations.length
-                        ? ` — ${call.violations.map((v) => v.reason).join("; ")}`
+                        ? ` · ${call.violations.map((v) => v.reason).join("; ")}`
                         : ""
                     }`}
                   />

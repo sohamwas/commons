@@ -9,8 +9,8 @@ import { agentName, formatDay, formatTime } from "@/lib/datasource";
  * The conflict ledger.
  *
  * Chronological, every decision, expandable to the full request and response. Handoff
- * §17.4 promises that every violation ships with a replayable trace rather than asking
- * anyone to trust an aggregate — this is where that promise is kept.
+ * section 17.4 promises every violation ships with a replayable trace rather than asking
+ * anyone to trust an aggregate. This is where that promise is kept.
  */
 
 interface Props {
@@ -31,11 +31,7 @@ export default function Ledger({
   const rows = violationsOnly ? calls.filter((c) => c.violations.length > 0) : calls;
 
   if (rows.length === 0) {
-    return (
-      <div className="empty">
-        {violationsOnly ? "No violations in this run." : "No calls recorded."}
-      </div>
-    );
+    return <div className="empty">No calls.</div>;
   }
 
   return (
@@ -57,8 +53,8 @@ export default function Ledger({
           {rows.map((call) => {
             const open = call.id === selectedCallId;
             return (
-              // A row and its expanded trace are two <tr>s for one call, so the key
-              // belongs on the Fragment that wraps them — not on the first <tr>.
+              // A row and its expanded trace are two <tr>s for one call, so the key belongs
+              // on the Fragment that wraps them, not on the first <tr>.
               <Fragment key={call.id}>
                 <tr
                   data-violation={call.violations.length > 0}
@@ -75,22 +71,17 @@ export default function Ledger({
                     <span className="mono">{call.tool}</span>
                     {call.action_class && (
                       <span style={{ color: "var(--text-faint)" }}>
-                        {" "}
-                        · {call.action_class.replace(/_/g, " ")}
+                        {" · "}
+                        {call.action_class.replace(/_/g, " ")}
                       </span>
                     )}
                     {call.unattributed && (
-                      <div
-                        style={{
-                          fontSize: 11.5,
-                          color: "var(--defer)",
-                          fontFamily: "var(--mono)",
-                          marginTop: 3,
-                        }}
+                      <span
+                        style={{ color: "var(--defer)" }}
                         title="No order or subscription named, so this could not be recognised as a re-offer and was counted as a separate giveaway."
                       >
-                        no order/subscription named — counted as a separate giveaway
-                      </div>
+                        {" · unattributed"}
+                      </span>
                     )}
                     {call.violations.map((v, i) => (
                       <div className="reason" key={i}>
@@ -100,10 +91,8 @@ export default function Ledger({
                   </td>
                   <td className="num">
                     {call.magnitude != null
-                      ? `${call.magnitude}${
-                          call.magnitude_unit === "percent" ? "%" : ""
-                        }`
-                      : "—"}
+                      ? `${call.magnitude}${call.magnitude_unit === "percent" ? "%" : ""}`
+                      : ""}
                   </td>
                   <td>
                     <span className="verdict" data-v={call.decision}>
