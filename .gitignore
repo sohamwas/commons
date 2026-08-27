@@ -27,3 +27,4 @@ dashboard/node_modules/
 dashboard.log
 next-env.d.ts
 *.tsbuildinfo
+dashboard/.next-build/

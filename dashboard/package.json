@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3300",
-    "build": "next build",
-    "start": "next start"
+    "build": "node ./scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "start": "next start -p 3300"
   },
   "dependencies": {
     "next": "^15.1.0",
