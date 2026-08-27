@@ -60,11 +60,21 @@ class RuleFiring:
 class Rule:
     """Base class. Subclasses implement `check`, returning a firing or None."""
 
-    def __init__(self, rule_id: str, english: str, on_violation: str, scope: dict) -> None:
+    def __init__(
+        self,
+        rule_id: str,
+        english: str,
+        on_violation: str,
+        scope: dict,
+        enabled: bool = True,
+    ) -> None:
         self.id = rule_id
         self.english = english
         self.on_violation = on_violation
         self.scope = scope
+        # A merchant turning a rule off should not have to delete it and lose the
+        # English, the thresholds, and the review history attached to its id.
+        self.enabled = enabled
 
     def check(self, facts, ctx: EvalContext) -> RuleFiring | None:  # pragma: no cover
         raise NotImplementedError

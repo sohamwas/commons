@@ -53,8 +53,7 @@ def build_face(
     ledger,
     resolver,
     manifest: Manifest | None,
-    engine: RuleEngine | None = None,
-    mode: str = "OBSERVE",
+    settings=None,
     clock=None,
 ) -> Server:
     """An MCP server that presents `upstream` to `agent`, mediated by Commons.
@@ -122,6 +121,12 @@ def build_face(
         # — that is the whole point of "one engine, two modes".
         # ------------------------------------------------------------------
         sim_now = now()
+        # Read mode and rules AT DECISION TIME, never captured at build time. A merchant
+        # changing the discount cap or flipping to ENFORCE must take effect on the next
+        # call, not on the next restart of a gateway their agents are connected to.
+        engine = settings.engine if settings is not None else None
+        mode = settings.mode if settings is not None else "OBSERVE"
+
         if engine is not None:
             decision = engine.evaluate(
                 facts,

@@ -89,3 +89,21 @@ CREATE TABLE IF NOT EXISTS rule_fired (
     detail_json TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_rule_fired_call ON rule_fired(call_id);
+
+-- The merchant's verdict on a decision Commons made.
+--
+-- This is what connects OBSERVE to ENFORCE. Without it they are two modes sharing an
+-- engine but not a memory: the dry run tells you what WOULD have been stopped, and
+-- nothing carries your judgement of it forward.
+--
+-- Keyed per (call, rule) rather than per call, because a single call can breach two
+-- rules and a merchant may well agree with one and dispute the other.
+CREATE TABLE IF NOT EXISTS decision_review (
+    call_id     INTEGER NOT NULL REFERENCES call(id),
+    rule_id     TEXT NOT NULL,
+    verdict     TEXT NOT NULL CHECK (verdict IN ('correct', 'incorrect', 'unsure')),
+    note        TEXT,
+    reviewed_at TEXT NOT NULL,
+    PRIMARY KEY (call_id, rule_id)
+);
+CREATE INDEX IF NOT EXISTS idx_review_rule ON decision_review(rule_id, verdict);

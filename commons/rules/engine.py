@@ -71,6 +71,7 @@ class RuleEngine:
                     english=spec["english"],
                     on_violation=spec.get("on_violation", "BLOCK"),
                     scope=spec.get("scope", {}),
+                    enabled=spec.get("enabled", True),
                 )
             )
         logger.info("ruleset loaded: %d rules", len(rules))
@@ -87,6 +88,8 @@ class RuleEngine:
 
         firings: list[RuleFiring] = []
         for rule in self.rules:
+            if not getattr(rule, "enabled", True):
+                continue
             try:
                 firing = rule.check(facts, ctx)
             except Exception:  # noqa: BLE001 — a broken rule must not break the gateway

@@ -916,7 +916,59 @@ run once.
 
 ---
 
-### Day 10 — 3 Sep — export, Vercel replay, README
+### CORRECTION (27 Aug) — the dashboard is LOCAL; Vercel gets a marketing site
+
+The original plan (and handoff §15) had the dashboard deployed to Vercel as a hosted
+replay. **That is wrong, and the correction changes what Days 9–10 build.**
+
+- **The dashboard is the product, and it runs on the merchant's own machine.** They clone
+  the repo, run it, point their agents at it, and sync their own customer data. Commons
+  sees payment amounts, customer identifiers and refund decisions — hosting it would mean
+  routing live payment traffic through a stranger's server, which no merchant would
+  accept. Same call Langfuse, Arize Phoenix and promptfoo made.
+- **Vercel hosts a separate marketing site**: what Commons is, the problem, the features,
+  and a recorded demo. The §15.3 replay idea survives — as the demo *on that site*, not as
+  the product.
+
+**Consequence: the dashboard has to become an end-to-end tool, not a demo viewer.** It
+needs the things a real merchant would need on day one — a connect/setup page, a way to
+sync their customers, and configurable policy. Those are now Day 9.
+
+---
+
+### Day 9 (REVISED 27 Aug) — make it a real tool
+
+1. **Connect page** — the one-line config change per agent, generated for the merchant's
+   own agent ids, with a live "is it reaching me?" check.
+2. **Merchant data sync** — declare customers (phone / email / customer_id / order_id) so
+   identity resolution works on real data, not just simulator output.
+3. **Configurable policy.** The 15% cap is currently hardcoded in `ruleset.yaml`. A
+   merchant wanting 10% must be able to say so. Generalising, these should all be
+   merchant-editable:
+   - per-rule thresholds and windows (cap %, messages per day, lease duration)
+   - `on_violation` per rule: BLOCK vs DEFER
+   - enable/disable a rule
+   - which action classes a rule covers
+   - contradiction priority (which action class outranks which)
+   - the merchant's approved transactional template list — three bugs so far traced to it
+   - per-agent tool allowlists and per-agent discount ceilings
+   - OBSERVE/ENFORCE mode itself, currently a CLI flag
+4. **Connect OBSERVE to ENFORCE — the review loop.** Right now they are two modes that
+   share an engine but not a memory. They should share a *verdict history*: when Commons
+   flags something in OBSERVE, ask the merchant **"was this the right call?"** and record
+   it. That turns OBSERVE from a dry run into the tuning phase, and gives ENFORCE a
+   provenance for every rule it enforces.
+
+   This also directly addresses a problem the last two days produced repeatedly: **false
+   positives**. A merchant marking three breaches of one rule as wrong is the strongest
+   possible signal that the rule, not the agent, needs changing — and Commons should
+   surface that rather than making them read reason strings.
+
+---
+
+### Day 10 (REVISED) — marketing site, README, recorded demo
+
+### Day 10 (original plan, for reference) — export, Vercel replay, README
 
 - `commons export --run <id> > runs/seed-4471/run.json`. Commit it.
 - Deploy dashboard to Vercel in `file:` mode. **Zero backend, zero LLM calls, zero cost.**

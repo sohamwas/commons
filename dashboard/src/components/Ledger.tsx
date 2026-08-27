@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment } from "react";
+
 import type { Agent, Call } from "@/lib/types";
 import { agentName, formatDay, formatTime } from "@/lib/datasource";
 
@@ -55,9 +57,10 @@ export default function Ledger({
           {rows.map((call) => {
             const open = call.id === selectedCallId;
             return (
-              <>
+              // A row and its expanded trace are two <tr>s for one call, so the key
+              // belongs on the Fragment that wraps them — not on the first <tr>.
+              <Fragment key={call.id}>
                 <tr
-                  key={call.id}
                   data-violation={call.violations.length > 0}
                   onClick={() => onSelectCall(open ? null : call.id)}
                 >
@@ -120,7 +123,7 @@ export default function Ledger({
                   </td>
                 </tr>
                 {open && (
-                  <tr key={`${call.id}-trace`} className="trace">
+                  <tr className="trace">
                     <td colSpan={6}>
                       <pre>
                         {JSON.stringify(
@@ -140,7 +143,7 @@ export default function Ledger({
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             );
           })}
         </tbody>

@@ -29,8 +29,8 @@ from commons.ledger.db import Ledger
 from commons.proxy.face import COMMONS_VERSION, build_face
 from commons.proxy.registry import AGENTS
 from commons.proxy.upstream import UpstreamPool
-from commons.rules.engine import RuleEngine
 from commons.semantics.manifest import load_manifests
+from commons.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ def create_app(
     ledger = Ledger(db_path)
     resolver = IdentityResolver(ledger)
     manifests = load_manifests()
-    engine = RuleEngine.load()
+    settings = Settings(mode=mode)
     clock = Clock()
 
     # Build every (agent, upstream) face up front. Each is a full Starlette sub-app with
@@ -113,8 +113,7 @@ def create_app(
                 ledger,
                 resolver,
                 manifests.get(upstream.name),
-                engine=engine,
-                mode=mode,
+                settings=settings,
                 clock=clock.now,
             )
             sub = face.streamable_http_app(streamable_http_path="/")
@@ -128,11 +127,11 @@ def create_app(
             {
                 "service": "commons",
                 "version": COMMONS_VERSION,
-                "mode": mode,
+                "mode": settings.mode,
                 "run_id": ledger.run_id,
                 "upstreams": [u.name for u in pool],
                 "manifests": {n: len(m.tools) for n, m in manifests.items()},
-                "rules": [r.id for r in engine.rules],
+                "rules": [r.id for r in settings.engine.rules],
                 "endpoints": endpoints,
             }
         )
@@ -172,10 +171,10 @@ def create_app(
         """
         body = await request.json() if await request.body() else {}
         run_id = ledger.start_run(
-            mode=mode, seed=body.get("seed"), notes=body.get("notes", "")
+            mode=settings.mode, seed=body.get("seed"), notes=body.get("notes", "")
         )
         logger.info("started run %s", run_id)
-        return JSONResponse({"run_id": run_id, "mode": mode})
+        return JSONResponse({"run_id": run_id, "mode": settings.mode})
 
     async def set_clock(request):
         """Move simulated time. POST /admin/clock {"now": "<iso8601>"} (null to reset)."""
@@ -203,6 +202,55 @@ def create_app(
             return JSONResponse({"error": f"unknown entity: {ref}"}, status_code=404)
         ledger.set_state(entity_id, key, value)
         return JSONResponse({"entity_id": entity_id, key: value})
+
+    def _cors(payload, status: int = 200):
+        return JSONResponse(
+            payload, status_code=status, headers={"Access-Control-Allow-Origin": "*"}
+        )
+
+    async def api_policy(request):
+        """Read or change merchant policy without restarting the gateway.
+
+        GET  -> the current mode and every editable rule
+        PUT  -> {"mode": "ENFORCE"} and/or {"rules": [{"id": ..., "scope": {"cap": 10}}]}
+
+        A merchant who wants a 10% cap instead of 15% should say so here, not edit a YAML
+        file and restart a gateway their agents are connected to.
+        """
+        if request.method == "GET":
+            return _cors(settings.policy())
+
+        body = await request.json()
+        try:
+            if "mode" in body:
+                settings.set_mode(body["mode"])
+            if body.get("rules"):
+                settings.update_rules(body["rules"])
+        except ValueError as exc:
+            return _cors({"error": str(exc)}, status=400)
+        return _cors(settings.policy())
+
+    async def api_review(request):
+        """Record the merchant's verdict on something Commons flagged.
+
+        POST {"call_id": 12, "rule_id": "discount_cap",
+              "verdict": "correct" | "incorrect" | "unsure", "note": "..."}
+
+        This is what joins OBSERVE to ENFORCE. A dry run that tells you what WOULD have
+        been stopped is only half the loop; the other half is you saying whether it should
+        have been, and that judgement outliving the run.
+        """
+        body = await request.json()
+        verdict = body.get("verdict")
+        if verdict not in ("correct", "incorrect", "unsure"):
+            return _cors({"error": "verdict must be correct, incorrect or unsure"}, 400)
+        try:
+            ledger.record_review(
+                int(body["call_id"]), str(body["rule_id"]), verdict, body.get("note", "")
+            )
+        except (KeyError, ValueError, TypeError) as exc:
+            return _cors({"error": f"bad review: {exc}"}, 400)
+        return _cors({"ok": True, "accuracy": ledger.rule_accuracy()})
 
     async def api_run(request):
         """The dashboard's live backend — identical shape to the exported file.
@@ -243,8 +291,11 @@ def create_app(
             await pool.open_all(stack)
             for sub in sub_apps:
                 await stack.enter_async_context(sub.router.lifespan_context(sub))
-            run_id = ledger.start_run(mode=mode, notes="proxy session")
-            logger.info("commons ready - %d endpoints, mode=%s, run=%s", len(endpoints), mode, run_id)
+            run_id = ledger.start_run(mode=settings.mode, notes="proxy session")
+            logger.info(
+                "commons ready - %d endpoints, mode=%s, run=%s",
+                len(endpoints), settings.mode, run_id,
+            )
             for path in endpoints:
                 logger.info("  %s", path)
             try:
@@ -258,6 +309,8 @@ def create_app(
             Route("/admin/entities", seed_entities, methods=["POST"]),
             Route("/admin/entities", list_entities, methods=["GET"]),
             Route("/api/run", api_run),
+            Route("/api/policy", api_policy, methods=["GET", "PUT"]),
+            Route("/api/review", api_review, methods=["POST"]),
             Route("/admin/run", start_run, methods=["POST"]),
             Route("/admin/clock", set_clock, methods=["POST"]),
             Route("/admin/state", set_state, methods=["POST"]),

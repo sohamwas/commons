@@ -176,6 +176,55 @@ class Ledger:
         self.conn.execute(f"INSERT INTO rule_fired ({cols}) VALUES ({marks})", tuple(fields.values()))
         self.conn.commit()
 
+    # ---------------- merchant review: what connects OBSERVE to ENFORCE ----------------
+
+    def record_review(
+        self, call_id: int, rule_id: str, verdict: str, note: str = ""
+    ) -> None:
+        """Record the merchant's judgement of one rule firing on one call."""
+        self.conn.execute(
+            "INSERT OR REPLACE INTO decision_review "
+            "(call_id, rule_id, verdict, note, reviewed_at) VALUES (?,?,?,?,?)",
+            (call_id, rule_id, verdict, note, _now()),
+        )
+        self.conn.commit()
+
+    def reviews_for_run(self, run_id: str | None = None) -> dict[int, list[dict]]:
+        rows = self.conn.execute(
+            """SELECT dr.* FROM decision_review dr
+               JOIN call c ON c.id = dr.call_id WHERE c.run_id = ?""",
+            (run_id or self.run_id,),
+        ).fetchall()
+        out: dict[int, list[dict]] = {}
+        for r in rows:
+            out.setdefault(r["call_id"], []).append(
+                {
+                    "rule_id": r["rule_id"],
+                    "verdict": r["verdict"],
+                    "note": r["note"],
+                    "reviewed_at": r["reviewed_at"],
+                }
+            )
+        return out
+
+    def rule_accuracy(self) -> dict[str, dict[str, int]]:
+        """Per rule: how often the merchant agreed with it.
+
+        A rule the merchant keeps marking wrong is a rule that needs changing — that is a
+        far stronger signal than asking them to read reason strings, and it is the whole
+        point of running OBSERVE before ENFORCE.
+
+        Reviews are counted across ALL runs, because a merchant's judgement of a rule does
+        not expire when a run ends.
+        """
+        rows = self.conn.execute(
+            "SELECT rule_id, verdict, COUNT(*) n FROM decision_review GROUP BY rule_id, verdict"
+        ).fetchall()
+        out: dict[str, dict[str, int]] = {}
+        for r in rows:
+            out.setdefault(r["rule_id"], {})[r["verdict"]] = r["n"]
+        return out
+
     # ---------------- queries the rule engine needs ----------------
 
     # Only `forwarded = 1` rows count. In OBSERVE a violating call really happened, so it

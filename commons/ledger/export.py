@@ -67,6 +67,22 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
             }
         )
 
+    # ---- the merchant's verdicts on what Commons flagged ----
+    reviews: dict[int, list[dict]] = {}
+    for r in conn.execute(
+        """SELECT dr.* FROM decision_review dr JOIN call c ON c.id = dr.call_id
+           WHERE c.run_id = ?""",
+        (run_id,),
+    ):
+        reviews.setdefault(r["call_id"], []).append(
+            {
+                "rule_id": r["rule_id"],
+                "verdict": r["verdict"],
+                "note": r["note"],
+                "reviewed_at": r["reviewed_at"],
+            }
+        )
+
     # ---- calls ----
     calls: list[dict] = []
     for r in conn.execute(
@@ -95,6 +111,7 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
                 "result": _json(r["result_json"]),
                 "rules_fired": fired,
                 "violations": [f for f in fired if f["verdict"] != "ALLOW"],
+                "reviews": reviews.get(r["id"], []),
                 # A discount that does not say WHAT it discounts cannot be recognised as
                 # a re-offer on something already discounted, so it is counted as a
                 # separate giveaway and inflates the total. Surface it on the call
@@ -193,6 +210,14 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
         reverse=True,
     )
 
+    # Reviews span runs — a merchant's judgement of a rule does not expire when a run
+    # ends — so accuracy is counted across all of them.
+    accuracy: dict[str, dict[str, int]] = {}
+    for r in conn.execute(
+        "SELECT rule_id, verdict, COUNT(*) n FROM decision_review GROUP BY rule_id, verdict"
+    ):
+        accuracy.setdefault(r["rule_id"], {})[r["verdict"]] = r["n"]
+
     engine = RuleEngine.load()
     rules = [
         {
@@ -207,6 +232,11 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
             "violations": sum(
                 1 for c in calls for f in c["violations"] if f["rule_id"] == rule.id
             ),
+            "enabled": getattr(rule, "enabled", True),
+            # How often the merchant agreed with this rule. A rule repeatedly marked
+            # wrong is a rule that needs changing, and that is a far stronger signal
+            # than asking anyone to read reason strings.
+            "review": accuracy.get(rule.id, {}),
         }
         for rule in engine.rules
     ]
