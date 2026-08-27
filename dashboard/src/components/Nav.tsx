@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { getHealth, type Health, type Mode } from "@/lib/api";
+import { getHealth, updatePolicy, type Health } from "@/lib/api";
 
 const PAGES = [
   { href: "/", label: "Customers" },
@@ -14,29 +14,45 @@ const PAGES = [
   { href: "/connect", label: "Connect" },
 ];
 
-/** Shared header. Mode lives here because it applies to the whole gateway. */
-export default function Nav({ onModeChange }: { onModeChange?: (m: Mode) => void }) {
+/**
+ * Shared header.
+ *
+ * Mode is a control here, not a readout. It applies to the whole gateway, and a merchant
+ * needs to know at all times whether Commons is watching or actually stopping things, so
+ * burying the switch on one page made it easy to misread every other page.
+ */
+export default function Nav() {
   const pathname = usePathname();
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
 
-  useEffect(() => {
-    let alive = true;
-    const poll = () =>
+  const poll = useCallback(
+    () =>
       getHealth()
         .then((h) => {
-          if (!alive) return;
           setHealth(h);
           setOffline(false);
         })
-        .catch(() => alive && setOffline(true));
+        .catch(() => setOffline(true)),
+    []
+  );
+
+  useEffect(() => {
     poll();
     const timer = setInterval(poll, 5000);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-    };
-  }, []);
+    return () => clearInterval(timer);
+  }, [poll]);
+
+  const toggleMode = async () => {
+    if (!health) return;
+    const next = health.mode === "OBSERVE" ? "ENFORCE" : "OBSERVE";
+    setHealth({ ...health, mode: next });
+    try {
+      await updatePolicy({ mode: next });
+    } catch {
+      poll(); // the gateway is the authority, so fall back to what it reports
+    }
+  };
 
   return (
     <header className="top">
@@ -66,22 +82,18 @@ export default function Nav({ onModeChange }: { onModeChange?: (m: Mode) => void
           </span>
         ) : (
           health && (
-            <>
-              <span className="pill" title={health.upstreams.join(", ")}>
-                {health.upstreams.length} vendors
-              </span>
-              <span
-                className="pill"
-                data-mode={health.mode}
-                title={
-                  health.mode === "OBSERVE"
-                    ? "Watching only. Nothing is stopped."
-                    : "Violating calls are stopped."
-                }
-              >
-                {health.mode}
-              </span>
-            </>
+            <button
+              className="pill"
+              data-mode={health.mode}
+              onClick={toggleMode}
+              title={
+                health.mode === "OBSERVE"
+                  ? "Watching only. Click to enforce."
+                  : "Violating calls are stopped. Click to observe."
+              }
+            >
+              {health.mode}
+            </button>
           )
         )}
       </div>

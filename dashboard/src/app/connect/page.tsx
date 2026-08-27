@@ -11,6 +11,9 @@ import { PROXY_URL, getHealth, type Health } from "@/lib/api";
  * Adoption is one line per agent: point it at a Commons URL instead of the vendor's.
  * Nothing inside the agent changes, which is the whole reason the proxy sits where it
  * does. It works for third-party agents whose source you cannot touch.
+ *
+ * The agent names below come from /health, so this page describes whatever the merchant
+ * has registered rather than the cast this project happened to demo with.
  */
 
 function Copyable({ text }: { text: string }) {
@@ -32,13 +35,17 @@ function Copyable({ text }: { text: string }) {
   );
 }
 
-const WORKS: [string, boolean, string][] = [
-  ["Your own code", true, "You own the MCP config"],
-  ["Claude Desktop, Cursor, VS Code", true, "You own the MCP config"],
-  ["n8n, LangChain, CrewAI, Zapier", true, "All take an MCP URL"],
-  ["Third-party agents you deploy", true, "Commons needs the tool schema, not the source"],
-  ["Razorpay Agent Studio", false, "Managed. No merchant-configurable endpoint."],
-];
+const REGISTER_EXAMPLE = `# commons/proxy/registry.py
+AGENTS = {
+    "my-agent": AgentSpec(
+        id="my-agent",
+        display_name="My Agent",
+        tools={
+            "razorpay": ("create_payment_link", "fetch_order"),
+            "messaging": ("send_whatsapp",),
+        },
+    ),
+}`;
 
 export default function ConnectPage() {
   const [health, setHealth] = useState<Health | null>(null);
@@ -62,8 +69,7 @@ export default function ConnectPage() {
       <div className="shell">
         <h1>Connect</h1>
         <p className="lede">
-          Replace the vendor URL in an agent&apos;s MCP config with its Commons URL. That is
-          the whole integration.
+          Replace the vendor URL in an agent&apos;s MCP config with its Commons URL.
         </p>
 
         {error && (
@@ -75,35 +81,20 @@ export default function ConnectPage() {
 
         {health && (
           <>
-            <div className="ok-banner">
-              <span className="mono">{PROXY_URL}</span> · {health.upstreams.join(", ")} ·{" "}
-              {health.rules.length} rules
-            </div>
+            <h2>URL pattern</h2>
+            <Copyable text={`${PROXY_URL}/mcp/{agent}/{vendor}`} />
+            <p className="note">
+              <span className="mono">{"{agent}"}</span> is any agent you register.{" "}
+              <span className="mono">{"{vendor}"}</span> is one of{" "}
+              <span className="mono">{health.upstreams.join(", ")}</span>. Each agent gets
+              its own address so Commons knows who is calling.
+            </p>
 
-            <h2>What Commons can sit in front of</h2>
-            <div className="ledger">
-              <table>
-                <tbody>
-                  {WORKS.map(([what, ok, why]) => (
-                    <tr key={what} data-violation={!ok}>
-                      <td style={{ width: 300 }}>{what}</td>
-                      <td style={{ width: 70 }}>
-                        <span className="verdict" data-v={ok ? "ALLOW" : "BLOCK"}>
-                          {ok ? "yes" : "no"}
-                        </span>
-                      </td>
-                      <td style={{ color: "var(--text-dim)" }}>{why}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <h2>Endpoints</h2>
+            <h2>Registered agents</h2>
             {[...byAgent.entries()].map(([agent, paths]) => (
               <section className="rule" key={agent}>
                 <div className="rule-head">
-                  <strong>{agent.replace(/-/g, " ")}</strong>
+                  <strong>{agent}</strong>
                 </div>
                 {paths.map((path) => {
                   const upstream = path.split("/")[3];
@@ -121,6 +112,13 @@ export default function ConnectPage() {
               </section>
             ))}
 
+            <h2>Register your own</h2>
+            <Copyable text={REGISTER_EXAMPLE} />
+            <p className="note">
+              An agent needs an id and the tools it may call on each vendor. Restart Commons
+              after editing, and its addresses appear above.
+            </p>
+
             <h2>Then</h2>
             <ol className="steps">
               <li>
@@ -132,23 +130,10 @@ export default function ConnectPage() {
                 vendors resolve to one person.
               </li>
               <li>
-                Stay in OBSERVE. Work through <a href="/review">Review</a>, then enforce from{" "}
-                <a href="/rules">Rules</a>.
+                Stay in OBSERVE. Work through <a href="/review">Review</a>, then switch to
+                ENFORCE.
               </li>
             </ol>
-
-            <h2>Agent Studio</h2>
-            <p className="lede">
-              Agent Studio runs agents on Razorpay&apos;s infrastructure and exposes no way
-              for a merchant to change where an agent sends its tool calls. A tunnel would
-              fix reachability but not that.
-            </p>
-            <p className="lede">
-              This is the gap Commons exists to describe. Once third-party builders publish
-              there, a merchant runs agents from several parties against the same customers,
-              and no vendor can see what the others did. That needs either a
-              merchant-configurable endpoint or this arbitration in the platform.
-            </p>
 
             <p className="note">
               Commons runs on your machine. Nothing leaves your network except the calls your

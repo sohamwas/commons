@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 
 import Nav from "@/components/Nav";
 import {
   declareEntities,
-  getEntities,
-  parseCustomerCsv,
+  readCustomerCsv,
   syncCustomers,
-  type AdminEntity,
+  type CsvImport,
   type SyncResult,
 } from "@/lib/api";
 
@@ -22,34 +21,23 @@ import {
  * customer list they already have.
  */
 
-const SAMPLE = `customer_id,name,phone,email,order_id
-cust_1001,Priya Sharma,+919800000021,priya@example.com,order_1001
-cust_1002,Arjun Rao,9800000022,arjun@example.com,order_1002`;
+const EMPTY: CsvImport = { entities: [], used: [], ignored: [] };
 
 export default function DataPage() {
-  const [entities, setEntities] = useState<AdminEntity[] | null>(null);
-  const [csv, setCsv] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sync, setSync] = useState<SyncResult | null>(null);
   const [syncing, setSyncing] = useState(false);
-
-  const load = () =>
-    getEntities()
-      .then((e) => {
-        setEntities(e);
-        setError(null);
-      })
-      .catch((e: Error) => setError(e.message));
+  const [csv, setCsv] = useState<CsvImport>(EMPTY);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const runSync = async (dryRun: boolean) => {
     setSyncing(true);
     setError(null);
     try {
-      const res = await syncCustomers({ source: "razorpay", limit: 100, dry_run: dryRun });
-      setSync(res);
-      if (!dryRun) await load();
+      setSync(await syncCustomers({ source: "razorpay", limit: 100, dry_run: dryRun }));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -57,20 +45,38 @@ export default function DataPage() {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  const takeFile = async (file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    setResult(null);
+    try {
+      const parsed = readCustomerCsv(await file.text());
+      setCsv(parsed);
+      setFileName(file.name);
+      if (parsed.entities.length === 0) {
+        setError(`No customers found in ${file.name}. Expecting a header row.`);
+      }
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
-  const preview = csv.trim() ? parseCustomerCsv(csv) : [];
+  const clear = () => {
+    setCsv(EMPTY);
+    setFileName(null);
+    setResult(null);
+    if (fileInput.current) fileInput.current.value = "";
+  };
 
   const submit = async () => {
     setBusy(true);
     setResult(null);
     try {
-      const res = await declareEntities(preview);
+      const res = await declareEntities(csv.entities);
       setResult(`Imported ${res.seeded}`);
-      setCsv("");
-      await load();
+      setCsv(EMPTY);
+      setFileName(null);
+      if (fileInput.current) fileInput.current.value = "";
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -139,92 +145,85 @@ export default function DataPage() {
           </>
         )}
 
-        <h2>Import CSV</h2>
-        <p className="lede">
-          Columns: <span className="mono">customer_id, name, phone, email, order_id</span>.
-          Only the ones you have.
-        </p>
+        <h2>Import a CSV</h2>
 
-        <textarea
-          className="csv"
-          value={csv}
-          placeholder={SAMPLE}
-          onChange={(e) => setCsv(e.target.value)}
-          spellCheck={false}
-        />
-
-        <div className="review-actions">
-          <button className="btn" disabled={!preview.length || busy} onClick={submit}>
-            {busy ? "importing" : `Import ${preview.length || ""}`}
-          </button>
-          <button className="btn btn-quiet" onClick={() => setCsv(SAMPLE)}>
-            example
-          </button>
-          {result && <span className="ok">{result}</span>}
+        <div
+          className="dropzone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            takeFile(e.dataTransfer.files[0]);
+          }}
+          onClick={() => fileInput.current?.click()}
+        >
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".csv,text/csv"
+            hidden
+            onChange={(e) => takeFile(e.target.files?.[0])}
+          />
+          {fileName ? (
+            <>
+              <strong>{fileName}</strong>
+              <span className="field-hint">
+                {csv.entities.length} customers · {csv.used.join(", ")}
+              </span>
+            </>
+          ) : (
+            <>
+              <strong>Choose a .csv file or drop one here</strong>
+              <span className="field-hint">
+                customer_id, name, phone, email, order_id
+              </span>
+            </>
+          )}
         </div>
 
-        {preview.length > 0 && (
-          <div className="ledger">
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: 220 }}>Name</th>
-                  <th>Handles</th>
-                </tr>
-              </thead>
-              <tbody>
-                {preview.slice(0, 8).map((p, i) => (
-                  <tr key={i}>
-                    <td>{p.display_name}</td>
-                    <td className="mono" style={{ color: "var(--text-dim)" }}>
-                      {Object.entries(p.handles)
-                        .map(([k, v]) => `${k}=${v}`)
-                        .join("  ·  ")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {csv.ignored.length > 0 && (
+          <div className="warn">Columns ignored: {csv.ignored.join(", ")}</div>
         )}
 
-        <h2>Known ({entities?.length ?? 0})</h2>
-        {!entities && !error && <div className="loading">loading</div>}
-        {entities && entities.length === 0 && <div className="empty">None yet.</div>}
-        {entities && entities.length > 0 && (
-          <div className="ledger">
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: 200 }}>Customer</th>
-                  <th>Known by</th>
-                  <th style={{ width: 150 }}>State</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entities.slice(0, 40).map((e) => (
-                  <tr key={e.id}>
-                    <td>{e.display_name}</td>
-                    <td className="mono" style={{ color: "var(--text-dim)" }}>
-                      {e.handles.map(([ns, v]) => `${ns}=${v}`).join("  ·  ")}
-                      {e.handles.length === 1 && (
-                        // One handle means another channel will not resolve to this person.
-                        <span style={{ color: "var(--defer)" }} title="Only one handle">
-                          {"  "}!
-                        </span>
-                      )}
-                    </td>
-                    <td className="mono" style={{ color: "var(--text-faint)" }}>
-                      {Object.entries(e.state)
-                        .map(([k, v]) => `${k}=${v}`)
-                        .join(", ")}
-                    </td>
+        {csv.entities.length > 0 && (
+          <>
+            <div className="review-actions">
+              <button className="btn" disabled={busy} onClick={submit}>
+                {busy ? "importing" : `Import ${csv.entities.length}`}
+              </button>
+              <button className="btn btn-quiet" onClick={clear}>
+                clear
+              </button>
+            </div>
+
+            <div className="ledger">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 220 }}>Name</th>
+                    <th>Handles Commons will link</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {csv.entities.slice(0, 10).map((p, i) => (
+                    <tr key={i}>
+                      <td>{p.display_name}</td>
+                      <td className="mono" style={{ color: "var(--text-dim)" }}>
+                        {Object.entries(p.handles)
+                          .map(([k, v]) => `${k}=${v}`)
+                          .join("  ·  ")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {csv.entities.length > 10 && (
+              <p className="note">and {csv.entities.length - 10} more</p>
+            )}
+          </>
         )}
+
+        {result && <div className="ok-banner">{result}</div>}
       </div>
     </>
   );

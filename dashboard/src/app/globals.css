@@ -625,8 +625,18 @@ tbody td {
   padding: 5px 10px;
   border-radius: 6px;
   border: 1px solid var(--border-bright);
+  background: transparent;
   color: var(--text-dim);
   white-space: nowrap;
+}
+
+button.pill {
+  cursor: pointer;
+}
+
+button.pill:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
 }
 
 .pill[data-mode="ENFORCE"] {
@@ -944,4 +954,28 @@ h2 .btn {
 .btn[data-current="true"] {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- dropzone */
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 30px 20px;
+  border: 1px dashed var(--border-bright);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropzone:hover {
+  border-color: var(--text-faint);
+}
+
+.dropzone strong {
+  font-weight: 500;
+  font-size: 14px;
 }

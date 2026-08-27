@@ -121,28 +121,101 @@ export const declareEntities = (
     body: JSON.stringify({ entities }),
   });
 
-/** Parse a pasted CSV of customers into the declare payload. */
-export function parseCustomerCsv(text: string) {
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
-  if (lines.length === 0) return [];
-  const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
-  const known = ["customer_id", "name", "phone", "email", "order_id"];
-  const cols = header.map((h) => (known.includes(h) ? h : null));
+// ---------------------------------------------------------------- csv
 
-  return lines.slice(1).map((line) => {
-    const cells = line.split(",").map((c) => c.trim());
+/**
+ * Split CSV text into rows.
+ *
+ * Written out rather than split on commas because these are real exports: a CRM will
+ * happily emit `"Rao, Arjun"`, and Excel writes a BOM that would otherwise become part of
+ * the first column name.
+ */
+function parseCsv(text: string): string[][] {
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cur = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch !== '"') cur += ch;
+      else if (text[i + 1] === '"') (cur += '"'), i++;
+      else quoted = false;
+      continue;
+    }
+    if (ch === '"') quoted = true;
+    else if (ch === ",") (row.push(cur), (cur = ""));
+    else if (ch === "\n") (row.push(cur), rows.push(row), (row = []), (cur = ""));
+    else if (ch !== "\r") cur += ch;
+  }
+  if (cur !== "" || row.length) (row.push(cur), rows.push(row));
+
+  return rows.filter((r) => r.some((c) => c.trim() !== ""));
+}
+
+/** Header spellings seen in real exports, mapped to the handle namespaces Commons uses. */
+const COLUMNS: Record<string, string> = {
+  "customer id": "customer_id",
+  customerid: "customer_id",
+  customer_id: "customer_id",
+  id: "customer_id",
+  name: "name",
+  "full name": "name",
+  "customer name": "name",
+  fullname: "name",
+  phone: "phone",
+  contact: "phone",
+  mobile: "phone",
+  "phone number": "phone",
+  phone_number: "phone",
+  "contact number": "phone",
+  "mobile number": "phone",
+  email: "email",
+  "email address": "email",
+  email_address: "email",
+  "e-mail": "email",
+  "order id": "order_id",
+  order_id: "order_id",
+  orderid: "order_id",
+  order: "order_id",
+};
+
+export interface CsvImport {
+  entities: Array<{ ref?: string; display_name: string; handles: Record<string, string> }>;
+  used: string[];
+  ignored: string[];
+}
+
+/** Turn a customer export into the declare payload. */
+export function readCustomerCsv(text: string): CsvImport {
+  const rows = parseCsv(text);
+  if (rows.length === 0) return { entities: [], used: [], ignored: [] };
+
+  const header = rows[0].map((h) => h.trim().toLowerCase());
+  const cols = header.map((h) => COLUMNS[h] ?? null);
+
+  const used = header.filter((_, i) => cols[i]);
+  const ignored = header.filter((h, i) => !cols[i] && h !== "");
+
+  const entities = rows.slice(1).map((cells) => {
     const handles: Record<string, string> = {};
     let display = "";
     cols.forEach((col, i) => {
-      const value = cells[i];
+      const value = (cells[i] ?? "").trim();
       if (!col || !value) return;
       if (col === "name") display = value;
       else handles[col] = value;
     });
     return {
       ref: handles.customer_id,
-      display_name: display || handles.customer_id || handles.phone,
+      display_name: display || handles.customer_id || handles.phone || handles.email || "",
       handles,
     };
   });
+
+  // A row with no handle at all cannot be declared, so drop it rather than send it.
+  return { entities: entities.filter((e) => Object.keys(e.handles).length > 0), used, ignored };
 }
