@@ -113,9 +113,25 @@ export default function ConnectPage() {
     setError(null);
     try {
       const headers: Record<string, string> = {};
-      if (vHeader.trim()) {
-        const [k, ...rest] = vHeader.split(":");
-        headers[k.trim()] = rest.join(":").trim();
+      const raw = vHeader.trim();
+      if (raw) {
+        // What people paste is the key. Splitting on the first colon regardless turned
+        // "re_abc123" into a header NAMED re_abc123 with an empty value, and
+        // "env:MY_TOKEN" into a header named env, both silently.
+        //
+        // So only treat this as "Name: value" when the part before the colon actually
+        // looks like a header name, and otherwise assume the bearer token it almost
+        // always is.
+        const sep = raw.indexOf(":");
+        const prefix = sep > 0 ? raw.slice(0, sep).trim() : "";
+        const isHeaderName =
+          /^[A-Za-z][A-Za-z0-9-]*$/.test(prefix) && prefix.toLowerCase() !== "env";
+
+        if (isHeaderName) {
+          headers[prefix] = raw.slice(sep + 1).trim();
+        } else {
+          headers.Authorization = /^bearers/i.test(raw) ? raw : `Bearer ${raw}`;
+        }
       }
       await addVendor({ name: vName.trim().toLowerCase(), url: vUrl.trim(), headers });
       setVName("");
@@ -235,16 +251,16 @@ export default function ConnectPage() {
                 />
               </label>
               <label className="field">
-                <span className="field-label">Auth header</span>
+                <span className="field-label">API key</span>
                 <input
                   className="mono"
                   value={vHeader}
-                  placeholder="Authorization: Bearer env:MY_TOKEN"
+                  placeholder="re_your_key   or   env:MY_TOKEN"
                   onChange={(e) => setVHeader(e.target.value)}
                 />
                 <span className="field-hint">
-                  optional. Most hosted servers want Bearer env:NAME, which reads the
-                  token from .env instead of storing it here
+                  optional. Paste the key, or write env:NAME to read it from .env
+                  instead of storing it here. A full "Header: value" also works.
                 </span>
               </label>
             </div>
