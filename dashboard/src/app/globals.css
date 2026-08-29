@@ -979,3 +979,32 @@ h2 .btn {
   font-weight: 500;
   font-size: 14px;
 }
+
+/* ---------------------------------------------------------------- customer search */
+
+.list-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 32px 0 14px;
+  flex-wrap: wrap;
+}
+
+.search {
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.customer-card[data-unidentified="true"] .name {
+  color: var(--text-faint);
+  font-style: italic;
+}

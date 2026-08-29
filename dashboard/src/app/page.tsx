@@ -11,7 +11,22 @@ import {
   laneColor,
   maskPhone,
 } from "@/lib/datasource";
-import type { RunData } from "@/lib/types";
+import type { Entity, RunData } from "@/lib/types";
+
+// A merchant can have thousands. Render a page of them and let search reach the rest.
+const SHOWN = 60;
+
+/**
+ * An order id on its own is not a person.
+ *
+ * When a tool names only an order or subscription and the merchant has not declared who
+ * it belongs to, Commons still has to attribute the call to something, so it mints an
+ * entity keyed on that id. Those are real, and they carry real agent activity, but
+ * listing them as customers is wrong: nobody has a customer called sub_4475.
+ */
+function identified(e: Entity): boolean {
+  return e.handles.some(([ns]) => ns !== "order_id");
+}
 
 /**
  * The merchant's own customers.
@@ -27,6 +42,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [entityId, setEntityId] = useState<string | null>(null);
   const [callId, setCallId] = useState<number | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     setData(null);
@@ -47,6 +63,26 @@ export default function Page() {
   const entity = useMemo(
     () => data?.entities.find((e) => e.id === entityId) ?? null,
     [data, entityId]
+  );
+
+  const customers = useMemo(() => {
+    if (!data) return [];
+    const q = query.trim().toLowerCase();
+    const ranked = [...data.entities].sort(
+      (a, b) => Number(identified(b)) - Number(identified(a))
+    );
+    if (!q) return ranked;
+    return ranked.filter(
+      (e) =>
+        e.display_name.toLowerCase().includes(q) ||
+        e.handles.some(([, v]) => v.toLowerCase().includes(q))
+    );
+  }, [data, query]);
+
+  // The stat said "Customers" and counted order ids among them.
+  const people = useMemo(
+    () => (data ? data.entities.filter(identified).length : 0),
+    [data]
   );
 
   const entityCalls = useMemo(() => {
@@ -76,7 +112,12 @@ export default function Page() {
             <div className="stats">
               <div className="stat">
                 <div className="label">Customers</div>
-                <div className="value">{data.stats.entities}</div>
+                <div className="value">{people}</div>
+                {people < data.entities.length && (
+                  <div className="sub">
+                    +{data.entities.length - people} unidentified
+                  </div>
+                )}
               </div>
               <div className="stat">
                 <div className="label">2+ agents</div>
@@ -104,20 +145,45 @@ export default function Page() {
               </div>
             </div>
 
+            <div className="list-head">
+              <input
+                className="search"
+                placeholder="Search name, phone, email or id"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                spellCheck={false}
+              />
+              <span className="count">
+                {customers.length === data.entities.length
+                  ? `${data.entities.length} customers`
+                  : `${customers.length} of ${data.entities.length}`}
+                {customers.length > SHOWN && ` · showing ${SHOWN}, search to narrow`}
+              </span>
+            </div>
+
+            {customers.length === 0 && (
+              <div className="empty">No customer matches that.</div>
+            )}
+
             <div className="customer-grid">
-              {data.entities.slice(0, 12).map((e) => (
+              {customers.slice(0, SHOWN).map((e) => (
                 <button
                   key={e.id}
                   className="customer-card"
                   data-selected={e.id === entityId}
+                  data-unidentified={!identified(e)}
                   onClick={() => {
                     setEntityId(e.id);
                     setCallId(null);
                   }}
                 >
-                  <div className="name">{e.display_name}</div>
+                  <div className="name">
+                    {identified(e) ? e.display_name : "Unidentified"}
+                  </div>
                   <div className="ref">
-                    {handleOf(e, "customer_id") ?? maskPhone(handleOf(e, "phone"))}
+                    {identified(e)
+                      ? handleOf(e, "customer_id") ?? maskPhone(handleOf(e, "phone"))
+                      : handleOf(e, "order_id")}
                   </div>
                   <div className="pips">
                     {data.agents.map((a, i) => (
