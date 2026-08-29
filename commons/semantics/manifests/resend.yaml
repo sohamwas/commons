@@ -1,0 +1,83 @@
+# Tool semantics for Resend's MCP server.
+#
+# Written from the schemas the server publishes over `tools/list`, verified live on
+# 2026-08-29, not from Resend's source and not from a search result. Resend has never
+# heard of Commons and has no reason to describe its tools in Commons' vocabulary, so
+# the mapping from "what this tool is" to "what it does to a customer" is ours to state.
+#
+# Resend publishes about 100 tools. Nine are declared here. The rest still work and are
+# still logged; no rule reaches them, which is the honest default for a tool nobody has
+# said anything about.
+
+upstream: resend
+
+tools:
+  # The one that matters. Note `to` is an ARRAY of 1-50 recipients, not a string, which
+  # is exactly the kind of thing that has to be read off the real schema rather than
+  # assumed — Razorpay's send tools take a bare string in the same position.
+  #
+  # ONE RECIPIENT IS ATTRIBUTED. Commons resolves a call to a single person, so a mail
+  # to fifty people counts against the first. That undercounts, which is the direction
+  # that lets traffic through rather than blocking it wrongly. Agents doing per-customer
+  # outreach send one at a time; bulk sending is what `send-broadcast` is for, and that
+  # is deliberately left ungoverned below rather than mis-attributed to one person.
+  send-email:
+    action_class: promotional_message
+    entity:
+      from: args
+      path: to.0
+      as: email
+
+  # Contact records. These name a customer and consume nothing, so they are attributed
+  # but not governed: an agent managing someone's contact record is an agent working that
+  # customer, and the timeline should show it.
+  create-contact:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  get-contact:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  update-contact:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  remove-contact:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  # Suppression is a customer asking not to be contacted. Attributed for the same reason:
+  # it belongs on that person's timeline.
+  add-suppression:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  remove-suppression:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  get-suppression:
+    action_class: read
+    entity: {from: args, path: email, as: email}
+
+  # Account-level reads. No customer, nothing consumed.
+  list-emails: {action_class: read}
+  list-contacts: {action_class: read}
+
+# DELIBERATELY ABSENT, and worth saying why rather than leaving a silent gap:
+#
+#   send-batch-emails   up to 100 emails in one call, each with its own recipient
+#   send-broadcast      one email to an entire segment
+#
+# Both contact many people in a single call, and Commons attributes a call to one person.
+# Declaring them would mean charging one customer for a message fifty others received,
+# which is worse than not governing them: a wrong attribution is a wrong enforcement
+# decision, while an ungoverned call is at least logged honestly and visible on Connect.
+#
+# CLASSIFICATION CAVEAT: every send-email here is treated as promotional, because the
+# schema carries nothing that separates a receipt from a campaign. Razorpay's messaging
+# manifest solves this with a merchant-approved `template` list, and the equivalent here
+# would be Resend `tags`. Until that is declared, a genuine transactional email counts
+# against the marketing frequency cap. In OBSERVE that shows up in Review as a wrong
+# call, which is the point of reviewing before enforcing.
