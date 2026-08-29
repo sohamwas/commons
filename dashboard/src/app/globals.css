@@ -1020,3 +1020,72 @@ h2 .btn {
   border-radius: 10px;
   padding: 18px;
 }
+
+/* ---------------------------------------------------------------- vendors and tools */
+
+.vendor-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 8px;
+}
+
+.vendor-url {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 3px;
+}
+
+.tool-picker {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-top: 12px;
+}
+
+.tool-picker-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.tool-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 4px 16px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text-faint);
+}
+
+.tool:hover {
+  background: var(--border);
+}
+
+/* Tools Commons has semantics for: the ones any rule can actually reach. */
+.tool[data-governed="true"] {
+  color: var(--text);
+}
+
+.tool-class {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--accent);
+  white-space: nowrap;
+}

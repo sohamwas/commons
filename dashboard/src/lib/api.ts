@@ -58,6 +58,23 @@ export interface Policy {
   rules: PolicyRule[];
 }
 
+export interface Vendor {
+  name: string;
+  url: string;
+  auth: string | null;
+  connected: boolean;
+  error: string | null;
+  has_manifest: boolean;
+}
+
+export interface VendorTool {
+  name: string;
+  description: string;
+  /** Commons knows what this tool does and to whom, so rules can apply to it. */
+  governed: boolean;
+  action_class: string | null;
+}
+
 export interface Agent {
   id: string;
   display_name: string;
@@ -104,6 +121,26 @@ export const submitReview = (body: {
 }) => call<{ ok: boolean }>("/api/review", { method: "POST", body: JSON.stringify(body) });
 
 export const getEntities = () => call<AdminEntity[]>("/admin/entities");
+
+export const getVendors = () => call<{ vendors: Vendor[] }>("/admin/vendors");
+
+export const addVendor = (body: {
+  name: string;
+  url: string;
+  headers?: Record<string, string>;
+  auth?: string;
+}) => call<{ name: string }>("/admin/vendors", { method: "POST", body: JSON.stringify(body) });
+
+export const removeVendor = (name: string) =>
+  call<{ removed: string }>(`/admin/vendors/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+  });
+
+/** What a vendor publishes, so nobody has to remember tool names. */
+export const getVendorTools = (name: string) =>
+  call<{ vendor: string; has_manifest: boolean; tools: VendorTool[] }>(
+    `/admin/vendors/${encodeURIComponent(name)}/tools`
+  );
 
 export const getAgents = () =>
   call<{ agents: Agent[]; vendors: string[] }>("/admin/agents");

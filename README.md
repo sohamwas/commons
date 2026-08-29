@@ -46,10 +46,25 @@ cd dashboard && npm install && npm run dev
 
 Open <http://localhost:3300>.
 
-### 4. Register your agents
+### 4. Add your vendors
 
-On **Connect**, give each agent an id and the tools it may call. Commons needs nothing
-else — no prompt, no model, no source. It is served immediately, with no restart.
+On **Connect**, add each MCP server your agents call: a name and its URL. Any MCP server
+works. A secret header is written as `env:MY_TOKEN` so the token stays in `.env`.
+
+Razorpay is added for you if its keys are in `.env`.
+
+A vendor also needs a **semantics manifest** for Commons to govern it. Without one its
+calls are forwarded and logged, but no rule can reach them, and Connect says so per
+vendor. Manifests live in `commons/semantics/manifests/`.
+
+### 5. Register your agents
+
+Still on **Connect**: give the agent an id, then **tick the tools it needs** from what the
+vendor publishes. Commons asks the vendor for its catalogue, so there is nothing to
+remember or type. Tools Commons has semantics for are highlighted.
+
+That is all it needs — no prompt, no model, no source. It is served immediately, with no
+restart.
 
 Then replace the vendor URL in that agent's MCP config with the one Connect shows you:
 
@@ -61,7 +76,7 @@ Then replace the vendor URL in that agent's MCP config with the one Connect show
 That is the whole integration. Nothing inside the agent changes, which is why it works for
 agents you did not write and cannot modify.
 
-### 5. Tell Commons who your customers are
+### 6. Tell Commons who your customers are
 
 Commons unifies `+91 98000 00021`, `9800000021` and `09800000021` on its own — one detail
 written three ways. It will **not** guess that a phone number and an email belong to the
@@ -73,7 +88,7 @@ On **Data**, either sync from Razorpay (same keys, nothing to export) or import 
 `Mobile Number` are understood, and any column it does not recognise is named rather than
 silently dropped.
 
-### 6. Watch, then enforce
+### 7. Watch, then enforce
 
 Leave it in OBSERVE for a few days. Nothing is blocked, so no agent can break.
 
@@ -140,8 +155,8 @@ examples/            a worked agent that imports nothing from commons/
 scripts/             run_proxy, the stress harness, entity repair
 ```
 
-`agents.yaml` and `commons.db` are created on first run. Both are yours; neither is
-committed.
+`agents.yaml`, `vendors.yaml` and `commons.db` are created on first run. They are
+yours; none are committed.
 
 ---
 

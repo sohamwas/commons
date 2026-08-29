@@ -193,6 +193,28 @@ class UpstreamPool:
         """The upstreams that actually connected."""
         return [up for name, up in self.upstreams.items() if name not in self.failed]
 
+    async def add(self, cfg: UpstreamConfig, stack: AsyncExitStack) -> Upstream:
+        """Connect a vendor while the gateway is running.
+
+        Raises if it will not connect, so the caller can report the reason instead of
+        registering something that does not work.
+        """
+        up = Upstream(cfg)
+        self.upstreams[cfg.name] = up
+        self.failed.pop(cfg.name, None)
+        try:
+            await up.open(stack)
+        except Exception as exc:  # noqa: BLE001 - the caller reports this to the merchant
+            self.failed[cfg.name] = str(exc)[:200]
+            raise
+        return up
+
+    async def drop(self, name: str) -> None:
+        up = self.upstreams.pop(name, None)
+        self.failed.pop(name, None)
+        if up is not None:
+            await up.close()
+
     def get(self, name: str) -> Upstream:
         return self.upstreams[name]
 

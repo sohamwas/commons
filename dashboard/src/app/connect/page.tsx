@@ -6,22 +6,27 @@ import Nav from "@/components/Nav";
 import {
   PROXY_URL,
   addAgent,
+  addVendor,
   getAgents,
-  getHealth,
+  getVendorTools,
+  getVendors,
   removeAgent,
+  removeVendor,
   type Agent,
-  type Health,
+  type Vendor,
+  type VendorTool,
 } from "@/lib/api";
 
 /**
- * Onboarding.
+ * Onboarding: vendors, then agents.
  *
- * Registering an agent is a merchant action, done here, served immediately. It used to
- * mean editing registry.py and restarting a gateway the other agents were connected to.
+ * Both are merchant actions done here and served immediately. Both used to be hardcoded
+ * in Python, which made Commons a Razorpay-and-messaging tool rather than an arbitration
+ * layer for whatever a merchant actually runs.
  *
- * Adoption is then one line per agent: point it at its Commons URL instead of the
- * vendor's. Nothing inside the agent changes, which is the whole reason the proxy sits
- * where it does. It works for agents whose source you cannot touch.
+ * Tools are TICKED, not typed. The vendor publishes its catalogue and Commons knows which
+ * of those tools it has semantics for, so asking a merchant to remember tool names was
+ * asking them for something the software already had.
  */
 
 function Copyable({ text }: { text: string }) {
@@ -44,47 +49,74 @@ function Copyable({ text }: { text: string }) {
 }
 
 export default function ConnectPage() {
-  const [health, setHealth] = useState<Health | null>(null);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [vendors, setVendors] = useState<string[]>([]);
+  const [catalogue, setCatalogue] = useState<Record<string, VendorTool[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // add vendor
+  const [vName, setVName] = useState("");
+  const [vUrl, setVUrl] = useState("");
+  const [vHeader, setVHeader] = useState("");
+  const [showVendorForm, setShowVendorForm] = useState(false);
+
+  // add agent
   const [id, setId] = useState("");
   const [name, setName] = useState("");
-  const [tools, setTools] = useState<Record<string, string>>({});
+  const [picked, setPicked] = useState<Record<string, Set<string>>>({});
 
-  const load = useCallback(
-    () =>
-      Promise.all([getHealth(), getAgents()])
-        .then(([h, a]) => {
-          setHealth(h);
-          setAgents(a.agents);
-          setVendors(a.vendors);
-          setError(null);
-        })
-        .catch((e: Error) => setError(e.message)),
-    []
-  );
+  const load = useCallback(async () => {
+    try {
+      const [v, a] = await Promise.all([getVendors(), getAgents()]);
+      setVendors(v.vendors);
+      setAgents(a.agents);
+      setError(null);
+
+      const tools: Record<string, VendorTool[]> = {};
+      await Promise.all(
+        v.vendors
+          .filter((x) => x.connected)
+          .map(async (x) => {
+            try {
+              tools[x.name] = (await getVendorTools(x.name)).tools;
+            } catch {
+              tools[x.name] = [];
+            }
+          })
+      );
+      setCatalogue(tools);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, []);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const submit = async () => {
+  const toggle = (vendor: string, tool: string) =>
+    setPicked((p) => {
+      const next = new Set(p[vendor] ?? []);
+      if (next.has(tool)) next.delete(tool);
+      else next.add(tool);
+      return { ...p, [vendor]: next };
+    });
+
+  const submitVendor = async () => {
     setBusy(true);
     setError(null);
     try {
-      // Comma or whitespace separated, because that is how people type a list.
-      const payload: Record<string, string[]> = {};
-      for (const [vendor, raw] of Object.entries(tools)) {
-        const names = raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
-        if (names.length) payload[vendor] = names;
+      const headers: Record<string, string> = {};
+      if (vHeader.trim()) {
+        const [k, ...rest] = vHeader.split(":");
+        headers[k.trim()] = rest.join(":").trim();
       }
-      await addAgent({ id: id.trim().toLowerCase(), display_name: name.trim(), tools: payload });
-      setId("");
-      setName("");
-      setTools({});
+      await addVendor({ name: vName.trim().toLowerCase(), url: vUrl.trim(), headers });
+      setVName("");
+      setVUrl("");
+      setVHeader("");
+      setShowVendorForm(false);
       await load();
     } catch (e) {
       setError((e as Error).message);
@@ -93,83 +125,214 @@ export default function ConnectPage() {
     }
   };
 
-  const drop = async (agentId: string) => {
+  const submitAgent = async () => {
+    setBusy(true);
     setError(null);
     try {
-      await removeAgent(agentId);
+      const tools: Record<string, string[]> = {};
+      for (const [vendor, set] of Object.entries(picked)) {
+        if (set.size) tools[vendor] = [...set];
+      }
+      await addAgent({ id: id.trim().toLowerCase(), display_name: name.trim(), tools });
+      setId("");
+      setName("");
+      setPicked({});
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const act = async (fn: () => Promise<unknown>) => {
+    setError(null);
+    try {
+      await fn();
       await load();
     } catch (e) {
       setError((e as Error).message);
     }
   };
 
-  const ready = id.trim() && Object.values(tools).some((v) => v.trim());
+  const chosen = Object.values(picked).reduce((n, s) => n + s.size, 0);
 
   return (
     <>
       <Nav />
       <div className="shell">
         <h1>Connect</h1>
-        <p className="lede">
-          Register an agent, then replace the vendor URL in its MCP config with the URL
-          below. Nothing inside the agent changes.
-        </p>
 
         {error && <div className="err">{error}</div>}
 
-        {health && Object.keys(health.unavailable).length > 0 && (
-          <div className="warn">
-            {Object.entries(health.unavailable).map(([vendor, why]) => (
-              <div key={vendor}>
-                <strong>{vendor}</strong> is not reachable: <span className="mono">{why}</span>
-              </div>
-            ))}
-            Agents can still be registered against the vendors that are up.
+        {/* ------------------------------------------------------------ vendors */}
+
+        <h2>Vendors</h2>
+        <p className="lede">
+          Any MCP server your agents call. Commons forwards to these and decides what gets
+          through.
+        </p>
+
+        {vendors.length === 0 && !showVendorForm && (
+          <div className="empty">None yet. Add the MCP server your agents talk to.</div>
+        )}
+
+        {vendors.map((v) => (
+          <div className="vendor-row" key={v.name}>
+            <div>
+              <strong>{v.name}</strong>
+              <div className="mono vendor-url">{v.url}</div>
+              {!v.connected && <div className="reason">{v.error}</div>}
+              {v.connected && !v.has_manifest && (
+                <div className="reason">
+                  No semantics manifest, so calls are forwarded and logged but no rule
+                  applies to them.
+                </div>
+              )}
+            </div>
+            <div className="spacer" />
+            <span className="verdict" data-v={v.connected ? "ALLOW" : "BLOCK"}>
+              {v.connected ? `${(catalogue[v.name] ?? []).length} tools` : "down"}
+            </span>
+            <button className="btn btn-quiet" onClick={() => act(() => removeVendor(v.name))}>
+              remove
+            </button>
+          </div>
+        ))}
+
+        {showVendorForm ? (
+          <>
+            <div className="agent-form">
+              <label className="field">
+                <span className="field-label">Name</span>
+                <input
+                  className="mono"
+                  value={vName}
+                  placeholder="my-crm"
+                  onChange={(e) => setVName(e.target.value)}
+                />
+                <span className="field-hint">used in the URL</span>
+              </label>
+              <label className="field">
+                <span className="field-label">MCP URL</span>
+                <input
+                  className="mono"
+                  value={vUrl}
+                  placeholder="https://mcp.example.com/mcp"
+                  onChange={(e) => setVUrl(e.target.value)}
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">Auth header</span>
+                <input
+                  className="mono"
+                  value={vHeader}
+                  placeholder="Authorization: env:MY_TOKEN"
+                  onChange={(e) => setVHeader(e.target.value)}
+                />
+                <span className="field-hint">
+                  optional. env:NAME reads from .env instead of storing the secret
+                </span>
+              </label>
+            </div>
+            <div className="review-actions">
+              <button
+                className="btn"
+                disabled={!vName.trim() || !vUrl.trim() || busy}
+                onClick={submitVendor}
+              >
+                {busy ? "connecting" : "Add vendor"}
+              </button>
+              <button className="btn btn-quiet" onClick={() => setShowVendorForm(false)}>
+                cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="review-actions">
+            <button className="btn btn-quiet" onClick={() => setShowVendorForm(true)}>
+              add a vendor
+            </button>
           </div>
         )}
 
+        {/* ------------------------------------------------------------- agents */}
+
         <h2>Add an agent</h2>
-        <div className="agent-form">
-          <label className="field">
-            <span className="field-label">Id</span>
-            <input
-              className="mono"
-              value={id}
-              placeholder="cart-recovery"
-              onChange={(e) => setId(e.target.value)}
-            />
-            <span className="field-hint">lowercase, used in the URL</span>
-          </label>
+        {vendors.filter((v) => v.connected).length === 0 ? (
+          <div className="empty">Connect a vendor first.</div>
+        ) : (
+          <>
+            <div className="agent-form">
+              <label className="field">
+                <span className="field-label">Id</span>
+                <input
+                  className="mono"
+                  value={id}
+                  placeholder="cart-recovery"
+                  onChange={(e) => setId(e.target.value)}
+                />
+                <span className="field-hint">lowercase, used in the URL</span>
+              </label>
+              <label className="field">
+                <span className="field-label">Name</span>
+                <input
+                  value={name}
+                  placeholder="Cart Recovery"
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <span className="field-hint">optional</span>
+              </label>
+            </div>
 
-          <label className="field">
-            <span className="field-label">Name</span>
-            <input
-              value={name}
-              placeholder="Cart Recovery"
-              onChange={(e) => setName(e.target.value)}
-            />
-            <span className="field-hint">optional</span>
-          </label>
+            {vendors
+              .filter((v) => v.connected)
+              .map((v) => (
+                <section className="tool-picker" key={v.name}>
+                  <div className="tool-picker-head">
+                    <strong>{v.name}</strong>
+                    <span className="field-hint">
+                      pick only what this agent needs. {(picked[v.name]?.size ?? 0)} of{" "}
+                      {(catalogue[v.name] ?? []).length} selected
+                    </span>
+                  </div>
+                  <div className="tool-list">
+                    {(catalogue[v.name] ?? []).map((t) => (
+                      <label
+                        className="tool"
+                        key={t.name}
+                        data-governed={t.governed}
+                        title={t.description}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={picked[v.name]?.has(t.name) ?? false}
+                          onChange={() => toggle(v.name, t.name)}
+                        />
+                        <span className="mono">{t.name}</span>
+                        {t.action_class && t.action_class !== "read" && (
+                          <span className="tool-class">{t.action_class.replace(/_/g, " ")}</span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              ))}
 
-          {vendors.map((vendor) => (
-            <label className="field" key={vendor}>
-              <span className="field-label">{vendor} tools</span>
-              <input
-                className="mono"
-                value={tools[vendor] ?? ""}
-                placeholder="create_payment_link, fetch_order"
-                onChange={(e) => setTools((t) => ({ ...t, [vendor]: e.target.value }))}
-              />
-              <span className="field-hint">only what this agent needs</span>
-            </label>
-          ))}
-        </div>
+            <p className="note">
+              Highlighted tools are the ones Commons has semantics for, so rules can apply
+              to them. The rest still work and are still logged.
+            </p>
 
-        <div className="review-actions">
-          <button className="btn" disabled={!ready || busy} onClick={submit}>
-            {busy ? "adding" : "Add agent"}
-          </button>
-        </div>
+            <div className="review-actions">
+              <button className="btn" disabled={!id.trim() || !chosen || busy} onClick={submitAgent}>
+                {busy ? "adding" : `Add agent${chosen ? ` with ${chosen} tools` : ""}`}
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* --------------------------------------------------------- registered */}
 
         <h2>Registered ({agents.length})</h2>
         {agents.length === 0 ? (
@@ -188,7 +351,7 @@ export default function ConnectPage() {
                       .join("   ·   ")}
                   </div>
                 </div>
-                <button className="btn btn-quiet" onClick={() => drop(agent.id)}>
+                <button className="btn btn-quiet" onClick={() => act(() => removeAgent(agent.id))}>
                   remove
                 </button>
               </div>
@@ -211,6 +374,9 @@ export default function ConnectPage() {
 
         <h2>Then</h2>
         <ol className="steps">
+          <li>
+            Paste that config into the agent, replacing the vendor URL it uses today.
+          </li>
           <li>
             Calls appear on <a href="/">Customers</a>. Nothing there means the agent is
             still talking to the vendor.

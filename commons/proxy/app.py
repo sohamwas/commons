@@ -17,6 +17,7 @@ agents are connected to the gateway being restarted.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import datetime, timezone
@@ -32,6 +33,7 @@ from commons.identity.resolver import IdentityResolver
 from commons.ledger.db import Ledger
 from commons.proxy.face import COMMONS_VERSION, build_face
 from commons.proxy.registry import AgentRegistry, InvalidAgent, parse_agent
+from commons.proxy.vendors import InvalidVendor, VendorRegistry, parse_vendor
 from commons.proxy.upstream import UpstreamPool
 from commons.semantics.manifest import load_manifests
 from commons.settings import Settings
@@ -93,8 +95,12 @@ def create_app(
     db_path: str = "commons.db",
     mode: str = "OBSERVE",
     agents_path: str = "agents.yaml",
+    vendors_path: str = "vendors.yaml",
 ):
-    pool = UpstreamPool(upstream_configs or default_upstreams())
+    # A caller can pin the vendor set (the stress harness does, with in-memory servers).
+    # Otherwise the merchant owns the list and edits it from the Connect page.
+    vendors = None if upstream_configs else VendorRegistry(vendors_path)
+    pool = UpstreamPool(upstream_configs or vendors.upstream_configs())
     ledger = Ledger(db_path)
     resolver = IdentityResolver(ledger)
     manifests = load_manifests()
@@ -105,7 +111,7 @@ def create_app(
     # Endpoint path -> the sub-app serving it, and one exit stack per agent so an agent
     # can be unmounted without tearing down the others.
     table: dict[str, object] = {}
-    agent_stacks: dict[str, AsyncExitStack] = {}
+    agent_stacks: dict[str, tuple[asyncio.Task, asyncio.Event]] = {}
     # Set once the app has started. Mounting needs a stack that outlives the request, and
     # only the lifespan owns one.
     runtime: dict[str, AsyncExitStack | None] = {"stack": None}
@@ -116,53 +122,187 @@ def create_app(
     async def mount_agent(agent) -> list[str]:
         """Build and serve this agent's endpoints, one per vendor it may call.
 
-        Each face is a full Starlette sub-app with its own session manager, so its
-        lifespan has to be entered explicitly — nothing runs the lifespan of a sub-app
-        for you.
+        Each face is a Starlette sub-app with its own session manager, and that manager
+        is an anyio cancel scope. A scope has to be exited by the task that entered it,
+        so each agent gets a holder task that opens its faces and stays parked until the
+        agent is removed or the gateway stops.
+
+        Doing this inline instead looked fine at startup, where mounting and unmounting
+        both happen in the lifespan task, and broke for every agent added through the
+        admin API: those mount in a request task and are torn down in the lifespan task,
+        which anyio rejects with "attempted to exit cancel scope in a different task".
         """
-        stack = AsyncExitStack()
-        await stack.__aenter__()
-        paths: list[str] = []
+        ready: asyncio.Event = asyncio.Event()
+        closing: asyncio.Event = asyncio.Event()
+        outcome: dict[str, object] = {"paths": [], "error": None}
 
-        for upstream in pool.available():
-            if not agent.allowed(upstream.name):
-                continue  # this agent has no business with this vendor at all
-            face = build_face(
-                agent,
-                upstream,
-                ledger,
-                resolver,
-                manifests.get(upstream.name),
-                settings=settings,
-                clock=clock.now,
-            )
-            sub = face.streamable_http_app(streamable_http_path="/")
-            await stack.enter_async_context(sub.router.lifespan_context(sub))
-            path = f"/mcp/{agent.id}/{upstream.name}"
-            table[path] = sub
-            paths.append(path)
+        async def hold() -> None:
+            try:
+                async with AsyncExitStack() as stack:
+                    paths: list[str] = []
+                    for upstream in pool.available():
+                        if not agent.allowed(upstream.name):
+                            continue  # no business with this vendor at all
+                        face = build_face(
+                            agent,
+                            upstream,
+                            ledger,
+                            resolver,
+                            manifests.get(upstream.name),
+                            settings=settings,
+                            clock=clock.now,
+                        )
+                        sub = face.streamable_http_app(streamable_http_path="/")
+                        await stack.enter_async_context(sub.router.lifespan_context(sub))
+                        path = f"/mcp/{agent.id}/{upstream.name}"
+                        table[path] = sub
+                        paths.append(path)
 
-        if not paths:
-            await stack.aclose()
+                    outcome["paths"] = paths
+                    ready.set()
+                    if not paths:
+                        return
+                    await closing.wait()
+            except BaseException as exc:  # noqa: BLE001 - reported to the caller
+                outcome["error"] = exc
+            finally:
+                ready.set()
+
+        task = asyncio.create_task(hold(), name=f"agent-{agent.id}")
+        await ready.wait()
+
+        if outcome["error"] is not None:
+            logger.error("could not mount %s: %s", agent.id, outcome["error"])
             return []
 
-        agent_stacks[agent.id] = stack
-        # The stack must be closed when the app stops, not when this call returns.
+        paths = list(outcome["paths"])  # type: ignore[arg-type]
+        if not paths:
+            return []
+
+        agent_stacks[agent.id] = (task, closing)
         if runtime["stack"] is not None:
-            runtime["stack"].push_async_callback(stack.aclose)
+            runtime["stack"].push_async_callback(_release, agent.id)
         logger.info("mounted %s: %s", agent.id, ", ".join(paths))
         return paths
+
+    async def _release(agent_id: str) -> None:
+        """Park the holder task and wait for it to unwind its own scopes."""
+        held = agent_stacks.pop(agent_id, None)
+        if held is None:
+            return
+        task, closing = held
+        closing.set()
+        try:
+            await asyncio.wait_for(asyncio.shield(task), timeout=5.0)
+        except Exception:  # noqa: BLE001 - teardown, the routes are already gone
+            logger.warning("while unmounting %s", agent_id, exc_info=True)
 
     async def unmount_agent(agent_id: str) -> None:
         for path in endpoints_of(agent_id):
             table.pop(path, None)
-        stack = agent_stacks.pop(agent_id, None)
-        if stack is not None:
-            try:
-                await stack.aclose()
-            except Exception:  # noqa: BLE001 - teardown, the routes are already gone
-                logger.warning("while unmounting %s", agent_id, exc_info=True)
+        await _release(agent_id)
         logger.info("unmounted %s", agent_id)
+
+    async def list_vendors(_request):
+        return _cors(
+            {
+                "vendors": [
+                    {
+                        "name": v.name,
+                        "url": v.url,
+                        "auth": v.auth,
+                        "connected": v.name not in pool.failed,
+                        "error": pool.failed.get(v.name),
+                        "has_manifest": v.name in manifests,
+                    }
+                    for v in sorted(vendors or [], key=lambda v: v.name)
+                ]
+            }
+        )
+
+    async def vendor_tools(request):
+        """Everything this vendor publishes, and whether Commons can govern each tool.
+
+        A merchant should not have to remember tool names, or know which of them Commons
+        understands. The vendor already publishes both, so ask it.
+        """
+        name = request.path_params["vendor"]
+        if name in pool.failed or name not in pool.upstreams:
+            return _cors({"error": f"'{name}' is not connected"}, 404)
+
+        manifest = manifests.get(name)
+        try:
+            tools = await pool.get(name).list_tools()
+        except Exception as exc:  # noqa: BLE001
+            return _cors({"error": f"could not list tools: {str(exc)[:160]}"}, 502)
+
+        return _cors(
+            {
+                "vendor": name,
+                "has_manifest": manifest is not None,
+                "tools": [
+                    {
+                        "name": t.name,
+                        "description": (t.description or "").strip().split("\n")[0][:160],
+                        # Without semantics Commons can forward and log the call but has
+                        # no idea who it touches or what it spends, so no rule applies.
+                        "governed": bool(manifest and manifest.get(t.name)),
+                        "action_class": (
+                            manifest.get(t.name).action_class
+                            if manifest and manifest.get(t.name)
+                            else None
+                        ),
+                    }
+                    for t in sorted(tools, key=lambda t: t.name)
+                ],
+            }
+        )
+
+    async def add_vendor(request):
+        """Register an MCP server and connect to it now.
+
+        POST /admin/vendors
+        {"name": "my-crm", "url": "https://mcp.example.com/mcp",
+         "headers": {"Authorization": "env:MY_CRM_TOKEN"}}
+        """
+        if vendors is None:
+            return _cors({"error": "vendors are fixed by the caller in this process"}, 409)
+        body = await request.json()
+        try:
+            vendor = parse_vendor(str(body.get("name", "")).strip().lower(), body)
+            cfg = vendor.to_upstream()
+        except InvalidVendor as exc:
+            return _cors({"error": str(exc)}, 400)
+
+        try:
+            await pool.add(cfg, runtime["stack"])
+        except Exception as exc:  # noqa: BLE001
+            return _cors({"error": f"could not connect: {str(exc)[:160]}"}, 502)
+
+        vendors.add(vendor)
+        # Agents that named this vendor before it existed can now be served on it.
+        for agent in registry:
+            if vendor.name in agent.tools:
+                await unmount_agent(agent.id)
+                await mount_agent(agent)
+
+        return _cors(
+            {"name": vendor.name, "connected": True, "has_manifest": vendor.name in manifests},
+            201,
+        )
+
+    async def delete_vendor(request):
+        if vendors is None:
+            return _cors({"error": "vendors are fixed by the caller in this process"}, 409)
+        name = request.path_params["vendor"]
+        if not vendors.remove(name):
+            return _cors({"error": f"no vendor '{name}'"}, 404)
+        for agent in registry:
+            if name in agent.tools:
+                await unmount_agent(agent.id)
+                await mount_agent(agent)
+        await pool.drop(name)
+        return _cors({"removed": name})
 
     async def list_agents(_request):
         return _cors(
@@ -496,6 +636,10 @@ def create_app(
         middleware=[cors],
         routes=[
             Route("/health", health),
+            Route("/admin/vendors", list_vendors, methods=["GET"]),
+            Route("/admin/vendors", add_vendor, methods=["POST"]),
+            Route("/admin/vendors/{vendor}", delete_vendor, methods=["DELETE"]),
+            Route("/admin/vendors/{vendor}/tools", vendor_tools, methods=["GET"]),
             Route("/admin/agents", list_agents, methods=["GET"]),
             Route("/admin/agents", add_agent, methods=["POST"]),
             Route("/admin/agents/{agent_id}", delete_agent, methods=["DELETE"]),

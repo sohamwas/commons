@@ -35,3 +35,5 @@ stress.db-*
 agents.yaml
 stress-agents.yaml
 outbox.jsonl
+vendors.yaml
+x-vendors.yaml
