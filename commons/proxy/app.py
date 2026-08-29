@@ -209,7 +209,9 @@ def create_app(
                 "vendors": [
                     {
                         "name": v.name,
-                        "url": v.url,
+                        # A stdio vendor has a command rather than a URL; show whichever
+                        # one identifies it.
+                        "url": v.url or " ".join([v.command, *v.args]).strip(),
                         "auth": v.auth,
                         "connected": v.name not in pool.failed,
                         "error": pool.failed.get(v.name),
@@ -312,6 +314,9 @@ def create_app(
                         "id": a.id,
                         "display_name": a.display_name,
                         "tools": {up: list(names) for up, names in a.tools.items()},
+                        # What it has actually called, so narrowing an allowlist can be
+                        # suggested from evidence rather than guessed at during onboarding.
+                        "used": ledger.tools_used_by(a.id),
                         "endpoints": endpoints_of(a.id),
                     }
                     for a in sorted(registry, key=lambda a: a.id)

@@ -26,6 +26,18 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_PATH = Path("agents.yaml")
 
+# Every tool the vendor publishes.
+#
+# This is the DEFAULT, because narrowing an allowlist is a security decision and putting
+# one in front of a merchant before they have seen the thing work is the wrong order.
+# Commons governs an agent holding all 42 tools exactly as well as one holding three: the
+# rules are about what happens to a CUSTOMER, not about which tool did it.
+#
+# Narrowing is a real second layer and worth doing, just not by guesswork at onboarding.
+# Once an agent has run, the ledger knows which tools it actually called, so the suggestion
+# can come from evidence.
+ALL = "*"
+
 # Agent ids become URL path segments, so they have to survive being one.
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 
@@ -44,6 +56,13 @@ class AgentSpec:
     def allowed(self, upstream: str) -> tuple[str, ...]:
         return self.tools.get(upstream, ())
 
+    def takes_all(self, upstream: str) -> bool:
+        return ALL in self.tools.get(upstream, ())
+
+    def permits(self, upstream: str, tool: str) -> bool:
+        names = self.tools.get(upstream, ())
+        return ALL in names or tool in names
+
     def as_dict(self) -> dict:
         return {
             "display_name": self.display_name,
@@ -59,9 +78,16 @@ def parse_agent(agent_id: str, raw: dict, known_upstreams: set[str] | None = Non
             "starting with a letter or digit."
         )
 
-    tools_raw = (raw or {}).get("tools") or {}
+    body = raw or {}
+    tools_raw = body.get("tools") or {}
+
+    # The easy path: name the vendors and take everything they publish.
+    #   {"id": "cart-recovery", "vendors": ["razorpay"]}
+    if not tools_raw and body.get("vendors"):
+        tools_raw = {str(name): [ALL] for name in body["vendors"]}
+
     if not isinstance(tools_raw, dict) or not tools_raw:
-        raise InvalidAgent(f"'{agent_id}' lists no tools, so it would have nothing to call.")
+        raise InvalidAgent(f"'{agent_id}' names no vendors, so it would have nothing to call.")
 
     tools: dict[str, tuple[str, ...]] = {}
     for upstream, names in tools_raw.items():
@@ -73,8 +99,10 @@ def parse_agent(agent_id: str, raw: dict, known_upstreams: set[str] | None = Non
         if isinstance(names, str):
             names = [names]
         if not isinstance(names, (list, tuple)) or not names:
-            raise InvalidAgent(f"'{agent_id}' lists no tools for vendor '{upstream}'.")
-        tools[upstream] = tuple(str(n).strip() for n in names if str(n).strip())
+            # An empty list means the whole vendor, not nothing. "Nothing" is what
+            # leaving the vendor out is for.
+            names = [ALL]
+        tools[upstream] = tuple(str(n).strip() for n in names if str(n).strip()) or (ALL,)
 
     return AgentSpec(
         id=agent_id,

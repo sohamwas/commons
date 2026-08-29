@@ -1089,3 +1089,16 @@ h2 .btn {
   color: var(--accent);
   white-space: nowrap;
 }
+
+.usage {
+  font-size: 12px;
+  margin: 4px 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.usage-list {
+  color: var(--text-dim);
+  font-size: 11.5px;
+}

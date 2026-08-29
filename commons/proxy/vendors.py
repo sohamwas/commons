@@ -41,37 +41,64 @@ class InvalidVendor(ValueError):
 
 @dataclass
 class VendorDef:
+    """One MCP server, reached either over HTTP or by running a local command.
+
+    Both matter. Hosted vendors speak streamable HTTP, and a great many MCP servers ship
+    as something you run (`npx -y some-server`), which is how most of the ecosystem is
+    distributed. Supporting only URLs would have left most of it unreachable.
+    """
+
     name: str
-    url: str
+    url: str = ""
     headers: dict[str, str] = field(default_factory=dict)
+    command: str = ""
+    args: list[str] = field(default_factory=list)
     # Set for vendors Commons knows how to authenticate itself, so the merchant does not
     # have to hand-build a header from keys that are already in .env.
     auth: str | None = None
 
     def as_dict(self) -> dict:
-        body: dict = {"url": self.url}
+        body: dict = {}
+        if self.command:
+            body["command"] = self.command
+            if self.args:
+                body["args"] = list(self.args)
+        else:
+            body["url"] = self.url
         if self.headers:
             body["headers"] = dict(self.headers)
         if self.auth:
             body["auth"] = self.auth
         return body
 
+    def _resolve(self, value: str) -> str:
+        if not value.startswith(ENV_PREFIX):
+            return value
+        env_name = value[len(ENV_PREFIX):].strip()
+        found = os.environ.get(env_name, "").strip()
+        if not found:
+            raise InvalidVendor(
+                f"'{self.name}' expects a value from ${env_name}, which is not set in .env"
+            )
+        return found
+
     def to_upstream(self) -> UpstreamConfig:
         if self.auth == "razorpay":
             return razorpay_remote()
-        resolved = {}
-        for key, value in self.headers.items():
-            if isinstance(value, str) and value.startswith(ENV_PREFIX):
-                env_name = value[len(ENV_PREFIX):].strip()
-                resolved[key] = os.environ.get(env_name, "").strip()
-                if not resolved[key]:
-                    raise InvalidVendor(
-                        f"'{self.name}' expects header {key} from ${env_name}, "
-                        "which is not set in .env"
-                    )
-            else:
-                resolved[key] = value
-        return UpstreamConfig(name=self.name, kind="http", url=self.url, headers=resolved)
+        if self.command:
+            return UpstreamConfig(
+                name=self.name,
+                kind="stdio",
+                command=self.command,
+                args=list(self.args),
+                env={k: self._resolve(v) for k, v in self.headers.items()},
+            )
+        return UpstreamConfig(
+            name=self.name,
+            kind="http",
+            url=self.url,
+            headers={k: self._resolve(v) for k, v in self.headers.items()},
+        )
 
 
 def parse_vendor(name: str, raw: dict) -> VendorDef:
@@ -83,20 +110,32 @@ def parse_vendor(name: str, raw: dict) -> VendorDef:
     body = raw or {}
     auth = body.get("auth")
     url = str(body.get("url") or "").strip()
+    command = str(body.get("command") or "").strip()
 
     if auth == "razorpay":
         return VendorDef(name=name, url=url or "https://mcp.razorpay.com/mcp", auth=auth)
 
-    if not url.startswith(("http://", "https://")):
-        raise InvalidVendor(f"'{name}' needs an http or https MCP URL.")
-
     headers = body.get("headers") or {}
     if not isinstance(headers, dict):
         raise InvalidVendor(f"'{name}' has headers that are not a mapping.")
+    headers = {str(k): str(v) for k, v in headers.items()}
 
-    return VendorDef(
-        name=name, url=url, headers={str(k): str(v) for k, v in headers.items()}
-    )
+    if command:
+        args = body.get("args") or []
+        if isinstance(args, str):
+            args = args.split()
+        if not isinstance(args, (list, tuple)):
+            raise InvalidVendor(f"'{name}' has args that are not a list.")
+        return VendorDef(
+            name=name, command=command, args=[str(a) for a in args], headers=headers
+        )
+
+    if not url.startswith(("http://", "https://")):
+        raise InvalidVendor(
+            f"'{name}' needs either an http/https MCP URL or a command to run."
+        )
+
+    return VendorDef(name=name, url=url, headers=headers)
 
 
 def seed_defaults() -> dict[str, VendorDef]:

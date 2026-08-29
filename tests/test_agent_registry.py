@@ -128,3 +128,37 @@ def test_round_trips_through_yaml(registry):
     )
     registry.add(spec)
     assert AgentRegistry(registry.path).get("a") == spec
+
+
+# ---------------------------------------------------------------- full access
+
+
+def test_naming_vendors_alone_grants_every_tool():
+    """The easy path: {"id": "x", "vendors": ["razorpay"]} and nothing else."""
+    spec = parse_agent("x", {"vendors": ["razorpay", "messaging"]})
+    assert spec.takes_all("razorpay")
+    assert spec.permits("razorpay", "anything_at_all")
+    assert spec.permits("messaging", "send_whatsapp")
+    assert not spec.permits("stripe", "charge")
+
+
+def test_an_empty_tool_list_means_the_whole_vendor_not_nothing():
+    """Leaving the vendor out is how you say "nothing"."""
+    assert parse_agent("x", {"tools": {"razorpay": []}}).takes_all("razorpay")
+
+
+def test_a_narrowed_agent_permits_only_what_it_lists():
+    spec = parse_agent("x", {"tools": {"razorpay": ["fetch_order"]}})
+    assert not spec.takes_all("razorpay")
+    assert spec.permits("razorpay", "fetch_order")
+    assert not spec.permits("razorpay", "create_payment_link")
+
+
+def test_naming_no_vendors_at_all_is_still_refused():
+    with pytest.raises(InvalidAgent, match="nothing to call"):
+        parse_agent("x", {})
+
+
+def test_full_access_survives_a_restart(registry):
+    registry.add(parse_agent("x", {"vendors": ["razorpay"]}))
+    assert AgentRegistry(registry.path).get("x").takes_all("razorpay")

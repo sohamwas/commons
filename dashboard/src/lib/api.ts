@@ -78,9 +78,15 @@ export interface VendorTool {
 export interface Agent {
   id: string;
   display_name: string;
+  /** A vendor mapped to ["*"] means every tool that vendor publishes. */
   tools: Record<string, string[]>;
+  /** Tools this agent has actually called, per vendor. */
+  used: Record<string, string[]>;
   endpoints: string[];
 }
+
+/** Every tool the vendor publishes. */
+export const ALL_TOOLS = "*";
 
 export interface Health {
   service: string;

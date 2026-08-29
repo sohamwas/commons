@@ -64,6 +64,9 @@ def build_face(
 
     now = clock or (lambda: datetime.now(timezone.utc))
 
+    # A wildcard allowlist means every tool the vendor publishes. Least privilege is a
+    # real second layer, but it is not what makes Commons work, so it is opt-in.
+    takes_all = agent.takes_all(upstream.name)
     allowed = set(agent.allowed(upstream.name))
     # Entity lookups (order_id -> customer) are stable within a run; cache them so
     # resolution costs at most one extra upstream round trip per distinct resource.
@@ -73,7 +76,7 @@ def build_face(
         ctx: ServerRequestContext, params: PaginatedRequestParams | None
     ) -> ListToolsResult:
         tools = await upstream.list_tools()
-        visible = [t for t in tools if t.name in allowed]
+        visible = tools if takes_all else [t for t in tools if t.name in allowed]
         logger.info(
             "list_tools agent=%s upstream=%s -> %d/%d tools",
             agent.id,
@@ -91,7 +94,7 @@ def build_face(
 
         # Least privilege still applies, and applies first. Commons sits ALONGSIDE
         # per-agent scoping (handoff §6.1), it does not replace it.
-        if params.name not in allowed:
+        if not takes_all and params.name not in allowed:
             logger.warning(
                 "OUT-OF-SCOPE agent=%s upstream=%s tool=%s", agent.id, upstream.name, params.name
             )

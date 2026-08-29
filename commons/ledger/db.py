@@ -128,6 +128,24 @@ class Ledger:
         self.conn.commit()
         return entity_id
 
+    def tools_used_by(self, agent_id: str) -> dict[str, list[str]]:
+        """Which tools this agent has actually called, per vendor, across every run.
+
+        Narrowing an allowlist is a real second layer of defence, and guessing at it
+        during onboarding is the wrong time to decide. After an agent has run there is
+        evidence, so the suggestion can come from what it did rather than from what a
+        merchant imagined it would do.
+        """
+        rows = self.conn.execute(
+            """SELECT upstream, tool FROM call
+               WHERE agent_id = ? GROUP BY upstream, tool ORDER BY upstream, tool""",
+            (agent_id,),
+        ).fetchall()
+        used: dict[str, list[str]] = {}
+        for row in rows:
+            used.setdefault(row["upstream"], []).append(row["tool"])
+        return used
+
     def absorb(self, keep: str, drop: str) -> None:
         """Fold one entity into another, then remove it.
 

@@ -48,8 +48,16 @@ Open <http://localhost:3300>.
 
 ### 4. Add your vendors
 
-On **Connect**, add each MCP server your agents call: a name and its URL. Any MCP server
-works. A secret header is written as `env:MY_TOKEN` so the token stays in `.env`.
+On **Connect**, add each MCP server your agents call. Either a URL, or a command to run
+for the many MCP servers distributed as something you launch:
+
+```
+url:     https://mcp.example.com/mcp
+command: npx    args: -y @modelcontextprotocol/server-everything
+```
+
+A secret is written as `env:MY_TOKEN` and read from `.env` at connect time, so it never
+lands in the file.
 
 Razorpay is added for you if its keys are in `.env`.
 
@@ -59,12 +67,18 @@ vendor. Manifests live in `commons/semantics/manifests/`.
 
 ### 5. Register your agents
 
-Still on **Connect**: give the agent an id, then **tick the tools it needs** from what the
-vendor publishes. Commons asks the vendor for its catalogue, so there is nothing to
-remember or type. Tools Commons has semantics for are highlighted.
+Still on **Connect**: give the agent an id and press Add. By default it gets **every tool
+those vendors publish**, which is what it has today without Commons, and every call is
+still governed. The rules are about what happens to a customer, not about which tool did
+it.
 
 That is all it needs — no prompt, no model, no source. It is served immediately, with no
 restart.
+
+Narrowing an allowlist is a real second layer, and a better decision to make with
+evidence than at onboarding. Once the agent has run, Connect shows what it actually
+called — `used 3 of 42 tools` — with one click to narrow it to those. You can also tick
+tools upfront if you already know.
 
 Then replace the vendor URL in that agent's MCP config with the one Connect shows you:
 

@@ -6,6 +6,7 @@ import Nav from "@/components/Nav";
 import {
   PROXY_URL,
   addAgent,
+  ALL_TOOLS,
   addVendor,
   getAgents,
   getVendorTools,
@@ -65,6 +66,10 @@ export default function ConnectPage() {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [picked, setPicked] = useState<Record<string, Set<string>>>({});
+  // Narrowing an allowlist is a security decision. Putting one in front of someone before
+  // they have seen the thing work is the wrong order, so full access is the default and
+  // this opens the picker for anyone who wants to tighten it now.
+  const [narrowing, setNarrowing] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -130,13 +135,18 @@ export default function ConnectPage() {
     setError(null);
     try {
       const tools: Record<string, string[]> = {};
-      for (const [vendor, set] of Object.entries(picked)) {
-        if (set.size) tools[vendor] = [...set];
+      if (narrowing) {
+        for (const [vendor, set] of Object.entries(picked)) {
+          if (set.size) tools[vendor] = [...set];
+        }
+      } else {
+        for (const v of vendors.filter((x) => x.connected)) tools[v.name] = [ALL_TOOLS];
       }
       await addAgent({ id: id.trim().toLowerCase(), display_name: name.trim(), tools });
       setId("");
       setName("");
       setPicked({});
+      setNarrowing(false);
       await load();
     } catch (e) {
       setError((e as Error).message);
@@ -156,6 +166,8 @@ export default function ConnectPage() {
   };
 
   const chosen = Object.values(picked).reduce((n, s) => n + s.size, 0);
+  const connected = vendors.filter((v) => v.connected);
+  const canAdd = id.trim() && (narrowing ? chosen > 0 : connected.length > 0);
 
   return (
     <>
@@ -285,9 +297,8 @@ export default function ConnectPage() {
               </label>
             </div>
 
-            {vendors
-              .filter((v) => v.connected)
-              .map((v) => (
+            {narrowing &&
+              connected.map((v) => (
                 <section className="tool-picker" key={v.name}>
                   <div className="tool-picker-head">
                     <strong>{v.name}</strong>
@@ -319,16 +330,34 @@ export default function ConnectPage() {
                 </section>
               ))}
 
-            <p className="note">
-              Highlighted tools are the ones Commons has semantics for, so rules can apply
-              to them. The rest still work and are still logged.
-            </p>
+            {narrowing && (
+              <p className="note">
+                Highlighted tools are the ones Commons has semantics for, so rules can
+                apply to them. The rest still work and are still logged.
+              </p>
+            )}
 
             <div className="review-actions">
-              <button className="btn" disabled={!id.trim() || !chosen || busy} onClick={submitAgent}>
-                {busy ? "adding" : `Add agent${chosen ? ` with ${chosen} tools` : ""}`}
+              <button className="btn" disabled={!canAdd || busy} onClick={submitAgent}>
+                {busy
+                  ? "adding"
+                  : narrowing
+                    ? `Add agent with ${chosen} tools`
+                    : "Add agent"}
+              </button>
+              <button className="btn btn-quiet" onClick={() => setNarrowing((n) => !n)}>
+                {narrowing ? "use every tool instead" : "limit which tools it can call"}
               </button>
             </div>
+
+            {!narrowing && (
+              <p className="note">
+                It gets every tool these vendors publish, which is what it has today
+                without Commons. Every call is still governed: the rules are about what
+                happens to a customer, not about which tool did it. Narrow it later from
+                what it actually used.
+              </p>
+            )}
           </>
         )}
 
@@ -347,13 +376,54 @@ export default function ConnectPage() {
                   <strong>{agent.display_name}</strong>
                   <div className="rule-compiled mono">
                     {Object.entries(agent.tools)
-                      .map(([v, names]) => `${v}: ${names.join(", ")}`)
+                      .map(([v, names]) =>
+                        names.includes(ALL_TOOLS)
+                          ? `${v}: all tools`
+                          : `${v}: ${names.join(", ")}`
+                      )
                       .join("   ·   ")}
                   </div>
                 </div>
                 <button className="btn btn-quiet" onClick={() => act(() => removeAgent(agent.id))}>
                   remove
                 </button>
+              </div>
+
+              {/* Evidence, not a guess: what this agent has actually reached for. */}
+              <div className="usage">
+                {Object.entries(agent.used).length === 0 ? (
+                  <span className="field-hint">no calls yet</span>
+                ) : (
+                  Object.entries(agent.used).map(([vendor, used]) => {
+                    const total = (catalogue[vendor] ?? []).length;
+                    const open = agent.tools[vendor]?.includes(ALL_TOOLS);
+                    return (
+                      <div key={vendor}>
+                        <span className="field-hint">
+                          {vendor}: used {used.length}
+                          {total ? ` of ${total}` : ""} tools
+                        </span>{" "}
+                        <span className="mono usage-list">{used.join(", ")}</span>
+                        {open && total > used.length && (
+                          <button
+                            className="btn btn-quiet"
+                            onClick={() =>
+                              act(() =>
+                                addAgent({
+                                  id: agent.id,
+                                  display_name: agent.display_name,
+                                  tools: { ...agent.tools, [vendor]: used },
+                                })
+                              )
+                            }
+                          >
+                            narrow to these {used.length}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
               {agent.endpoints.map((path) => {
                 const vendor = path.split("/")[3];
