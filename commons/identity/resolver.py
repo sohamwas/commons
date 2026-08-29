@@ -147,14 +147,49 @@ class IdentityResolver:
                 found.add(existing)
         return found
 
+    def is_placeholder(self, entity_id: str) -> bool:
+        """True if nothing about this entity identifies a person.
+
+        An agent calling fetch_order(order_id=…) names an order, not a human. Commons has
+        to attribute that call to something, so it mints an entity keyed on the order id.
+        It is a real record with real activity, and it is nobody until the merchant says
+        whose order it was.
+        """
+        return not any(
+            namespace in (PHONE, EMAIL, CUSTOMER_ID)
+            for namespace, _ in self.ledger.identities_of(entity_id)
+        )
+
     def declare(self, entity_id: str, handles: dict[str, object], source: str = "declared") -> None:
         """Seed the graph: one entity owning several vendor handles.
 
         The world simulator calls this once per customer, which is the declarative
         mapping the merchant would supply in production.
+
+        Declaring a handle that currently belongs to a PLACEHOLDER absorbs it. Saying
+        "order_9001 is Priya" is the answer to a question Commons could not answer on its
+        own, so Priya inherits that order's history instead of it being stranded on a
+        record nobody can reach. A handle held by an identified person is left alone and
+        reported: that is two customers in conflict, not a placeholder being resolved.
         """
         for namespace, raw in handles.items():
             value = normalise(namespace, raw)
             if value is None:
                 continue
+
+            holder = self.ledger.lookup_identity(namespace, value)
+            if holder and holder != entity_id:
+                if self.is_placeholder(holder):
+                    logger.info(
+                        "absorbing placeholder %s into %s via %s=%s",
+                        holder, entity_id, namespace, value,
+                    )
+                    self.ledger.absorb(entity_id, holder)
+                else:
+                    logger.warning(
+                        "identity conflict: %s=%s belongs to %s, not %s — keeping existing",
+                        namespace, value, holder, entity_id,
+                    )
+                    continue
+
             self.ledger.link_identity(namespace, value, entity_id, source=source)

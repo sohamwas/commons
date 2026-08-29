@@ -85,6 +85,11 @@ export default function Page() {
     [data]
   );
 
+  const unidentified = useMemo(
+    () => (data ? data.entities.filter((e) => !identified(e)).length : 0),
+    [data]
+  );
+
   const entityCalls = useMemo(() => {
     if (!data || !entity) return [];
     return data.calls.filter((c) => c.entity_id === entity.id);
@@ -113,12 +118,15 @@ export default function Page() {
               <div className="stat">
                 <div className="label">Customers</div>
                 <div className="value">{people}</div>
-                {people < data.entities.length && (
-                  <div className="sub">
-                    +{data.entities.length - people} unidentified
-                  </div>
-                )}
+                <div className="sub">{data.stats.active_entities} acted on</div>
               </div>
+              {unidentified > 0 && (
+                <div className="stat">
+                  <div className="label">Unidentified</div>
+                  <div className="value">{unidentified}</div>
+                  <div className="sub">orders with no owner</div>
+                </div>
+              )}
               <div className="stat">
                 <div className="label">2+ agents</div>
                 <div className="value alert">{data.stats.multi_agent_entities}</div>
@@ -163,6 +171,14 @@ export default function Page() {
 
             {customers.length === 0 && (
               <div className="empty">No customer matches that.</div>
+            )}
+
+            {unidentified > 0 && !query && (
+              <p className="note">
+                {unidentified} rows are orders no customer claims. Add an{" "}
+                <span className="mono">order_id</span> column to your customer list on{" "}
+                <a href="/data">Data</a> to attach them and their history.
+              </p>
             )}
 
             <div className="customer-grid">

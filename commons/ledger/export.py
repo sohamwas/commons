@@ -144,9 +144,10 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
 
     entities: list[dict] = []
     for r in conn.execute("SELECT * FROM entity ORDER BY id"):
+        # Quiet customers are included. Skipping everyone without activity in this run
+        # is why a customer list imported on the Data page appeared to vanish: the
+        # merchant had 12 new customers and the page showed none of them.
         entity_calls = by_entity.get(r["id"], [])
-        if not entity_calls:
-            continue  # nothing happened to this person in this run
 
         handles = [
             [h["namespace"], h["value"]]
@@ -268,6 +269,9 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
             "forwarded": forwarded,
             "stopped": len(calls) - forwarded,
             "entities": len(entities),
+            # Customers an agent actually touched this run, as opposed to everyone the
+            # merchant has ever imported.
+            "active_entities": sum(1 for e in entities if e["summary"]["calls"]),
             "multi_agent_entities": sum(
                 1 for e in entities if e["summary"]["agent_count"] > 1
             ),

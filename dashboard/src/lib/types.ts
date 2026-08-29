@@ -97,6 +97,8 @@ export interface RunData {
     forwarded: number;
     stopped: number;
     entities: number;
+    /** Customers an agent touched this run, as opposed to everyone imported. */
+    active_entities: number;
     multi_agent_entities: number;
     violations: number;
     total_discount_pct: number;

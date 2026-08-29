@@ -128,6 +128,25 @@ class Ledger:
         self.conn.commit()
         return entity_id
 
+    def absorb(self, keep: str, drop: str) -> None:
+        """Fold one entity into another, then remove it.
+
+        Used when the merchant tells Commons who an order belongs to. Commons had to
+        attribute that order's calls to something before it was told, so the history sits
+        on a placeholder; naming the owner has to move it, not strand it.
+        """
+        self.conn.execute("UPDATE call SET entity_id = ? WHERE entity_id = ?", (keep, drop))
+        self.conn.execute(
+            "UPDATE OR REPLACE identity SET entity_id = ? WHERE entity_id = ?", (keep, drop)
+        )
+        self.conn.execute(
+            "UPDATE OR REPLACE entity_state SET entity_id = ? WHERE entity_id = ?", (keep, drop)
+        )
+        self.conn.execute("DELETE FROM identity WHERE entity_id = ?", (drop,))
+        self.conn.execute("DELETE FROM entity_state WHERE entity_id = ?", (drop,))
+        self.conn.execute("DELETE FROM entity WHERE id = ?", (drop,))
+        self.conn.commit()
+
     def identities_of(self, entity_id: str) -> list[tuple[str, str]]:
         rows = self.conn.execute(
             "SELECT namespace, value FROM identity WHERE entity_id = ? ORDER BY namespace",
