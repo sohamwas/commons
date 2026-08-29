@@ -30,3 +30,8 @@ next-env.d.ts
 dashboard/.next-build/
 stress.db
 stress.db-*
+
+# Created on first run, and yours
+agents.yaml
+stress-agents.yaml
+outbox.jsonl

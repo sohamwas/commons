@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from contextlib import AsyncExitStack
+from contextlib import AsyncExitStack, suppress
 
 import httpx2 as httpx
 from mcp import ClientSession
@@ -21,6 +21,19 @@ from mcp.types import CallToolResult, Tool
 from commons.config import UpstreamConfig
 
 logger = logging.getLogger(__name__)
+
+
+def _describe(exc: BaseException) -> str:
+    """The cause, not the wrapper.
+
+    MCP transports run in task groups, so a refused connection arrives as
+    "ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)". That tells a
+    merchant nothing; "ConnectError: All connection attempts failed" tells them their
+    vendor is not running.
+    """
+    while isinstance(exc, BaseExceptionGroup) and exc.exceptions:
+        exc = exc.exceptions[0]
+    return f"{type(exc).__name__}: {exc}"[:200]
 
 
 async def _stop(task: asyncio.Task) -> None:
@@ -41,12 +54,53 @@ class Upstream:
         self._tools: list[Tool] | None = None
         # Low-volume workload; serialise to keep session state unambiguous.
         self._lock = asyncio.Lock()
+        self.error: str | None = None
+        self._task: asyncio.Task | None = None
+        self._ready = asyncio.Event()
+        self._closing = asyncio.Event()
 
     @property
     def name(self) -> str:
         return self.cfg.name
 
+    async def _hold(self) -> None:
+        """Own this connection for the life of the process, in one dedicated task.
+
+        The transport is an anyio task group. Opening it on a stack shared with other
+        upstreams, then discarding it when the handshake failed, unwound that group from
+        the wrong scope: one unreachable vendor took the whole gateway down during
+        startup, and the error surfaced as a CancelledError far from its cause.
+
+        A cancel scope belongs to the task that entered it. Giving each vendor its own
+        task means a vendor that refuses is just a vendor that refuses.
+        """
+        try:
+            async with AsyncExitStack() as own:
+                await self._connect(own)
+                self.error = None
+                self._ready.set()
+                await self._closing.wait()
+        except BaseException as exc:  # noqa: BLE001 - recorded, then reported on /health
+            self.session = None
+            self.error = _describe(exc)
+        finally:
+            self._ready.set()
+
     async def open(self, stack: AsyncExitStack) -> None:
+        """Start the connection task and wait for it to succeed or fail."""
+        self._task = asyncio.create_task(self._hold(), name=f"upstream-{self.name}")
+        stack.push_async_callback(self.close)
+        await self._ready.wait()
+        if self.error:
+            raise ConnectionError(self.error)
+
+    async def close(self) -> None:
+        self._closing.set()
+        if self._task is not None:
+            with suppress(BaseException):
+                await asyncio.wait_for(asyncio.shield(self._task), timeout=5.0)
+
+    async def _connect(self, stack: AsyncExitStack) -> None:
         cfg = self.cfg
         if cfg.kind == "http":
             assert cfg.url
@@ -117,10 +171,27 @@ class Upstream:
 class UpstreamPool:
     def __init__(self, configs: dict[str, UpstreamConfig]) -> None:
         self.upstreams = {name: Upstream(cfg) for name, cfg in configs.items()}
+        self.failed: dict[str, str] = {}
 
     async def open_all(self, stack: AsyncExitStack) -> None:
-        for up in self.upstreams.values():
-            await up.open(stack)
+        """Connect every vendor, and keep going if one refuses.
+
+        A vendor being unreachable is not a reason for the gateway to fail to boot. On a
+        first run the merchant has configured Razorpay and not yet stood up a messaging
+        server, and a Commons that will not start until every vendor answers is a Commons
+        they cannot try. The ones that did connect are governed; the rest are reported on
+        /health so the gap is visible rather than silent.
+        """
+        for name, up in self.upstreams.items():
+            try:
+                await up.open(stack)
+            except Exception as exc:  # noqa: BLE001 - report per vendor, do not abort boot
+                self.failed[name] = str(exc)[:200]
+                logger.error("upstream %s unavailable: %s", name, str(exc)[:200])
+
+    def available(self):
+        """The upstreams that actually connected."""
+        return [up for name, up in self.upstreams.items() if name not in self.failed]
 
     def get(self, name: str) -> Upstream:
         return self.upstreams[name]

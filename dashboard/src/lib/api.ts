@@ -58,6 +58,13 @@ export interface Policy {
   rules: PolicyRule[];
 }
 
+export interface Agent {
+  id: string;
+  display_name: string;
+  tools: Record<string, string[]>;
+  endpoints: string[];
+}
+
 export interface Health {
   service: string;
   version: string;
@@ -67,6 +74,9 @@ export interface Health {
   manifests: Record<string, number>;
   rules: string[];
   endpoints: string[];
+  agents: string[];
+  /** Vendors that did not connect, mapped to why. */
+  unavailable: Record<string, string>;
 }
 
 export interface AdminEntity {
@@ -94,6 +104,25 @@ export const submitReview = (body: {
 }) => call<{ ok: boolean }>("/api/review", { method: "POST", body: JSON.stringify(body) });
 
 export const getEntities = () => call<AdminEntity[]>("/admin/entities");
+
+export const getAgents = () =>
+  call<{ agents: Agent[]; vendors: string[] }>("/admin/agents");
+
+/** Register an agent. It is served immediately, with no restart. */
+export const addAgent = (body: {
+  id: string;
+  display_name?: string;
+  tools: Record<string, string[]>;
+}) =>
+  call<{ id: string; endpoints: string[] }>("/admin/agents", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const removeAgent = (id: string) =>
+  call<{ removed: string }>(`/admin/agents/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 
 export interface SyncResult {
   source: string;

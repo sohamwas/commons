@@ -17,7 +17,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from commons.proxy.registry import AGENTS
+from commons.proxy.registry import AgentRegistry
 from commons.rules.engine import RuleEngine
 
 
@@ -255,11 +255,20 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
 
     conn.close()
 
+    try:
+        names = {a.id: a.display_name for a in AgentRegistry()}
+    except Exception:  # noqa: BLE001 - a missing or malformed registry is not fatal here
+        names = {}
+
     forwarded = sum(1 for c in calls if c["forwarded"])
     return {
         "run": run,
+        # Derived from the calls, not from a global. An export is a read-only view of
+        # what happened, so the agents in it are the ones that did something. Names come
+        # from the registry when it is readable, and fall back to the id when it is not.
         "agents": [
-            {"id": a.id, "display_name": a.display_name} for a in AGENTS.values()
+            {"id": agent_id, "display_name": names.get(agent_id, agent_id)}
+            for agent_id in sorted({c["agent_id"] for c in calls})
         ],
         "rules": rules,
         "entities": entities,

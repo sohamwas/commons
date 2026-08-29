@@ -1,16 +1,18 @@
 """Commons proxy — the ASGI application.
 
-Mounts one MCP endpoint per (agent, upstream) pair:
+Mounts one MCP endpoint per (agent, vendor) pair:
 
-    /mcp/cart-recovery/razorpay
-    /mcp/subscription-recovery/razorpay
-    ...
+    /mcp/{agent}/{vendor}
 
-An agent is onboarded by pointing it at its own Commons URL instead of the vendor's —
-the one-line config change on the Connect screen:
+An agent is onboarded by pointing it at its own Commons URL instead of the vendor's,
+which is the one-line config change on the Connect screen:
 
     - "razorpay": { "url": "https://mcp.razorpay.com/mcp" }
-    + "razorpay": { "url": "https://commons.local/mcp/cart-recovery/razorpay" }
+    + "razorpay": { "url": "http://127.0.0.1:8787/mcp/my-agent/razorpay" }
+
+Agents are mounted and unmounted while the gateway is running. Registering one used to
+mean editing Python and restarting, which is not a thing to ask of a merchant whose
+agents are connected to the gateway being restarted.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ from commons.config import UpstreamConfig, default_upstreams
 from commons.identity.resolver import IdentityResolver
 from commons.ledger.db import Ledger
 from commons.proxy.face import COMMONS_VERSION, build_face
-from commons.proxy.registry import AGENTS
+from commons.proxy.registry import AgentRegistry, InvalidAgent, parse_agent
 from commons.proxy.upstream import UpstreamPool
 from commons.semantics.manifest import load_manifests
 from commons.settings import Settings
@@ -90,6 +92,7 @@ def create_app(
     upstream_configs: dict[str, UpstreamConfig] | None = None,
     db_path: str = "commons.db",
     mode: str = "OBSERVE",
+    agents_path: str = "agents.yaml",
 ):
     pool = UpstreamPool(upstream_configs or default_upstreams())
     ledger = Ledger(db_path)
@@ -97,18 +100,33 @@ def create_app(
     manifests = load_manifests()
     settings = Settings(mode=mode)
     clock = Clock()
+    registry = AgentRegistry(agents_path)
 
-    # Build every (agent, upstream) face up front. Each is a full Starlette sub-app with
-    # its own session manager, so its lifespan must be entered explicitly — nothing runs
-    # the lifespan of a sub-app for you.
+    # Endpoint path -> the sub-app serving it, and one exit stack per agent so an agent
+    # can be unmounted without tearing down the others.
     table: dict[str, object] = {}
-    sub_apps: list[Starlette] = []
-    endpoints: list[str] = []
+    agent_stacks: dict[str, AsyncExitStack] = {}
+    # Set once the app has started. Mounting needs a stack that outlives the request, and
+    # only the lifespan owns one.
+    runtime: dict[str, AsyncExitStack | None] = {"stack": None}
 
-    for agent in AGENTS.values():
-        for upstream in pool:
+    def endpoints_of(agent_id: str) -> list[str]:
+        return sorted(p for p in table if p.startswith(f"/mcp/{agent_id}/"))
+
+    async def mount_agent(agent) -> list[str]:
+        """Build and serve this agent's endpoints, one per vendor it may call.
+
+        Each face is a full Starlette sub-app with its own session manager, so its
+        lifespan has to be entered explicitly — nothing runs the lifespan of a sub-app
+        for you.
+        """
+        stack = AsyncExitStack()
+        await stack.__aenter__()
+        paths: list[str] = []
+
+        for upstream in pool.available():
             if not agent.allowed(upstream.name):
-                continue  # this agent has no business with this upstream at all
+                continue  # this agent has no business with this vendor at all
             face = build_face(
                 agent,
                 upstream,
@@ -119,10 +137,83 @@ def create_app(
                 clock=clock.now,
             )
             sub = face.streamable_http_app(streamable_http_path="/")
+            await stack.enter_async_context(sub.router.lifespan_context(sub))
             path = f"/mcp/{agent.id}/{upstream.name}"
             table[path] = sub
-            sub_apps.append(sub)
-            endpoints.append(path)
+            paths.append(path)
+
+        if not paths:
+            await stack.aclose()
+            return []
+
+        agent_stacks[agent.id] = stack
+        # The stack must be closed when the app stops, not when this call returns.
+        if runtime["stack"] is not None:
+            runtime["stack"].push_async_callback(stack.aclose)
+        logger.info("mounted %s: %s", agent.id, ", ".join(paths))
+        return paths
+
+    async def unmount_agent(agent_id: str) -> None:
+        for path in endpoints_of(agent_id):
+            table.pop(path, None)
+        stack = agent_stacks.pop(agent_id, None)
+        if stack is not None:
+            try:
+                await stack.aclose()
+            except Exception:  # noqa: BLE001 - teardown, the routes are already gone
+                logger.warning("while unmounting %s", agent_id, exc_info=True)
+        logger.info("unmounted %s", agent_id)
+
+    async def list_agents(_request):
+        return _cors(
+            {
+                "agents": [
+                    {
+                        "id": a.id,
+                        "display_name": a.display_name,
+                        "tools": {up: list(names) for up, names in a.tools.items()},
+                        "endpoints": endpoints_of(a.id),
+                    }
+                    for a in sorted(registry, key=lambda a: a.id)
+                ],
+                "vendors": [u.name for u in pool.available()],
+            }
+        )
+
+    async def add_agent(request):
+        """Register an agent and serve it immediately.
+
+        POST /admin/agents
+        {"id": "cart-recovery", "display_name": "Cart Recovery",
+         "tools": {"razorpay": ["create_payment_link"], "messaging": ["send_whatsapp"]}}
+        """
+        body = await request.json()
+        agent_id = str(body.get("id", "")).strip().lower()
+        vendors = {u.name for u in pool.available()}
+        try:
+            spec = parse_agent(agent_id, body, known_upstreams=vendors)
+        except InvalidAgent as exc:
+            return _cors({"error": str(exc)}, 400)
+
+        if registry.get(agent_id):
+            # Re-registering is how a merchant widens or narrows an allowlist, so replace
+            # the routes rather than refusing.
+            await unmount_agent(agent_id)
+
+        registry.add(spec)
+        paths = await mount_agent(spec)
+        if not paths:
+            registry.remove(agent_id)
+            return _cors({"error": f"'{agent_id}' matched no reachable vendor."}, 400)
+
+        return _cors({"id": spec.id, "endpoints": paths}, 201)
+
+    async def delete_agent(request):
+        agent_id = request.path_params["agent_id"]
+        if not registry.remove(agent_id):
+            return _cors({"error": f"no agent '{agent_id}'"}, 404)
+        await unmount_agent(agent_id)
+        return _cors({"removed": agent_id})
 
     async def health(_request):
         return JSONResponse(
@@ -131,10 +222,14 @@ def create_app(
                 "version": COMMONS_VERSION,
                 "mode": settings.mode,
                 "run_id": ledger.run_id,
-                "upstreams": [u.name for u in pool],
+                "upstreams": [u.name for u in pool.available()],
+                # Named so a merchant can see WHY a vendor is missing instead of
+                # wondering where their endpoints went.
+                "unavailable": pool.failed,
                 "manifests": {n: len(m.tools) for n, m in manifests.items()},
                 "rules": [r.id for r in settings.engine.rules],
-                "endpoints": endpoints,
+                "agents": sorted(a.id for a in registry),
+                "endpoints": sorted(table),
             }
         )
 
@@ -356,22 +451,31 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_app: Starlette):
         async with AsyncExitStack() as stack:
+            runtime["stack"] = stack
             await pool.open_all(stack)
-            for sub in sub_apps:
-                await stack.enter_async_context(sub.router.lifespan_context(sub))
+            for agent in registry:
+                await mount_agent(agent)
+
             # Resume, never start. A restart must not wipe what every rule aggregates
             # over; see Ledger.resume_or_start_run.
             run_id = ledger.resume_or_start_run(mode=settings.mode, notes="deployment")
             logger.info(
-                "commons ready - %d endpoints, mode=%s, run=%s",
-                len(endpoints), settings.mode, run_id,
+                "commons ready - %d agents, %d endpoints, mode=%s, run=%s",
+                len(registry), len(table), settings.mode, run_id,
             )
-            for path in endpoints:
+            for path in sorted(table):
                 logger.info("  %s", path)
-            try:
-                yield
-            finally:
-                ledger.end_run()
+            if not registry:
+                logger.info("  no agents registered yet - add one on the Connect page")
+            for name, why in pool.failed.items():
+                logger.warning("  vendor %s is unavailable: %s", name, why)
+
+            # The run is NOT ended here. A run is a deployment lifetime, and ending it on
+            # shutdown meant the next boot found none open, started a fresh one, and reset
+            # every customer's budget and frequency window. Stopping the gateway is not
+            # the end of the merchant's history.
+            yield
+            runtime["stack"] = None
 
     # The dashboard is served from a different port than the gateway, so every request
     # it makes is cross-origin. Per-route headers were not enough: a PUT or POST triggers
@@ -384,7 +488,7 @@ def create_app(
     cors = Middleware(
         CORSMiddleware,
         allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
-        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
@@ -392,6 +496,9 @@ def create_app(
         middleware=[cors],
         routes=[
             Route("/health", health),
+            Route("/admin/agents", list_agents, methods=["GET"]),
+            Route("/admin/agents", add_agent, methods=["POST"]),
+            Route("/admin/agents/{agent_id}", delete_agent, methods=["DELETE"]),
             Route("/admin/entities", seed_entities, methods=["POST"]),
             Route("/admin/entities", list_entities, methods=["GET"]),
             Route("/api/run", api_run),

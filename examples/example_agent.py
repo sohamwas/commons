@@ -5,7 +5,10 @@ This file is the worked example for the Connect page. It is deliberately OUTSIDE
 governs agents whose source it never sees. The only Commons-specific things here are the
 two URLs and one check on the error text.
 
-    .venv/Scripts/python.exe examples/loyalty_agent.py --customers 6
+    .venv/Scripts/python.exe examples/example_agent.py --agent my-agent --customers 6
+
+Register the agent on the Connect page first. Its id is the only thing Commons needs to
+know about it, and the prompt below is yours to replace.
 
 Everything else is an ordinary MCP tool-calling agent. Point BASE_URL at
 https://mcp.razorpay.com/mcp instead and it still runs, ungoverned, which is the
@@ -29,8 +32,7 @@ from openai import OpenAI
 
 load_dotenv(dotenv_path=".env")
 
-AGENT_ID = "loyalty"
-UPSTREAMS = ("razorpay", "messaging")
+DEFAULT_AGENT = "example"
 
 # A merchant's loyalty programme, written to a plausible job description. It is told
 # nothing about Commons, nothing about other agents, and nothing about the merchant's
@@ -68,17 +70,19 @@ def llm() -> tuple[OpenAI, str]:
     return OpenAI(api_key=key, base_url="https://api.groq.com/openai/v1"), "openai/gpt-oss-120b"
 
 
-class LoyaltyAgent:
-    def __init__(self, base_url: str) -> None:
+class ExampleAgent:
+    def __init__(self, base_url: str, agent_id: str, upstreams: tuple[str, ...]) -> None:
         self.base_url = base_url
+        self.agent_id = agent_id
+        self.upstreams = upstreams
         self.sessions: dict[str, ClientSession] = {}
         self.owner: dict[str, str] = {}
         self.tools: list[dict] = []
         self.client, self.model = llm()
 
     async def connect(self, stack: AsyncExitStack) -> None:
-        for upstream in UPSTREAMS:
-            url = f"{self.base_url}/mcp/{AGENT_ID}/{upstream}"
+        for upstream in self.upstreams:
+            url = f"{self.base_url}/mcp/{self.agent_id}/{upstream}"
             http = await stack.enter_async_context(httpx.AsyncClient(timeout=90.0))
             read, write = await stack.enter_async_context(
                 streamable_http_client(url, http_client=http)
@@ -187,13 +191,15 @@ async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8787")
     parser.add_argument("--customers", type=int, default=6)
+    parser.add_argument("--agent", default=DEFAULT_AGENT, help="the id you registered")
+    parser.add_argument("--vendors", default="razorpay,messaging")
     args = parser.parse_args()
 
     people = await targets(args.base_url, args.customers)
     if not people:
         sys.exit("No customers with a phone number. Import some on the Data page first.")
 
-    agent = LoyaltyAgent(args.base_url)
+    agent = ExampleAgent(args.base_url, args.agent, tuple(v.strip() for v in args.vendors.split(",")))
     allowed = refused = 0
 
     async with AsyncExitStack() as stack:

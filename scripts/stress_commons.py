@@ -4,7 +4,8 @@
 
 Runs against a SEPARATE proxy on its own port and its own database, with in-memory
 upstreams, so it never touches Razorpay's test account (which caps payment links at 30)
-and never disturbs the recorded demo run.
+and never disturbs the merchant's own ledger. It registers its own agents through the
+same admin API a merchant uses, so it exercises the real onboarding path.
 
 Deliberately no LLM. A stress test should measure Commons, not model variance, and a
 deterministic driver can hammer far harder than a free-tier quota allows.
@@ -36,13 +37,22 @@ from mcp.client.streamable_http import streamable_http_client
 
 from commons.config import UpstreamConfig
 from commons.proxy.app import create_app
-from commons.proxy.registry import AGENTS
 from mcp_servers.fake_razorpay.server import build_fake_razorpay
 from mcp_servers.messaging.server import build_messaging_server
 
 PORT = 8799
 BASE = f"http://127.0.0.1:{PORT}"
 DB = "stress.db"
+AGENTS_FILE = "stress-agents.yaml"
+
+# The harness registers its own agents through the same API a merchant uses, so it is
+# testing the real onboarding path rather than a fixture.
+TEST_AGENTS = {
+    "load-a": {"razorpay": ["create_payment_link", "fetch_order"], "messaging": ["send_whatsapp"]},
+    "load-b": {"razorpay": ["create_payment_link", "fetch_order"], "messaging": ["send_whatsapp"]},
+    "load-c": {"razorpay": ["create_payment_link", "fetch_order"], "messaging": ["send_whatsapp"]},
+    "reader": {"razorpay": ["fetch_order"], "messaging": ["send_whatsapp"]},
+}
 
 PASS, FAIL = "PASS", "FAIL"
 results: list[tuple[str, str, str]] = []
@@ -169,9 +179,7 @@ async def probe_concurrency(stack: AsyncExitStack) -> None:
     # Taken from the registry rather than hardcoded, so this cannot silently degrade into
     # testing nothing when an allowlist changes. It did exactly that on the first run:
     # rto-shield has no create_payment_link, so the load was a third short of the cap.
-    granting = [
-        agent for agent, spec in AGENTS.items() if "create_payment_link" in spec.allowed("razorpay")
-    ]
+    granting = [a for a, tools in TEST_AGENTS.items() if "create_payment_link" in tools["razorpay"]]
     cap, pct = 15, 6
     assert len(granting) * pct > cap >= (len(granting) - 1) * pct, (
         f"{len(granting)} agents x {pct}% does not straddle a cap of {cap}"
@@ -212,7 +220,7 @@ async def probe_edges(stack: AsyncExitStack) -> None:
     print("\n3. EDGE CASES", flush=True)
     await api("POST", "/admin/run", {"notes": "stress edges"})
 
-    c = Client("loyalty")
+    c = Client("load-a")  # needs an agent that can actually grant
     await c.open(stack)
 
     # A tool the merchant did not allowlist for this agent.
@@ -268,7 +276,7 @@ async def probe_enforce(stack: AsyncExitStack) -> None:
     await api("PUT", "/api/policy", {"mode": "ENFORCE"})
     await api("POST", "/admin/run", {"notes": "stress enforce"})
 
-    c = Client("loyalty")
+    c = Client("reader")
     await c.open(stack, upstreams=("messaging",))
 
     phone = "+919899000010"
@@ -289,7 +297,7 @@ async def probe_latency(stack: AsyncExitStack) -> None:
     print("\n5. LATENCY", flush=True)
     await api("POST", "/admin/run", {"notes": "stress latency"})
 
-    c = Client("loyalty")
+    c = Client("reader")
     await c.open(stack, upstreams=("messaging",))
 
     samples = []
@@ -326,9 +334,11 @@ async def main() -> int:
     parser.add_argument("--customers", type=int, default=25)
     args = parser.parse_args()
 
-    agents = ["cart-recovery", "subscription-recovery", "rto-shield", "loyalty"]
+    agents = list(TEST_AGENTS)
 
-    app = create_app(upstream_configs=stress_upstreams(), db_path=DB, mode="OBSERVE")
+    app = create_app(
+        upstream_configs=stress_upstreams(), db_path=DB, mode="OBSERVE", agents_path=AGENTS_FILE
+    )
     config = uvicorn.Config(app, host="127.0.0.1", port=PORT, log_level="error")
     server = uvicorn.Server(config)
     serving = asyncio.create_task(server.serve())
@@ -342,6 +352,10 @@ async def main() -> int:
         return 1
 
     print(f"stress proxy on {BASE}, db={DB}, in-memory upstreams", flush=True)
+    for agent_id, tools in TEST_AGENTS.items():
+        await api("POST", "/admin/agents", {"id": agent_id, "tools": tools})
+    print(f"registered {len(TEST_AGENTS)} agents through the admin API", flush=True)
+
     try:
         return await run_all(agents, args.customers)
     finally:
