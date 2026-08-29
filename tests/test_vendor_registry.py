@@ -125,3 +125,30 @@ def test_round_trips_through_yaml(registry):
     back = VendorRegistry(registry.path).get("crm")
     assert back.url == "https://x/mcp"
     assert back.headers == {"A": "b"}
+
+
+def test_a_secret_composes_with_a_scheme(monkeypatch):
+    """Bearer env:TOKEN is the shape almost every hosted MCP server wants.
+
+    Resolving only values that STARTED with env: made this impossible: the bare form sent
+    a token with no scheme, and the composed form was sent literally. Both came back
+    Unauthorized, which is a confusing way to discover the placeholder does not compose.
+    """
+    monkeypatch.setenv("RESEND_API_KEY", "re_abc123")
+    v = parse_vendor(
+        "resend",
+        {"url": "https://x/mcp", "headers": {"Authorization": "Bearer env:RESEND_API_KEY"}},
+    )
+    assert v.to_upstream().headers["Authorization"] == "Bearer re_abc123"
+
+
+def test_several_secrets_in_one_value(monkeypatch):
+    monkeypatch.setenv("A_ID", "id1")
+    monkeypatch.setenv("A_SECRET", "s1")
+    v = parse_vendor("x", {"url": "https://x/mcp", "headers": {"X": "env:A_ID:env:A_SECRET"}})
+    assert v.to_upstream().headers["X"] == "id1:s1"
+
+
+def test_a_value_with_no_placeholder_is_left_alone():
+    v = parse_vendor("x", {"url": "https://x/mcp", "headers": {"X-Api-Version": "2024-01"}})
+    assert v.to_upstream().headers["X-Api-Version"] == "2024-01"

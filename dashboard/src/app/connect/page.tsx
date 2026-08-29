@@ -239,11 +239,12 @@ export default function ConnectPage() {
                 <input
                   className="mono"
                   value={vHeader}
-                  placeholder="Authorization: env:MY_TOKEN"
+                  placeholder="Authorization: Bearer env:MY_TOKEN"
                   onChange={(e) => setVHeader(e.target.value)}
                 />
                 <span className="field-hint">
-                  optional. env:NAME reads from .env instead of storing the secret
+                  optional. Most hosted servers want Bearer env:NAME, which reads the
+                  token from .env instead of storing it here
                 </span>
               </label>
             </div>

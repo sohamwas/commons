@@ -32,7 +32,8 @@ DEFAULT_PATH = Path("vendors.yaml")
 # Vendor names become URL path segments, exactly like agent ids.
 NAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 
-ENV_PREFIX = "env:"
+# env:NAME anywhere in a header value, so "Bearer env:TOKEN" composes.
+ENV_REF = re.compile(r"env:([A-Za-z_][A-Za-z0-9_]*)")
 
 
 class InvalidVendor(ValueError):
@@ -72,15 +73,27 @@ class VendorDef:
         return body
 
     def _resolve(self, value: str) -> str:
-        if not value.startswith(ENV_PREFIX):
-            return value
-        env_name = value[len(ENV_PREFIX):].strip()
-        found = os.environ.get(env_name, "").strip()
-        if not found:
-            raise InvalidVendor(
-                f"'{self.name}' expects a value from ${env_name}, which is not set in .env"
-            )
-        return found
+        """Substitute every env:NAME in the value, wherever it appears.
+
+        Resolving only a value that STARTS with env: made the common case impossible.
+        Almost every hosted MCP server wants `Authorization: Bearer <token>`, and neither
+        spelling worked: "env:TOKEN" produced a bare token with no scheme, and
+        "Bearer env:TOKEN" did not start with the prefix so it was sent literally. Both
+        came back Unauthorized, which is a confusing way to learn that the placeholder
+        cannot be composed with anything.
+        """
+
+        def swap(match: re.Match) -> str:
+            env_name = match.group(1)
+            found = os.environ.get(env_name, "").strip()
+            if not found:
+                raise InvalidVendor(
+                    f"'{self.name}' expects a value from ${env_name}, "
+                    "which is not set in .env"
+                )
+            return found
+
+        return ENV_REF.sub(swap, value)
 
     def to_upstream(self) -> UpstreamConfig:
         if self.auth == "razorpay":
