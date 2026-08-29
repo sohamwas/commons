@@ -1,0 +1,14 @@
+Customer ID,Full Name,Mobile Number,Email Address,Order ID,Loyalty Tier
+cust_9001,Priya Nair,+91 99000 10001,priya.nair@example.com,order_9001,gold
+cust_9002,"Rao, Arjun",9900010002,Arjun.Rao@Example.COM,order_9002,silver
+cust_9003,Meera Krishnan,09900010003,meera.k@example.com,order_9003,gold
+
+cust_9004,Ishaan Gupta,+919900010004,ishaan.g@example.com,order_9004,bronze
+cust_9005,"D'Souza, Ryan",99000-10005,ryan.dsouza@example.com,order_9005,silver
+cust_9006,Ananya Bose,+91 99000 10006,ananya.bose@example.com,order_9006,gold
+cust_9007,Vikram Iyer,9900010007,,order_9007,bronze
+cust_9008,Fatima Sheikh,+91 99000 10008,fatima.s@example.com,,silver
+cust_9009,Rohan Kulkarni,9900010009,rohan.k@example.com,order_9009,gold
+,Neha Joshi,9900010010,,,bronze
+cust_9011,Aditya Menon,+91 99000 10011,aditya.menon@example.com,order_9011,silver
+cust_9012,Sanjana Reddy,09900010012,sanjana.r@example.com,order_9012,gold

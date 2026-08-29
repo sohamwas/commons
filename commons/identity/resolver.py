@@ -129,6 +129,24 @@ class IdentityResolver:
         )
         return "conflict"
 
+    def existing_for(self, handles: dict[str, object]) -> set[str]:
+        """Which entities do these handles already point at? Creates nothing.
+
+        Re-importing the same customer list is normal: a merchant syncs, adds a column,
+        syncs again. Without this the importer minted a fresh entity every time and
+        repointed the handles onto it, leaving the previous one behind with no handles
+        and no way to reach it.
+        """
+        found: set[str] = set()
+        for namespace, raw in handles.items():
+            value = normalise(namespace, raw)
+            if value is None:
+                continue
+            existing = self.ledger.lookup_identity(namespace, value)
+            if existing:
+                found.add(existing)
+        return found
+
     def declare(self, entity_id: str, handles: dict[str, object], source: str = "declared") -> None:
         """Seed the graph: one entity owning several vendor handles.
 

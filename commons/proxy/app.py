@@ -153,16 +153,47 @@ def create_app(
         """
         body = await request.json()
         mapping: dict[str, str] = {}
+        created = updated = conflicts = 0
+
         for item in body.get("entities", []):
             handles = item.get("handles") or {}
             ref = item.get("ref") or handles.get("customer_id") or item.get("display_name", "")
-            entity_id = ledger.create_entity(item.get("display_name") or ref)
+
+            # Re-importing a customer list is normal: sync, add a column, sync again.
+            # Minting a new entity every time repointed the handles onto it and left the
+            # previous one stranded with no handles, so the same person accumulated a
+            # duplicate per import and their history stopped following them.
+            known = resolver.existing_for(handles)
+            if len(known) == 1:
+                entity_id = known.pop()
+                updated += 1
+            elif not known:
+                entity_id = ledger.create_entity(item.get("display_name") or ref)
+                created += 1
+            else:
+                # These handles are spread across several existing people. Merging them
+                # is a judgement with real consequences, so link nothing and say so.
+                conflicts += 1
+                logger.warning(
+                    "import conflict: %s spans %d existing customers, skipped", ref, len(known)
+                )
+                continue
+
             resolver.declare(entity_id, handles, source="merchant-declared")
             for key, value in (item.get("state") or {}).items():
                 ledger.set_state(entity_id, key, value)
             mapping[ref] = entity_id
-        logger.info("seeded %d entities", len(mapping))
-        return JSONResponse({"seeded": len(mapping), "entities": mapping})
+
+        logger.info("import: %d new, %d updated, %d conflicts", created, updated, conflicts)
+        return JSONResponse(
+            {
+                "seeded": len(mapping),
+                "created": created,
+                "updated": updated,
+                "conflicts": conflicts,
+                "entities": mapping,
+            }
+        )
 
     async def start_run(request):
         """Begin a new run in the ledger.
