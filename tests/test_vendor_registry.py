@@ -152,3 +152,50 @@ def test_several_secrets_in_one_value(monkeypatch):
 def test_a_value_with_no_placeholder_is_left_alone():
     v = parse_vendor("x", {"url": "https://x/mcp", "headers": {"X-Api-Version": "2024-01"}})
     assert v.to_upstream().headers["X-Api-Version"] == "2024-01"
+
+
+# ---------------------------------------------------------------- a bad vendor is not fatal
+
+
+def test_razorpay_without_a_secret_is_unavailable_not_fatal(tmp_path, monkeypatch):
+    """A vendor that cannot authenticate must not take the gateway down at boot.
+
+    This is the failure a copied .env.example produced on a first run: the placeholder
+    set a key id, left the secret empty, and the resulting RuntimeError escaped
+    upstream_configs' handler and killed the process before anything served. The gateway
+    is supposed to start, report the vendor as unavailable, and let the merchant fix it
+    from the Connect page.
+    """
+    monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_test_xxxxxxxxxxxx")
+    monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
+
+    registry = VendorRegistry(tmp_path / "vendors.yaml")
+    registry.add(VendorDef(name="razorpay", url="https://mcp.razorpay.com/mcp", auth="razorpay"))
+
+    configs = registry.upstream_configs()
+
+    assert "razorpay" not in configs, "a vendor that cannot authenticate must not be offered"
+    assert registry.get("razorpay") is not None, "and it must stay in the list to be fixed"
+
+
+def test_a_live_key_is_refused_without_killing_the_gateway(tmp_path, monkeypatch):
+    """Commons forwards real write calls, so a live key is refused. Refused, not fatal."""
+    monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_live_realaccount")
+    monkeypatch.setenv("RAZORPAY_KEY_SECRET", "somesecret")
+
+    registry = VendorRegistry(tmp_path / "vendors.yaml")
+    registry.add(VendorDef(name="razorpay", url="https://mcp.razorpay.com/mcp", auth="razorpay"))
+
+    assert registry.upstream_configs() == {}
+
+
+def test_a_key_id_alone_does_not_add_razorpay_by_default(monkeypatch):
+    """Half a credential is not a configured vendor."""
+    from commons.proxy.vendors import seed_defaults
+
+    monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_test_xxxxxxxxxxxx")
+    monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
+    assert "razorpay" not in seed_defaults()
+
+    monkeypatch.setenv("RAZORPAY_KEY_SECRET", "a-real-secret")
+    assert "razorpay" in seed_defaults()

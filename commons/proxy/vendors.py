@@ -97,7 +97,19 @@ class VendorDef:
 
     def to_upstream(self) -> UpstreamConfig:
         if self.auth == "razorpay":
-            return razorpay_remote()
+            try:
+                return razorpay_remote()
+            except RuntimeError as exc:
+                # config.py signals a missing key, or a live key where a test key is
+                # required, with RuntimeError. upstream_configs() below turns a bad
+                # vendor into one reported as unavailable rather than a dead gateway,
+                # but it can only do that for InvalidVendor: a RuntimeError went
+                # straight past it and took the process down at boot.
+                #
+                # That is how a copied .env.example killed a first run. The file set
+                # RAZORPAY_KEY_ID to a placeholder and left the secret empty, which was
+                # enough to look configured and not enough to authenticate.
+                raise InvalidVendor(f"'{self.name}' cannot authenticate: {exc}") from exc
         if self.command:
             return UpstreamConfig(
                 name=self.name,
@@ -159,7 +171,12 @@ def seed_defaults() -> dict[str, VendorDef]:
     merchant has to work out that the cause is an empty .env.
     """
     vendors: dict[str, VendorDef] = {}
-    if os.environ.get("RAZORPAY_KEY_ID", "").strip():
+    # BOTH halves, not just the id. A key id on its own cannot authenticate, and checking
+    # only the id let a placeholder .env add a vendor that could never work.
+    if (
+        os.environ.get("RAZORPAY_KEY_ID", "").strip()
+        and os.environ.get("RAZORPAY_KEY_SECRET", "").strip()
+    ):
         vendors["razorpay"] = VendorDef(
             name="razorpay", url="https://mcp.razorpay.com/mcp", auth="razorpay"
         )
