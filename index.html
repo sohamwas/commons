@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Commons: limits that follow the customer, not the agent</title>
+<meta name="description" content="An arbitration layer for merchants running more than one AI agent. Every agent platform scopes permissions to the agent. Commons scopes limits to the customer being acted upon." />
+<meta property="og:title" content="Commons" />
+<meta property="og:description" content="Every agent was right. The merchant was still wrong." />
+<meta property="og:type" content="website" />
+
+<link rel="preload" href="fonts/geist-gyByhwUxId8gMEwcGFU.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/geist-mono-or3nQ6H-1_WfwkMZI_qYFrcdmg.woff2" as="font" type="font/woff2" crossorigin />
+
+<style>
+/*
+ * Fonts are served from this origin, not from Google. The page therefore makes zero
+ * third-party requests: nothing a visitor loads here tells anyone else that they read it.
+ *
+ * Both families are variable, so one file covers every weight we use. Latin subset only,
+ * which is what turns 27 files into 2 and 51KB total.
+ */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url(fonts/geist-gyByhwUxId8gMEwcGFU.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url(fonts/geist-mono-or3nQ6H-1_WfwkMZI_qYFrcdmg.woff2) format('woff2');
+}
+
+/*
+ * Commons marketing site.
+ *
+ * Dark, locked. The palette is lifted from the product's own dashboard so the site and
+ * the thing it describes look like one system. One accent (electric blue) across every
+ * section. The amber and red appearing inside the refusal block are not a second accent:
+ * they are the product's own verdict colours, quoted, and they appear nowhere else.
+ */
+
+:root {
+  --bg: #0a0b0d;
+  --surface: #101216;
+  --surface-2: #15181d;
+  --border: #23262e;
+  --border-bright: #313641;
+
+  --text: #e8eaee;
+  --text-dim: #99a0ac;
+  --text-faint: #626976;
+
+  --accent: #4c9aff;
+  --accent-dim: #1e3a5f;
+
+  /* Quoted from the gateway's own verdicts. Confined to the refusal block. */
+  --defer: #e0a53c;
+  --block: #ff5c5c;
+
+  --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  --radius: 10px;
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+/* ---------------------------------------------------------------- nav */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  background: rgba(10, 11, 13, 0.82);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 16px;
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.nav a.link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.nav a.link:hover { color: var(--text); }
+
+@media (max-width: 720px) {
+  .nav a.link { display: none; }
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.12s, background 0.2s, border-color 0.2s;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #061223;          /* dark ink on a light-blue fill, WCAG AA */
+  font-weight: 600;
+}
+.btn-primary:hover { background: #6aabff; }
+
+.btn-ghost {
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+.btn-ghost:hover { border-color: var(--text-faint); background: var(--surface); }
+
+/* ---------------------------------------------------------------- hero */
+
+.hero {
+  padding: 72px 0 84px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 56px;
+  align-items: center;
+}
+
+/* Scale is planned against the column width, not chosen for impact. Both sentences must
+   sit on one line each at desktop: a four-line hero headline is a font-size error. */
+h1 {
+  margin: 0 0 22px;
+  font-size: clamp(32px, 4.1vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+h1 .muted { color: var(--text-faint); display: block; }
+
+.hero p {
+  margin: 0 0 30px;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.shot {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+.shot img { display: block; width: 100%; height: auto; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero { padding: 56px 0 64px; }
+}
+
+/* ---------------------------------------------------------------- sections */
+
+section { padding: 96px 0; border-bottom: 1px solid var(--border); }
+
+h2 {
+  margin: 0 0 18px;
+  font-size: clamp(27px, 3.2vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.lede {
+  color: var(--text-dim);
+  font-size: 17px;
+  max-width: 62ch;
+  margin: 0 0 14px;
+}
+
+/* --- the problem: two narrated collisions, stacked --- */
+
+.collisions { display: grid; gap: 28px; margin-top: 48px; }
+
+.collision {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  gap: 28px;
+  padding: 26px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.collision .who {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.9;
+}
+.collision .what { margin: 0; color: var(--text-dim); font-size: 15.5px; }
+.collision .what strong { color: var(--text); font-weight: 500; }
+
+@media (max-width: 700px) {
+  .collision { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* --- five primitives: asymmetric five-cell grid, no equal thirds --- */
+
+.rules { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 1px; margin-top: 48px;
+         background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+/* Cells are not uniform: the lead cell carries a tinted surface and a soft accent wash so
+   the grid reads as a composition rather than five identical text boxes. */
+.rule { background: var(--bg); padding: 30px 28px; }
+.rule:nth-child(1) {
+  grid-column: 1; grid-row: 1 / span 2;
+  display: flex; flex-direction: column; justify-content: center;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(76, 154, 255, 0.10), transparent 62%),
+    var(--surface-2);
+}
+.rule:nth-child(3), .rule:nth-child(5) { background: var(--surface); }
+/* Five items, five cells. The lead cell holds column one across both rows and the
+   remaining four fill a 2x2, so the grid ends flush with no empty tile. */
+.rule:nth-child(2) { grid-column: 2; grid-row: 1; }
+.rule:nth-child(3) { grid-column: 3; grid-row: 1; }
+.rule:nth-child(4) { grid-column: 2; grid-row: 2; }
+.rule:nth-child(5) { grid-column: 3; grid-row: 2; }
+.rule:nth-child(4) { grid-column: span 1; }
+.rule:nth-child(5) { grid-column: span 2; }
+
+.rule .name { font-family: var(--mono); font-size: 12.5px; color: var(--accent); margin-bottom: 10px; }
+.rule .q { margin: 0; font-size: 16px; color: var(--text); line-height: 1.45; }
+.rule .note { margin: 12px 0 0; font-size: 14px; color: var(--text-faint); line-height: 1.5; }
+
+@media (max-width: 860px) {
+  .rules { grid-template-columns: 1fr; }
+  .rule:nth-child(1), .rule:nth-child(2), .rule:nth-child(3),
+  .rule:nth-child(4), .rule:nth-child(5) { grid-column: 1; grid-row: auto; }
+}
+
+/* --- real refusals --- */
+
+.log {
+  margin-top: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.log-row { display: grid; grid-template-columns: 210px 1fr; gap: 24px; padding: 20px 26px; border-top: 1px solid var(--border); }
+.log-row:first-child { border-top: none; }
+.log-rule { font-family: var(--mono); font-size: 12.5px; color: var(--text-faint); }
+.log-verdict { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; display: block; margin-bottom: 5px; }
+.v-defer { color: var(--defer); }
+.v-block { color: var(--block); }
+.log-text { font-family: var(--mono); font-size: 13.5px; color: var(--text); line-height: 1.6; word-break: break-word; }
+
+@media (max-width: 760px) {
+  .log-row { grid-template-columns: 1fr; gap: 8px; }
+}
+
+.figures { display: flex; gap: 48px; margin-top: 40px; flex-wrap: wrap; }
+.fig .n { font-family: var(--mono); font-size: 30px; font-weight: 500; letter-spacing: -0.02em; }
+.fig .l { font-size: 13.5px; color: var(--text-faint); margin-top: 2px; }
+
+/* --- code --- */
+
+pre {
+  margin: 0;
+  padding: 24px 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text-dim);
+}
+pre .add { color: #7ee2a8; }
+pre .del { color: var(--block); }
+pre .key { color: var(--accent); }
+pre .cm { color: var(--text-faint); }
+
+.code-note { margin: 22px 0 0; color: var(--text-dim); max-width: 60ch; font-size: 15.5px; }
+
+.two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; margin-top: 44px; align-items: start; }
+@media (max-width: 900px) { .two-up { grid-template-columns: 1fr; gap: 28px; } }
+
+/* Deliberately not .two-up: the prose column is narrower and the media is weighted
+   heavier, so this section does not read as a repeat of the code section below it. */
+.media-split { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 56px; align-items: center; }
+@media (max-width: 900px) { .media-split { grid-template-columns: 1fr; gap: 32px; } }
+
+/* --- local: full-bleed statement --- */
+
+.statement { text-align: center; padding: 24px 0; }
+.statement h2 { max-width: 20ch; margin-left: auto; margin-right: auto; }
+.statement .lede { margin-left: auto; margin-right: auto; }
+
+/* --- footer --- */
+
+footer { padding: 84px 0 64px; }
+.foot-grid { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+.foot-note { color: var(--text-faint); font-size: 13.5px; }
+.install {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin: 22px 0 30px;
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------- motion
+   MOTION_INTENSITY 4. One device: content lifts as it enters. It communicates
+   reading order and nothing else, which is the only reason it is here. */
+
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+</style>
+
+<!-- With scripting off the reveal class would hide most of the page. Content first. -->
+<noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top">Commons</a>
+    <a class="link" href="#problem">How it works</a>
+    <a class="link" href="#rules">What it enforces</a>
+    <a class="link" href="#integrate">Integration</a>
+    <a class="btn btn-ghost" href="https://github.com/sohamwas/commons">View on GitHub</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO: asymmetric split -->
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>Every agent was right.<span class="muted">The merchant was wrong.</span></h1>
+        <p>Agent platforms scope permissions to the agent. Commons scopes limits to the customer being acted upon.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/sohamwas/commons">View on GitHub</a>
+          <a class="btn btn-ghost" href="#problem">How it works</a>
+        </div>
+      </div>
+      <div class="shot reveal">
+        <img src="call-detail.png" width="2880" height="1880" fetchpriority="high"
+             alt="The Commons dashboard: one customer's timeline across four agent lanes, and a discount call stopped by two rules at once." />
+      </div>
+    </div>
+  </div>
+
+  <!-- THE PROBLEM: narrated collisions -->
+  <section id="problem">
+    <div class="wrap">
+      <h2 class="reveal">Nobody exceeded their own limit.</h2>
+      <p class="lede reveal">Each agent has its own ceiling and stays under it. No permission system is watching the
+        one thing that accumulates, which is the person on the other end.</p>
+
+      <div class="collisions">
+        <div class="collision reveal">
+          <div class="who">Cart Recovery<br />Subscription Recovery</div>
+          <p class="what">Cart Recovery offers 10% off to rescue an abandoned basket. Subscription Recovery, working
+            the same person's failed mandate, offers 8% to keep them. Each is well inside its own ceiling.
+            <strong>The customer is now holding 18% against a 15% cap.</strong></p>
+        </div>
+        <div class="collision reveal">
+          <div class="who">RTO Shield<br />Cart Recovery</div>
+          <p class="what">RTO Shield decides a customer is a return risk and locks their order to prepaid.
+            Cart Recovery, an hour into its own cycle, offers that same customer 10% off to buy.
+            <strong>The merchant is arguing with itself, and neither agent can see it.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IT ENFORCES: asymmetric five-cell grid -->
+  <section id="rules">
+    <div class="wrap">
+      <h2 class="reveal">Five questions a single call cannot answer.</h2>
+      <p class="lede reveal">Each one needs history and aggregation across every agent, which is exactly why
+        per-agent validation cannot express them.</p>
+
+      <div class="rules reveal">
+        <div class="rule">
+          <div class="name">Contradiction</div>
+          <p class="q">Does this undo what another agent just did?</p>
+          <p class="note">A fulfilment restriction and a discount incentive on the same customer is not a limit
+            breach. Nobody exceeded anything. It is the merchant working against itself, and no per-agent control
+            can see it.</p>
+        </div>
+        <div class="rule">
+          <div class="name">RateLimit</div>
+          <p class="q">How many times has this happened to them in a window?</p>
+        </div>
+        <div class="rule">
+          <div class="name">CumulativeBudget</div>
+          <p class="q">How much have they been given in total?</p>
+        </div>
+        <div class="rule">
+          <div class="name">StateCondition</div>
+          <p class="q">Is this allowed given their current state?</p>
+        </div>
+        <div class="rule">
+          <div class="name">MutualExclusion</div>
+          <p class="q">Is another agent already working this order?</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REAL REFUSALS -->
+  <section id="refusals">
+    <div class="wrap">
+      <h2 class="reveal">The agent gets a tool error, not a log line.</h2>
+      <p class="lede reveal">Violating calls are stopped before they reach the vendor. These are verbatim refusals
+        from one run of four agents against live Razorpay and Resend servers.</p>
+
+      <div class="log reveal">
+        <div class="log-row">
+          <div class="log-rule"><span class="log-verdict v-defer">DEFER</span>msg_frequency</div>
+          <div class="log-text">2 promotional_message in 24h, limit 1 (last by cart-recovery)</div>
+        </div>
+        <div class="log-row">
+          <div class="log-rule"><span class="log-verdict v-block">BLOCK</span>restriction_beats_incentive</div>
+          <div class="log-text">discount_grant contradicts fulfilment_restriction set by rto-shield within 7d</div>
+        </div>
+        <div class="log-row">
+          <div class="log-rule"><span class="log-verdict v-block">BLOCK</span>discount_cap</div>
+          <div class="log-text">10 + 8 = 18% in 30d, cap 15</div>
+        </div>
+        <div class="log-row">
+          <div class="log-rule"><span class="log-verdict v-defer">DEFER</span>one_agent_per_order</div>
+          <div class="log-text">rto-shield is already working order_TVczagexvBNqIl (lease 30m)</div>
+        </div>
+      </div>
+
+      <div class="figures reveal">
+        <div class="fig"><div class="n">4</div><div class="l">agents, two vendors</div></div>
+        <div class="fig"><div class="n">13</div><div class="l">customers resolved</div></div>
+        <div class="fig"><div class="n">71</div><div class="l">calls in the run</div></div>
+        <div class="fig"><div class="n">15</div><div class="l">stopped at the gateway</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- YOUR RULES: media split, image weighted heavier than the prose -->
+  <section id="yours">
+    <div class="wrap media-split">
+      <div class="reveal">
+        <h2>The limits are yours, in your words.</h2>
+        <p class="lede">Every rule carries the sentence you wrote beside the invariant that is actually enforced, so
+          you can check that the two still agree. Edit a threshold and it applies on the next call. Your agents stay
+          connected.</p>
+      </div>
+      <div class="shot reveal">
+        <img src="rules.png" width="2880" height="1880" loading="lazy"
+             alt="The Rules screen: each plain English sentence shown with its primitive, window, threshold and breach behaviour." />
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRATION -->
+  <section id="integrate">
+    <div class="wrap">
+      <h2 class="reveal">One line, in a config file you already own.</h2>
+      <div class="two-up">
+        <div class="reveal">
+<pre><span class="del">- "razorpay": { "url": "https://mcp.razorpay.com/mcp" }</span>
+<span class="add">+ "razorpay": { "url": "http://127.0.0.1:8787/mcp/cart-recovery/razorpay" }</span></pre>
+          <p class="code-note">Nothing inside the agent changes. That is why this works for agents you did not
+            write and cannot modify.</p>
+        </div>
+        <div class="reveal">
+<pre><span class="cm"># what a vendor tool means, and to whom</span>
+create_payment_link:
+  <span class="key">action_class</span>: discount_grant
+  <span class="key">entity</span>:    { from: args, path: customer_contact }
+  <span class="key">magnitude</span>: { from: args, path: notes.discount_pct }
+  <span class="key">resource</span>:  { from: args, path: notes.order_id }</pre>
+          <p class="code-note">Written from the schemas a vendor already publishes. Never from its source, which is
+            what lets Commons govern a third-party agent calling a third-party vendor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCAL -->
+  <section>
+    <div class="wrap statement">
+      <h2 class="reveal">It runs entirely on your machine.</h2>
+      <p class="lede reveal">Commons sees payment amounts, customer identifiers and refund decisions. That is why it
+        is never hosted for you, and why the dashboard is something you clone rather than something you log into.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <h2 class="reveal">Start in observe mode.</h2>
+          <p class="lede reveal">Nothing is blocked, so no agent can break. Watch for a few days, then enforce.</p>
+          <div class="install reveal">git clone https://github.com/sohamwas/commons &amp;&amp; python scripts/start.py</div>
+          <div>
+            <a class="btn btn-primary" href="https://github.com/sohamwas/commons">View on GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+// IntersectionObserver, not a scroll listener: no work on frames where nothing entered.
+//
+// Two guards, because the failure mode here is content that never becomes visible at all,
+// which is far worse than an animation that does not play:
+//
+//   threshold 0 fires as soon as a single pixel enters. At 0.15 a section scrolled past
+//   quickly could enter and leave inside one callback batch and be reported as not
+//   intersecting, leaving it blank permanently.
+//
+//   revealAll runs on pageshow and on any hard failure, so a browser quirk cannot leave
+//   the lower half of the page invisible.
+(function () {
+  var items = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+  function revealAll() {
+    items.forEach(function (el) { el.classList.add("in"); });
+  }
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !("IntersectionObserver" in window)) { revealAll(); return; }
+
+  try {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        // isIntersecting alone is not enough. On a fast scroll or an anchor jump an
+        // element can enter and leave between two callbacks, and it is then reported as
+        // not intersecting and stays invisible for the rest of the session. Anything
+        // whose top has already passed the bottom of the viewport has been reached, so
+        // reveal it too.
+        var reached = e.isIntersecting || e.boundingClientRect.top < window.innerHeight;
+        if (reached) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0, rootMargin: "0px 0px -32px 0px" });
+    items.forEach(function (el) { io.observe(el); });
+  } catch (err) {
+    revealAll();
+  }
+
+  // Restoring from the back/forward cache can skip the observer entirely.
+  window.addEventListener("pageshow", function (e) { if (e.persisted) revealAll(); });
+})();
+</script>
+
+</body>
+</html>
