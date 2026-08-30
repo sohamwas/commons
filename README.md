@@ -18,10 +18,37 @@ decisions, so it is never hosted for you.
 
 ## Getting started
 
-Two ways in. Docker if you want the whole thing up in one command; the manual path below
-if you want to develop against it.
+Three ways in. The launcher is the shortest; Docker if you would rather it were
+containerised; the manual path below if you want to see what either of them is doing.
+
+### One command
+
+```bash
+python scripts/start.py
+```
+
+That is the whole thing from a clean clone. It creates the virtualenv, installs both sets
+of dependencies, starts the gateway, the dashboard and the reference messaging vendor,
+waits until each is answering, and prints where to look. Ctrl+C stops all of them.
+
+Needs Python 3.11+ and Node 20+, which the gateway and the dashboard already require. It
+is stdlib only, because a launcher whose job is to install the dependencies cannot have
+dependencies of its own.
+
+```bash
+python scripts/start.py --mode ENFORCE     # start enforcing straight away
+python scripts/start.py --no-messaging     # skip the local reference vendor
+python scripts/start.py --gateway-port 9000 --dashboard-port 4000
+```
+
+First run installs npm packages and takes a few minutes. After that the gateway answers in
+seconds and the dashboard in under a minute.
 
 ### Docker
+
+Same three services, same three ports, if you would rather not have Node and Python on the
+host. On Windows this needs the WSL2 backend, which is a reboot and a 1GB install before
+you see anything; the launcher above needs neither.
 
 ```bash
 cp .env.example .env      # optional: add Razorpay test keys now or from Connect later
@@ -201,7 +228,7 @@ commons/semantics/   what each vendor tool means
 dashboard/           the local dashboard (Next.js)
 mcp_servers/         a reference messaging vendor, and an in-memory one for tests
 examples/            a worked agent that imports nothing from commons/
-scripts/             run_proxy and the stress harness
+scripts/             start (the one-command launcher), run_proxy, the stress harness
 Dockerfile           the gateway and the messaging vendor, one image, two commands
 dashboard/Dockerfile the dashboard: built to static HTML, served by nginx
 docker-compose.yml   all three, ports bound to loopback
