@@ -1,14 +1,14 @@
 """Upstream MCP server configuration.
 
 An upstream is a real MCP server that Commons forwards approved calls to.
-Three transports are supported (IMPLEMENTATION_PLAN.md D3):
+Three transports are supported:
 
   http   — Razorpay's remote server, https://mcp.razorpay.com/mcp
-  stdio  — a local binary (the §7 R1 fallback: razorpay-mcp-server built from Go)
+  stdio  — a local binary (fallback: razorpay-mcp-server built from Go)
   memory — an in-process Server object (our messaging server; the bundled fake Razorpay)
 
 Swapping transports is a config change, never a code change. That is what makes the
-two-tier setup of handoff §15.4 (`commons demo` vs `commons demo --real`) cheap.
+two-tier setup (`commons demo` vs `commons demo --real`) cheap.
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ def razorpay_remote() -> UpstreamConfig:
 
 
 def razorpay_local_stdio(binary_path: str) -> UpstreamConfig:
-    """§7 R1 fallback — only needed if the remote server ever drops a tool we depend on."""
+    """Fallback — only needed if the remote server ever drops a tool we depend on."""
     return UpstreamConfig(
         name="razorpay",
         kind="stdio",

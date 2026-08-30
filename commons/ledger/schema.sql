@@ -2,10 +2,10 @@
 --
 -- The proxy is the only writer. Every tool call from every agent lands here with the
 -- entity it acted upon, so that rules can ask "has too much happened to this object?"
--- (handoff §6.2) — a question no per-agent permission system can answer.
+-- a question no per-agent permission system can answer.
 --
--- Full args and results are stored because handoff §17.4 promises every violation ships
--- with a replayable trace. That cannot be reconstructed after the fact.
+-- Full args and results are stored because every violation must ship with a replayable
+-- trace. That cannot be reconstructed after the fact.
 
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS entity (
     created_at   TEXT NOT NULL
 );
 
--- The identity graph. DECLARATIVE, not inferred (handoff §11, plan D4).
+-- The identity graph. DECLARATIVE, not inferred.
 -- (namespace, value) is the vendor-visible handle; entity_id is who it really is.
 CREATE TABLE IF NOT EXISTS identity (
     namespace  TEXT NOT NULL,          -- phone | email | customer_id | order_id
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS call (
     result_json     TEXT,
     is_error        INTEGER NOT NULL DEFAULT 0,
     -- Malformed tool calls live in their own bucket so weak-model noise never
-    -- contaminates the violation count (handoff §16.7).
+    -- contaminates the violation count.
     malformed       INTEGER NOT NULL DEFAULT 0,
     latency_ms      INTEGER
 );
@@ -87,7 +87,7 @@ CREATE INDEX IF NOT EXISTS idx_call_run    ON call(run_id, ts);
 CREATE INDEX IF NOT EXISTS idx_call_action ON call(entity_id, action_class, ts);
 
 -- Every rule that fired on a call. All rules are evaluated, not just the first —
--- the hero UI's violation count depends on it (plan §4, engine contract).
+-- the hero UI's violation count depends on it. It is part of the engine contract.
 CREATE TABLE IF NOT EXISTS rule_fired (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     call_id     INTEGER NOT NULL REFERENCES call(id),

@@ -1,6 +1,6 @@
 """Day 2 definition-of-done.
 
-The single most important test in the project (plan §3): a WhatsApp message on one
+The single most important test in the project: a WhatsApp message on one
 vendor's server and a payment link on another vendor's server, naming the customer
 differently, must resolve to the SAME entity.
 

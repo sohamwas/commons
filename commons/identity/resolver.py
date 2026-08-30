@@ -1,4 +1,4 @@
-"""Entity resolution — the core technical contribution (plan §3).
+"""Entity resolution — the core technical contribution.
 
 The hard part is not joining two Razorpay calls; inside one vendor everything already
 carries a customer_id. The hard part is recognising that
@@ -10,7 +10,7 @@ are the same human, when the two servers were built by parties who have never he
 each other. Normalisation is what makes that join possible, and it is the only place
 Commons is allowed to be clever — everything downstream is plain SQL.
 
-Mappings are DECLARED, never inferred (handoff §11, plan D4): the merchant states once
+Mappings are DECLARED, never inferred: the merchant states once
 per server which argument carries which kind of handle. Commons only normalises.
 """
 
@@ -101,7 +101,7 @@ class IdentityResolver:
         When Razorpay receives create_payment_link(customer_contact=…, customer_email=…),
         the vendor is stating in one breath that this phone and this email are the same
         customer. Recording that is taking the vendor at its word, not inferring — which
-        is the line this project refuses to cross (handoff §11).
+        is the line this project refuses to cross.
 
         A handle already pointing at a DIFFERENT entity is left alone and reported. Two
         vendors disagreeing about who someone is deserves a merchant's attention, not a

@@ -1,6 +1,6 @@
 # Tool semantics for the messaging MCP server (ours — Day 4).
 #
-# A second, independently-built vendor is REQUIRED (handoff §8.3): Razorpay's MCP has
+# A second, independently-built vendor is REQUIRED: Razorpay's MCP has
 # no general messaging tools, and entity resolution only becomes interesting across
 # servers. Inside one vendor everything already carries a customer_id; the hard part is
 # recognising that a phone number here and a customer id there are one human.

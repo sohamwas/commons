@@ -2,8 +2,8 @@
 #
 # Each rule carries the plain-English sentence the merchant wrote alongside the compiled
 # invariant that is actually enforced, so the two can be shown side by side and checked
-# against each other (handoff §9, §13.2). Authoring these in English via an LLM is a
-# stretch goal (plan D5); the invariant below is the source of truth either way.
+# against each other. Authoring these in English via an LLM is a possible extension;
+# the invariant below is the source of truth either way.
 #
 # Every one of these needs HISTORY and AGGREGATION. None can be checked from a single
 # action in isolation, which is exactly why per-agent validation cannot express them.

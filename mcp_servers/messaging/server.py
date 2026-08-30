@@ -1,6 +1,6 @@
 """A messaging MCP server — the SECOND vendor.
 
-Required, not decorative (handoff §8.3):
+Required, not decorative:
 
   1. Razorpay's MCP has no general messaging tools, so the most intuitive rule in the
      demo — "don't message a customer three times a day" — is unimplementable with

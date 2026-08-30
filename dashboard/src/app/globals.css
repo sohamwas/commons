@@ -1,7 +1,7 @@
 /*
  * Commons: fintech infrastructure, not an AI product.
  *
- * Rules that are not negotiable (handoff §13.3):
+ * Rules that are not negotiable:
  *   - dark first, restrained, Linear/Stripe/Vercel rather than purple gradients;
  *     the audience is payments engineers
  *   - RED IS RESERVED FOR VIOLATIONS. Nothing else is ever red.
@@ -108,7 +108,7 @@ header.top {
   flex: 1;
 }
 
-/* Mode toggle: one engine, two modes, at a glance (handoff section 13.3). */
+/* Mode toggle: one engine, two modes, at a glance. */
 .modes {
   display: flex;
   border: 1px solid var(--border-bright);

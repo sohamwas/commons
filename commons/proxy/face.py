@@ -3,7 +3,7 @@
 One Server per (agent, upstream) pair. Agent identity therefore comes from the ROUTE
 (`/mcp/{agent}/{upstream}`) rather than a header, which means it is closed over in the
 handler and cannot be spoofed or lost. It also gives every agent its own onboarding
-URL, which is exactly the shape of the Connect screen (handoff §13.2).
+URL, which is exactly the shape of the Connect screen.
 
 Every call flows through one path:
 
@@ -93,7 +93,7 @@ def build_face(
         started = time.perf_counter()
 
         # Least privilege still applies, and applies first. Commons sits ALONGSIDE
-        # per-agent scoping (handoff §6.1), it does not replace it.
+        # per-agent scoping, it does not replace it.
         if not takes_all and params.name not in allowed:
             logger.warning(
                 "OUT-OF-SCOPE agent=%s upstream=%s tool=%s", agent.id, upstream.name, params.name
@@ -103,7 +103,7 @@ def build_face(
                 f"upstream '{upstream.name}'."
             )
 
-        # ---- what does this call mean? (plan §3) ----
+        # ---- what does this call mean? ----
         sem = manifest.get(params.name) if manifest else None
         if sem is None:
             # A tool with no declared semantics cannot be governed. Log it loudly rather

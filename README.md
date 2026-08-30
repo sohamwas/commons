@@ -201,7 +201,7 @@ commons/semantics/   what each vendor tool means
 dashboard/           the local dashboard (Next.js)
 mcp_servers/         a reference messaging vendor, and an in-memory one for tests
 examples/            a worked agent that imports nothing from commons/
-scripts/             run_proxy, the stress harness, entity repair
+scripts/             run_proxy and the stress harness
 Dockerfile           the gateway and the messaging vendor, one image, two commands
 dashboard/Dockerfile the dashboard: built to static HTML, served by nginx
 docker-compose.yml   all three, ports bound to loopback

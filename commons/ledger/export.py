@@ -3,11 +3,11 @@
 This is the dashboard's only data contract, and it is deliberately the SAME shape whether
 it comes from a live proxy over HTTP or from a file committed to the repo. That is what
 lets the hosted demo run the identical React components with no backend at all
-(handoff §15.3) — the determinism built for the A/B comparison pays for itself twice.
+— the determinism built for the A/B comparison pays for itself twice.
 
 Organised BY CUSTOMER, not by agent. Every existing dashboard is organised by agent;
 Commons is organised by the person being acted upon, and the data shape has to embody
-that or the UI will drift back to an agent-centric list view (handoff §13).
+that or the UI will drift back to an agent-centric list view.
 """
 
 from __future__ import annotations

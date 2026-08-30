@@ -2,7 +2,7 @@
 
 One long-lived connection per upstream, shared by every agent. That sharing is the
 whole point: cross-agent state is only observable because every agent's traffic passes
-through one process (IMPLEMENTATION_PLAN.md D1).
+through one process.
 """
 
 from __future__ import annotations

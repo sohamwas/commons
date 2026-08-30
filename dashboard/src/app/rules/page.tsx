@@ -15,7 +15,7 @@ import {
  * The merchant's policy, editable.
  *
  * 15% was our demo's number, not everyone's. Each rule shows the plain-English sentence
- * beside the invariant actually enforced (handoff section 9), and warns when the two have
+ * beside the invariant actually enforced, and warns when the two have
  * drifted apart: a screen stating one number while the gateway enforces another is worse
  * than either being wrong.
  */

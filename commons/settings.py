@@ -48,8 +48,8 @@ class Settings:
     def english_disagrees(rule) -> str | None:
         """Does the merchant's sentence still match the number being enforced?
 
-        Handoff §9 promises the plain-English rule is shown beside the compiled invariant
-        so a merchant can check that what was written is what is enforced. Editing a
+        The plain-English rule is shown beside the compiled invariant so a merchant can
+        check that what was written is what is enforced. Editing a
         threshold through the UI breaks that quietly: change the cap to 10% and the
         sentence still reads "more than 15%", so the screen now states one number while
         the gateway enforces another. Detect it and say so rather than let the two drift.

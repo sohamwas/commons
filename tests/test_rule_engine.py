@@ -2,7 +2,7 @@
 
 The rule engine is a pure function of (facts, ledger), so every demo rule can be proved
 here — with hand-written call sequences, no LLM, no agents, no simulator, in
-milliseconds. Handoff §17.2 is the point: the claim is LOGICAL, not statistical. A unit
+milliseconds. That is the point: the claim is LOGICAL, not statistical. A unit
 test with fabricated inputs still proves a bug is real.
 """
 
@@ -142,7 +142,7 @@ def test_cumulative_discount_across_agents_breaches_cap(ledger, engine, priya):
     """10% from Cart Recovery + 8% from Subscription Recovery = 18% > 15%.
 
     Neither individual grant is unreasonable. No per-agent check can see the sum.
-    This is the arithmetic from handoff §14 and the demo video.
+    This is the arithmetic from the demo.
     """
     happened(
         ledger, priya, agent="cart-recovery", action_class="discount_grant",

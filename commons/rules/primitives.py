@@ -2,7 +2,7 @@
 
 Each answers a question about ACCUMULATION on one entity — "has too much happened to
 this object?" — which is structurally different from the question every access-control
-system since the 1970s asks, "may this actor do this?" (handoff §6.2).
+system since the 1970s asks: "may this actor do this?"
 
 Every primitive is a pure function of (facts, context). Nothing here touches transport,
 LLMs, or the simulator, which is why the whole engine can be tested in milliseconds
@@ -88,7 +88,7 @@ class Rule:
             **kw,
         )
 
-    # The compiled form shown beside the English on the Rules screen (handoff §13.2),
+    # The compiled form shown beside the English on the Rules screen,
     # so a merchant can check that what was written is what is enforced.
     @property
     def compiled(self) -> str:  # pragma: no cover - display only
@@ -99,7 +99,7 @@ class RateLimit(Rule):
     """"Max N actions of these classes per entity per window."
 
     The frequency cap that marketing automation shipped in 2010 and agent platforms
-    still lack (handoff §6.5).
+    still lack.
     """
 
     def check(self, facts, ctx: EvalContext) -> RuleFiring | None:
@@ -130,7 +130,7 @@ class CumulativeBudget(Rule):
     """"No more than CAP total magnitude per entity per window."
 
     The card that declines any single purchase over Rs 10,000 does not stop fifty
-    purchases of Rs 9,000 (handoff §6.3).
+    purchases of Rs 9,000.
     """
 
     def check(self, facts, ctx: EvalContext) -> RuleFiring | None:

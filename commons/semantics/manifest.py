@@ -1,4 +1,4 @@
-"""The Tool Semantics Manifest (plan §3).
+"""The Tool Semantics Manifest.
 
 A rule like "max 15% total discount per customer per 30 days" needs three things from a
 tool call Commons has never seen before:
@@ -8,7 +8,7 @@ tool call Commons has never seen before:
     3. what magnitude it consumes
 
 Least-privilege systems need none of these — they only ask "may this actor call this
-tool?" — which is precisely why they cannot express the rules in handoff §6.3.
+tool?" — which is precisely why they cannot express a cumulative budget at all.
 
 Everything here is DECLARED from a tool's public schema, never inferred from its source.
 That is what lets Commons govern a third-party agent you cannot inspect: you need the

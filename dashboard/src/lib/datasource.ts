@@ -2,42 +2,22 @@ import { PROXY_URL } from "./api";
 import type { RunData } from "./types";
 
 /**
- * One adapter, two backends.
+ * Where the dashboard gets a run from.
  *
- *   file:  a recorded run committed to the repo   -> the hosted demo, no backend at all
- *   http:  a live Commons proxy                   -> the local app, watching a real run
- *
- * Both return the identical shape, so every component below is written once and never
- * learns which it is looking at. That is what makes the free hosted replay possible: the
- * determinism built for the A/B comparison pays for itself twice (handoff §15.3).
+ * One source today: the merchant's own Commons proxy. The shape is a single
+ * self-contained JSON document, so a component never learns where it came from and a
+ * second source could be added without touching any of them.
  */
 
-export type SourceKind = "file" | "http";
-
 export interface Source {
-  kind: SourceKind;
   label: string;
   url: string;
 }
-
-export const RECORDED_RUNS: Record<string, Source> = {
-  observe: {
-    kind: "file",
-    label: "OBSERVE recorded run, seed 4471",
-    url: "runs/observe-4471.json",
-  },
-  enforce: {
-    kind: "file",
-    label: "ENFORCE recorded run, seed 4471",
-    url: "runs/enforce-4471.json",
-  },
-};
 
 // Same base URL the rest of the client uses. It was hardcoded here while api.ts read
 // NEXT_PUBLIC_COMMONS_URL, so pointing the dashboard at a proxy on another port moved
 // every write but left the run feed talking to 8787.
 export const LIVE_SOURCE: Source = {
-  kind: "http",
   label: "LIVE local Commons proxy",
   url: `${PROXY_URL}/api/run`,
 };

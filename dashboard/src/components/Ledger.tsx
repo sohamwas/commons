@@ -8,9 +8,9 @@ import { agentName, formatDay, formatTime } from "@/lib/datasource";
 /**
  * The conflict ledger.
  *
- * Chronological, every decision, expandable to the full request and response. Handoff
- * section 17.4 promises every violation ships with a replayable trace rather than asking
- * anyone to trust an aggregate. This is where that promise is kept.
+ * Chronological, every decision, expandable to the full request and response. Every
+ * violation ships with a replayable trace rather than asking anyone to trust an
+ * aggregate. This is where that promise is kept.
  *
  * The expanded panel used to be JSON.stringify of the whole call. That is the right
  * content and the wrong reader: the person who needs to understand why a payment was

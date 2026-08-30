@@ -90,7 +90,7 @@ tools:
       as: phone
 
   # RTO Shield restricting an order to prepaid-only. Directly contradicts a Cart
-  # Recovery incentive on the same customer — the Contradiction rule (plan §4).
+  # Recovery incentive on the same customer — the Contradiction rule.
   update_order:
     action_class: fulfilment_restriction
     # Resolved through the merchant's DECLARED order -> customer mapping rather than by

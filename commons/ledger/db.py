@@ -2,7 +2,7 @@
 
 Everything the rule engine needs to answer "has too much happened to this entity?"
 lives here. Reads are ordinary SQL over indexed columns, which is why the rule
-primitives in §4 can be pure functions of (call, ledger).
+primitives can be pure functions of (call, ledger).
 """
 
 from __future__ import annotations
@@ -135,7 +135,7 @@ class Ledger:
 
         This is how the world simulator seeds the graph: one customer is declared to own
         a phone, an email and a Razorpay customer_id up front. Declarative, not inferred
-        (handoff §11) — the merchant states the mapping once per server.
+        — the merchant states the mapping once per server.
         """
         self.conn.execute(
             "INSERT OR REPLACE INTO identity (namespace, value, entity_id, source) VALUES (?,?,?,?)",
