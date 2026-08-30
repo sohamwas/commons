@@ -38,10 +38,17 @@ CREATE TABLE IF NOT EXISTS identity (
 CREATE INDEX IF NOT EXISTS idx_identity_entity ON identity(entity_id);
 
 -- Mutable per-entity state the rules read (e.g. dispute_status = 'open').
+-- State the rules read, e.g. dispute_status. `source` and `note` are not decoration:
+-- StateCondition can BLOCK a payment on the strength of a row in this table, and a
+-- merchant looking at that block needs to be able to ask "which dispute?" and get an
+-- answer. Identity has carried a source since the beginning, for exactly the same reason;
+-- state was writable by anyone with the admin API and recorded nothing about who or why.
 CREATE TABLE IF NOT EXISTS entity_state (
     entity_id  TEXT NOT NULL REFERENCES entity(id),
     key        TEXT NOT NULL,
     value      TEXT,
+    source     TEXT,
+    note       TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (entity_id, key)
 );

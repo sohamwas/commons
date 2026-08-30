@@ -52,11 +52,22 @@ export interface EntitySummary {
   unattributed_grants: number;
 }
 
+/** Where a piece of state came from. A dispute_status can stop a payment, so the
+ *  merchant has to be able to ask which dispute and get an answer. A null source is
+ *  shown as an undocumented assertion rather than passed off as evidence. */
+export interface StateProvenance {
+  value: string | null;
+  source: string | null;
+  note: string | null;
+  updated_at: string;
+}
+
 export interface Entity {
   id: string;
   display_name: string;
   handles: [string, string][];
   state: Record<string, string>;
+  state_detail?: Record<string, StateProvenance>;
   agents: string[];
   call_ids: number[];
   summary: EntitySummary;

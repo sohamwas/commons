@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sqlite3
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 DEFAULT_DB = Path("commons.db")
@@ -29,9 +32,30 @@ class Ledger:
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+        self._migrate()
         self.conn.commit()
         self._lock = asyncio.Lock()
         self.run_id: str | None = None
+
+    def _migrate(self) -> None:
+        """Add columns the schema has grown since a database was first created.
+
+        Every CREATE in schema.sql is IF NOT EXISTS, which means an existing database
+        never picks up a new column. Dropping and recreating is not an option: this file
+        holds the decision history a merchant reviews. So new columns are added here,
+        nullable, and old rows keep a NULL that reads honestly as "we do not know".
+        """
+        added = 0
+        for table, column, decl in [
+            ("entity_state", "source", "TEXT"),
+            ("entity_state", "note", "TEXT"),
+        ]:
+            existing = {r["name"] for r in self.conn.execute(f"PRAGMA table_info({table})")}
+            if column not in existing:
+                self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
+                added += 1
+        if added:
+            logger.info("schema migrated: %d column(s) added", added)
 
     # ---------------- runs ----------------
 
@@ -174,10 +198,32 @@ class Ledger:
 
     # ---------------- entity state ----------------
 
-    def set_state(self, entity_id: str, key: str, value: Any) -> None:
+    def set_state(
+        self,
+        entity_id: str,
+        key: str,
+        value: Any,
+        source: str | None = None,
+        note: str | None = None,
+    ) -> None:
+        """Record state, and where it came from.
+
+        `source` answers "who says so" and `note` answers "which one". A dispute_status
+        of open can stop a payment; a merchant seeing that block is entitled to ask which
+        dispute, and before these columns existed there was no answer anywhere in the
+        system. Callers that pass nothing leave NULL, which the UI shows as an
+        undocumented assertion rather than quietly implying provenance it does not have.
+        """
         self.conn.execute(
-            "INSERT OR REPLACE INTO entity_state (entity_id, key, value, updated_at) VALUES (?,?,?,?)",
-            (entity_id, key, None if value is None else str(value), _now()),
+            """INSERT OR REPLACE INTO entity_state
+               (entity_id, key, value, source, note, updated_at) VALUES (?,?,?,?,?,?)""",
+            (entity_id, key, None if value is None else str(value), source, note, _now()),
+        )
+        self.conn.commit()
+
+    def clear_state(self, entity_id: str, key: str) -> None:
+        self.conn.execute(
+            "DELETE FROM entity_state WHERE entity_id = ? AND key = ?", (entity_id, key)
         )
         self.conn.commit()
 
@@ -192,6 +238,23 @@ class Ledger:
             "SELECT key, value FROM entity_state WHERE entity_id = ?", (entity_id,)
         ).fetchall()
         return {r["key"]: r["value"] for r in rows}
+
+    def state_provenance_of(self, entity_id: str) -> dict[str, dict[str, Any]]:
+        """The same state, with the answer to "says who, and about what"."""
+        rows = self.conn.execute(
+            """SELECT key, value, source, note, updated_at
+               FROM entity_state WHERE entity_id = ?""",
+            (entity_id,),
+        ).fetchall()
+        return {
+            r["key"]: {
+                "value": r["value"],
+                "source": r["source"],
+                "note": r["note"],
+                "updated_at": r["updated_at"],
+            }
+            for r in rows
+        }
 
     # ---------------- calls ----------------
 

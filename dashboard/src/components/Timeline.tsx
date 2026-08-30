@@ -47,6 +47,16 @@ export default function Timeline({
   const email = handleOf(entity, "email");
   const customerId = handleOf(entity, "customer_id");
   const disputeOpen = entity.state.dispute_status === "open";
+  // A dispute can BLOCK a payment, so the badge has to be able to say which dispute.
+  // State written without a source is shown as unverified rather than presented as
+  // evidence: an assertion nobody signed is not the same thing as a chargeback.
+  const disputeFrom = entity.state_detail?.dispute_status;
+  const disputeDocumented = Boolean(disputeFrom?.source);
+  const disputeTitle = disputeDocumented
+    ? `Asserted by ${disputeFrom!.source}` +
+      (disputeFrom!.note ? ` · ${disputeFrom!.note}` : "") +
+      (disputeFrom!.updated_at ? ` · ${disputeFrom!.updated_at.slice(0, 10)}` : "")
+    : "Nothing recorded about where this came from. It still blocks promotions, so it is worth confirming or clearing.";
 
   // Day ticks across the observed window.
   const dayCount = Math.max(1, Math.ceil(span / 86_400_000));
@@ -74,7 +84,11 @@ export default function Timeline({
           <span className={`badge${entity.summary.discount_pct >= 15 ? " alert" : ""}`}>
             {entity.summary.discount_pct}% / 15%
           </span>
-          {disputeOpen && <span className="badge alert">dispute open</span>}
+          {disputeOpen && (
+            <span className="badge alert" title={disputeTitle}>
+              dispute open{disputeDocumented ? "" : " (unverified)"}
+            </span>
+          )}
           {entity.summary.violations > 0 && (
             // A single call can breach two rules at once, so the two counts differ.
             // Showing only the breach count makes the timeline look like it hides rows.

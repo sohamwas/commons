@@ -156,11 +156,25 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
                 (r["id"],),
             )
         ]
-        state = {
-            s["key"]: s["value"]
-            for s in conn.execute(
-                "SELECT key, value FROM entity_state WHERE entity_id = ?", (r["id"],)
+        # State is shipped twice: the flat map the rules read, and the provenance behind
+        # it. A dispute_status of open can stop a payment, so the screen showing that
+        # block has to be able to say who asserted it and which record it refers to.
+        state_rows = list(
+            conn.execute(
+                """SELECT key, value, source, note, updated_at
+                   FROM entity_state WHERE entity_id = ?""",
+                (r["id"],),
             )
+        )
+        state = {s["key"]: s["value"] for s in state_rows}
+        state_detail = {
+            s["key"]: {
+                "value": s["value"],
+                "source": s["source"],
+                "note": s["note"],
+                "updated_at": s["updated_at"],
+            }
+            for s in state_rows
         }
 
         agents_involved = sorted({c["agent_id"] for c in entity_calls})
@@ -195,6 +209,7 @@ def export_run(db_path: str | Path, run_id: str | None = None) -> dict:
                 "display_name": r["display_name"],
                 "handles": handles,
                 "state": state,
+                "state_detail": state_detail,
                 "agents": agents_involved,
                 "call_ids": [c["id"] for c in entity_calls],
                 "summary": {

@@ -421,7 +421,7 @@ def create_app(
 
             resolver.declare(entity_id, handles, source="merchant-declared")
             for key, value in (item.get("state") or {}).items():
-                ledger.set_state(entity_id, key, value)
+                ledger.set_state(entity_id, key, value, source="merchant-declared")
             mapping[ref] = entity_id
 
         logger.info("import: %d new, %d updated, %d conflicts", created, updated, conflicts)
@@ -459,8 +459,17 @@ def create_app(
     async def set_state(request):
         """Update entity state the rules read, e.g. a dispute opening mid-run.
 
-        POST /admin/state {"ref": "cust_4471", "key": "dispute_status", "value": "open"}
+        POST /admin/state {"ref": "cust_4471", "key": "dispute_status", "value": "open",
+                           "source": "razorpay-webhook", "note": "disp_NkX92"}
         `ref` is any handle Commons already knows: customer_id, phone or email.
+
+        `source` says who asserted this and `note` says which record it refers to. They
+        are optional so existing callers keep working, but a state written without them
+        shows on the customer as an undocumented assertion, because a dispute_status that
+        can stop a payment and cannot say which dispute is not evidence of anything.
+
+        DELETE the state by passing value: null, which is different from setting it to
+        "none": one says the condition ended, the other says it was never true.
         """
         body = await request.json()
         ref, key, value = body.get("ref"), body["key"], body.get("value")
@@ -473,8 +482,20 @@ def create_app(
                     break
         if entity_id is None:
             return JSONResponse({"error": f"unknown entity: {ref}"}, status_code=404)
-        ledger.set_state(entity_id, key, value)
-        return JSONResponse({"entity_id": entity_id, key: value})
+        if value is None:
+            ledger.clear_state(entity_id, key)
+            return JSONResponse({"entity_id": entity_id, key: None, "cleared": True})
+        ledger.set_state(
+            entity_id, key, value, source=body.get("source"), note=body.get("note")
+        )
+        return JSONResponse(
+            {
+                "entity_id": entity_id,
+                key: value,
+                "source": body.get("source"),
+                "note": body.get("note"),
+            }
+        )
 
     def _cors(payload, status: int = 200):
         # CORS is handled by middleware now; this wrapper just keeps call sites tidy.
