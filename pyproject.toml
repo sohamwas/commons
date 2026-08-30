@@ -3,6 +3,7 @@ name = "commons"
 version = "0.1.0"
 description = "An MCP-layer arbitration gateway that enforces policy on the entity being acted upon rather than the agent doing the acting."
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = [
     "mcp>=2.0.0",
     "openai>=2.0.0",
