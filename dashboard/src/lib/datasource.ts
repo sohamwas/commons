@@ -1,3 +1,4 @@
+import { PROXY_URL } from "./api";
 import type { RunData } from "./types";
 
 /**
@@ -32,10 +33,13 @@ export const RECORDED_RUNS: Record<string, Source> = {
   },
 };
 
+// Same base URL the rest of the client uses. It was hardcoded here while api.ts read
+// NEXT_PUBLIC_COMMONS_URL, so pointing the dashboard at a proxy on another port moved
+// every write but left the run feed talking to 8787.
 export const LIVE_SOURCE: Source = {
   kind: "http",
   label: "LIVE local Commons proxy",
-  url: "http://127.0.0.1:8787/api/run",
+  url: `${PROXY_URL}/api/run`,
 };
 
 export async function loadRun(source: Source): Promise<RunData> {

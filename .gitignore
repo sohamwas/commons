@@ -28,6 +28,8 @@ dashboard.log
 next-env.d.ts
 *.tsbuildinfo
 dashboard/.next-build/
+dashboard/.next-docker/
+dashboard/.next-verify/
 stress.db
 stress.db-*
 

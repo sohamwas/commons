@@ -18,6 +18,41 @@ decisions, so it is never hosted for you.
 
 ## Getting started
 
+Two ways in. Docker if you want the whole thing up in one command; the manual path below
+if you want to develop against it.
+
+### Docker
+
+```bash
+cp .env.example .env      # optional: add Razorpay test keys now or from Connect later
+docker compose up
+```
+
+Dashboard on <http://localhost:3300>, gateway on <http://localhost:8787>. It starts in
+OBSERVE, which blocks nothing.
+
+Three services come up: the gateway, the dashboard, and the reference messaging vendor
+that exists to show Commons resolving one customer across two independently built
+vendors. Razorpay and Resend are not among them, because they are remote MCP servers
+reached over HTTPS and configured at runtime rather than baked into an image.
+
+Every port is published to `127.0.0.1`, not `0.0.0.0`. Commons sees payment amounts,
+customer identifiers and refund decisions, so containerising it must not quietly widen
+who can reach it.
+
+`commons.db`, `agents.yaml` and `vendors.yaml` live on a named volume, so they survive a
+rebuild. To start genuinely clean:
+
+```bash
+docker compose down -v
+```
+
+Two things differ from the manual setup. Add the local messaging vendor as
+`http://messaging:8788/mcp`, not `127.0.0.1`, because inside the gateway container
+loopback is the gateway itself. And point your agents at
+`http://127.0.0.1:8787/mcp/<agent>/<vendor>` exactly as below: the published port makes
+the container indistinguishable from a local process.
+
 ### 1. Install
 
 ```bash
@@ -167,6 +202,9 @@ dashboard/           the local dashboard (Next.js)
 mcp_servers/         a reference messaging vendor, and an in-memory one for tests
 examples/            a worked agent that imports nothing from commons/
 scripts/             run_proxy, the stress harness, entity repair
+Dockerfile           the gateway and the messaging vendor, one image, two commands
+dashboard/Dockerfile the dashboard: built to static HTML, served by nginx
+docker-compose.yml   all three, ports bound to loopback
 ```
 
 `agents.yaml`, `vendors.yaml` and `commons.db` are created on first run. They are

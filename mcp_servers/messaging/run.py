@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 
 import uvicorn
 from starlette.applications import Starlette
@@ -44,6 +45,10 @@ def create_app(outbox: Outbox | None = None) -> Starlette:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=8788)
+    parser.add_argument("--port", type=int, default=int(os.environ.get("MESSAGING_PORT", "8788")))
+    # Loopback by default for the same reason as the gateway: this is a vendor holding
+    # customer messages. The container overrides it because a container's loopback
+    # reaches nothing but itself.
+    parser.add_argument("--host", default=os.environ.get("MESSAGING_HOST", "127.0.0.1"))
     args = parser.parse_args()
-    uvicorn.run(create_app(), host="127.0.0.1", port=args.port, log_level="warning")
+    uvicorn.run(create_app(), host=args.host, port=args.port, log_level="warning")
