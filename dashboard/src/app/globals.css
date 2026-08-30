@@ -554,6 +554,143 @@ tbody td {
   word-break: break-word;
 }
 
+/* ---- the expanded call, written for a merchant rather than for a debugger ---- */
+
+.tr {
+  padding: 18px 20px 14px;
+  display: grid;
+  gap: 18px;
+  max-width: 780px;
+}
+
+.tr-block h4 {
+  margin: 0 0 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tr-lead {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.tr-lead[data-tone="bad"] {
+  color: var(--danger);
+}
+.tr-lead[data-tone="warn"] {
+  color: var(--defer);
+}
+.tr-lead[data-tone="ok"] {
+  color: var(--text-dim);
+}
+
+.tr-sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.tr-muted {
+  color: var(--text-faint);
+}
+
+/* Label/value pairs, so the number a merchant cares about is not buried in a blob. */
+.tr-facts {
+  margin: 9px 0 0;
+  display: grid;
+  grid-template-columns: minmax(96px, max-content) 1fr;
+  gap: 4px 16px;
+  font-size: 12.5px;
+}
+
+.tr-facts dt {
+  color: var(--text-faint);
+}
+
+.tr-facts dd {
+  margin: 0;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One rule that had something to say. The stripe carries the verdict, so the sentence
+   does not have to shout it; red still means only a violation. */
+.tr-rule {
+  border-left: 2px solid var(--border-bright);
+  padding: 2px 0 2px 12px;
+  margin-bottom: 11px;
+}
+
+.tr-rule:last-child {
+  margin-bottom: 0;
+}
+
+.tr-rule[data-v="DEFER"] {
+  border-left-color: var(--defer);
+}
+
+.tr-rule[data-v="BLOCK"] {
+  border-left-color: var(--danger);
+}
+
+.tr-rule-head {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+/* The merchant's own sentence, quoted back. This is the whole point of showing it: the
+   English and the enforced invariant are meant to be checkable against each other. */
+.tr-rule-name {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.tr-rule-why {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  line-height: 1.45;
+}
+
+.tr-rule-num {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-rule-num strong {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.tr-raw summary {
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 6px 0;
+  user-select: none;
+}
+
+.tr-raw summary:hover {
+  color: var(--text-dim);
+}
+
+.tr-raw pre {
+  padding: 12px 0 0;
+  font-size: 11px;
+}
+
 /* ---------------------------------------------------------------- misc */
 
 .empty,

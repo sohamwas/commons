@@ -242,6 +242,8 @@ export default function Page() {
             <Ledger
               calls={entityCalls}
               agents={data.agents}
+              rules={data.rules}
+              entityName={entity?.display_name}
               selectedCallId={callId}
               onSelectCall={setCallId}
             />
