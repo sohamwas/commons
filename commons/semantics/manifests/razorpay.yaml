@@ -10,6 +10,15 @@
 
 upstream: razorpay
 
+# Order types the merchant has approved as routine. An order tagged with one of these is
+# ordinary commerce and consumes no discount budget. Everything else is treated as a
+# grant. The list is the MERCHANT's, which is the whole point: see `create_order`.
+routine_order_types: &routine_order_types
+  - standard
+  - replacement
+  - exchange
+  - warranty
+
 tools:
   # Cart Recovery / Subscription Recovery: a discounted payment link.
   # The discount is what consumes the shared margin budget.
@@ -34,6 +43,39 @@ tools:
     resource:
       from: args
       path: [notes.order_id, notes.subscription_id]
+
+  # The same grant as create_payment_link, on Razorpay's other surface. An agent that
+  # attaches a discount to the order itself has given exactly as much margin away as one
+  # that attached it to a link, and the customer can only be counted once across both.
+  #
+  # This entry exists because the link surface is not always available - a test account
+  # with an exhausted payment-link quota still creates orders - and a budget that can be
+  # bypassed by choosing the other endpoint is not a budget.
+  #
+  # GOVERNED BY DEFAULT, exempt only through the merchant's approved list above. That is
+  # the same polarity as `template` in the messaging manifest, and it matters: an agent
+  # cannot escape the cap by omitting a field, because omitting it leaves the governed
+  # default in place. Only a merchant-approved order type relaxes it.
+  #
+  # `notes.discount_pct` is caller-declared, exactly as it is for create_payment_link.
+  # Magnitude has always come from the caller. What must never come from the caller is
+  # whether the rule applies at all.
+  create_order:
+    action_class: discount_grant
+    action_class_when:
+      - if: {path: notes.order_type, in: *routine_order_types}
+        then: read
+    entity:
+      from: args
+      path: notes.customer_id
+      as: customer_id
+    magnitude:
+      from: args
+      path: notes.discount_pct
+      unit: percent
+    resource:
+      from: args
+      path: receipt
 
   # Razorpay's OWN outbound contact tool. Discovered during the Day 1 spike.
   # This is why the frequency rule is breached across two vendors' surfaces rather

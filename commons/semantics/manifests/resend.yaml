@@ -11,6 +11,27 @@
 
 upstream: resend
 
+# The merchant's approved transactional tag values, the Resend equivalent of the
+# messaging manifest's `template` list. An agent chooses the tag; only a value the
+# MERCHANT has approved buys an exemption, so labelling a campaign "dispute_response"
+# gets an agent nothing it was not already entitled to.
+transactional_tags: &transactional_tags
+  - dispute_response
+  - order_update
+  - shipping_update
+  - delivery_confirmation
+  - payment_receipt
+  - otp
+  # Dunning. "Your renewal did not go through, re-authorise your mandate" is a service
+  # notice about a payment that already failed, not a marketing touch, and counting it
+  # against the marketing frequency cap silences the one message the customer needs.
+  #
+  # The line is the OFFER, not the subject matter. A renewal notice carrying a discount
+  # to win the customer back is promotional however it is tagged, and is a discount_grant
+  # besides, so it is caught by the budget rule whatever this list says.
+  - payment_failure
+  - mandate_update
+
 tools:
   # The one that matters. Note `to` is an ARRAY of 1-50 recipients, not a string, which
   # is exactly the kind of thing that has to be read off the real schema rather than
@@ -23,6 +44,14 @@ tools:
   # is deliberately left ungoverned below rather than mis-attributed to one person.
   send-email:
     action_class: promotional_message
+    # Closes the CLASSIFICATION CAVEAT noted at the foot of this file. Promotional stays
+    # the default, so an agent that says nothing is still governed; only a merchant
+    # approved tag reclassifies. Without this the dispute handler is silenced by the very
+    # rule that exists to stop marketing at a disputing customer, which is a false
+    # positive the messaging manifest already fixed and this one had not.
+    action_class_when:
+      - if: {path: tags.0.value, in: *transactional_tags}
+        then: transactional_message
     entity:
       from: args
       path: to.0
