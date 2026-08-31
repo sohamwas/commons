@@ -1,9 +1,0 @@
-node_modules/
-.next/
-.next-build/
-.next-docker/
-.next-verify/
-out/
-*.log
-.env
-.env.*

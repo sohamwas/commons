@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -152,6 +153,9 @@ def ensure_env_file() -> None:
 
 
 def spawn(name: str, command: list[str], cwd: Path, env: dict[str, str]) -> subprocess.Popen:
+    # start_new_session puts the child in its own process group on POSIX, which is what
+    # makes killpg in stop() able to reach the grandchildren. Without it there is no
+    # group to signal and only the direct child dies.
     proc = subprocess.Popen(
         command,
         cwd=str(cwd),
@@ -160,6 +164,7 @@ def spawn(name: str, command: list[str], cwd: Path, env: dict[str, str]) -> subp
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        start_new_session=not WINDOWS,
     )
 
     def pump() -> None:
@@ -177,20 +182,30 @@ def stop(proc: subprocess.Popen) -> None:
     npm spawns next, which spawns its own server, so terminating the process we launched
     leaves the actual listener running and the port held. /T on Windows and killpg
     elsewhere are what make Ctrl+C actually free the ports.
+
+    This used to call plain terminate() on POSIX, which contradicted the sentence above:
+    it signals one process, not the group, so on macOS and Linux the dashboard survived
+    Ctrl+C still holding 3300 and the next run died in preflight.
     """
     if proc.poll() is not None:
         return
     if WINDOWS:
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
-            capture_output=True,
-        )
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
     else:
-        proc.terminate()
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            proc.terminate()
     try:
         proc.wait(timeout=10)
     except subprocess.TimeoutExpired:
-        proc.kill()
+        if WINDOWS:
+            proc.kill()
+        else:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                proc.kill()
 
 
 def wait_for(url: str, label: str, timeout: int) -> bool:
