@@ -38,3 +38,6 @@ stress-agents.yaml
 outbox.jsonl
 vendors.yaml
 x-vendors.yaml
+
+# The video script. A working document, not part of the project.
+PITCH.md
